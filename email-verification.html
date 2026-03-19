@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vérification Email – FLYHOST</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dim: rgba(99,102,241,0.1);
+            --green: #10b981;
+            --red: #ef4444;
+            --bg: #f0f0f8;
+            --card: #ffffff;
+            --text: #0f172a;
+            --text-2: #475569;
+            --text-3: #94a3b8;
+            --border: rgba(99,102,241,0.15);
+            --border-s: rgba(99,102,241,0.35);
+            --shadow: 0 20px 60px -15px rgba(99,102,241,0.18);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ── Fond dégradé animé ── */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::before {
+            width: 500px; height: 500px;
+            background: rgba(99,102,241,0.22);
+            top: -180px; left: -100px;
+            animation: float1 18s ease-in-out infinite alternate;
+        }
+        body::after {
+            width: 400px; height: 400px;
+            background: rgba(139,92,246,0.18);
+            bottom: -150px; right: -80px;
+            animation: float2 22s ease-in-out infinite alternate;
+        }
+        @keyframes float1 { to { transform: translate(60px, 80px) scale(1.2); } }
+        @keyframes float2 { to { transform: translate(-50px, -60px) scale(1.15); } }
+
+        /* ── Carte principale ── */
+        .card {
+            position: relative;
+            z-index: 1;
+            background: var(--card);
+            border-radius: 28px;
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.8);
+            animation: slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes slideUp {
+            from { opacity:0; transform: translateY(30px) scale(0.96); }
+            to   { opacity:1; transform: translateY(0)    scale(1);    }
+        }
+
+        /* ── Logo/brand ── */
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 32px;
+            text-decoration: none;
+        }
+        .brand-mark {
+            width: 36px; height: 36px;
+            background: var(--accent);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px; color: white;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+        }
+        .brand-name { font-weight: 800; font-size: 17px; color: var(--text); }
+
+        /* ── Icône centrale ── */
+        .hero-icon {
+            width: 72px; height: 72px;
+            background: linear-gradient(135deg, var(--accent-dim), rgba(139,92,246,0.12));
+            border: 1.5px solid var(--border-s);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 20px;
+            animation: iconPop 0.6s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes iconPop { from { opacity:0; transform: scale(0.5) rotate(-15deg); } to { opacity:1; transform: scale(1) rotate(0); } }
+
+        /* ── Titres ── */
+        .card-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .card-title span { color: var(--accent); }
+        .card-sub {
+            font-size: 14px;
+            color: var(--text-2);
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* ── Email pill ── */
+        .email-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-dim);
+            border: 1px solid var(--border-s);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            margin: 0 auto 24px;
+            width: fit-content;
+            max-width: 100%;
+            word-break: break-all;
+        }
+        .email-pill i { flex-shrink: 0; }
+
+        /* ── Timer ── */
+        .timer-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-3);
+            margin-bottom: 20px;
+        }
+        .timer-wrap.warn { color: #f59e0b; }
+        .timer-wrap.expired { color: var(--red); }
+        .timer-num {
+            font-variant-numeric: tabular-nums;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-2);
+            background: #f1f5f9;
+            padding: 3px 10px;
+            border-radius: 8px;
+        }
+        .timer-wrap.expired .timer-num { color: var(--red); background: rgba(239,68,68,0.08); }
+
+        /* ── Code inputs ── */
+        .code-group {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .code-box {
+            width: 52px;
+            height: 62px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 26px;
+            font-weight: 800;
+            text-align: center;
+            color: var(--text);
+            background: #f8fafc;
+            outline: none;
+            transition: all 0.2s;
+            caret-color: var(--accent);
+            -webkit-appearance: none;
+        }
+        .code-box::placeholder { color: #cbd5e1; }
+        .code-box:focus {
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99,102,241,0.12);
+            transform: translateY(-2px);
+        }
+        .code-box.filled {
+            border-color: var(--accent);
+            background: rgba(99,102,241,0.06);
+            color: var(--accent);
+        }
+        .code-box.error {
+            border-color: var(--red);
+            background: rgba(239,68,68,0.06);
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        /* ── Hint ── */
+        .code-hint {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-3);
+            margin-bottom: 22px;
+        }
+
+        /* ── Alert ── */
+        .alert {
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: translateY(0); } }
+        .alert-success { background: rgba(16,185,129,0.1); color: #059669; border: 1px solid rgba(16,185,129,0.25); }
+        .alert-error   { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
+        .alert-info    { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--border-s); }
+
+        /* ── Boutons ── */
+        .btn-verify {
+            width: 100%;
+            padding: 15px;
+            border-radius: 14px;
+            background: var(--accent);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+            box-shadow: 0 6px 20px rgba(99,102,241,0.35);
+        }
+        .btn-verify:not(:disabled):hover {
+            background: #5254d4;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(99,102,241,0.4);
+        }
+        .btn-verify:disabled {
+            background: #c7d2fe;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        .btn-verify.loading::after {
+            content: '';
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-resend {
+            width: 100%;
+            padding: 13px;
+            border-radius: 14px;
+            background: transparent;
+            color: var(--text-2);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            border: 1.5px solid #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+        .btn-resend:not(:disabled):hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+        .btn-resend:disabled {
+            color: var(--text-3);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .resend-count {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-3);
+            background: #f1f5f9;
+            padding: 1px 7px;
+            border-radius: 20px;
+        }
+
+        /* ── Footer ── */
+        .card-footer {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-3);
+        }
+        .card-footer a {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .card-footer a:hover { text-decoration: underline; }
+
+        /* ── Divider ── */
+        .divider {
+            border: none;
+            border-top: 1px solid #f1f5f9;
+            margin: 20px 0;
+        }
+
+        /* ── Success / Error states ── */
+        .state-icon {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 20px;
+            animation: iconPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        .state-success { background: rgba(16,185,129,0.1); }
+        .state-error   { background: rgba(239,68,68,0.1); }
+
+        /* ── Mobile ── */
+        @media (max-width: 480px) {
+            .card { padding: 28px 20px; border-radius: 24px; }
+            .code-box { width: 46px; height: 56px; font-size: 22px; border-radius: 12px; }
+            .code-group { gap: 6px; }
+        }
+        @media (max-width: 380px) {
+            body { padding: 10px; }
+            .card { padding: 24px 16px; }
+            .code-box { width: 42px; height: 52px; font-size: 20px; gap: 4px; }
+            .code-group { gap: 5px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card" id="main-card">
+    <a href="/" class="brand">
+        <div class="brand-mark">FH</div>
+        <span class="brand-name">FLYHOST</span>
+    </a>
+    <!-- contenu injecté par JS -->
+</div>
+
+<script>
+(function () {
+    const params = new URLSearchParams(location.search);
+    const email  = params.get('email');
+    const status = params.get('status');
+    const card   = document.getElementById('main-card');
+
+    function brand() {
+        return `<a href="/" class="brand"><div class="brand-mark">FH</div><span class="brand-name">FLYHOST</span></a>`;
+    }
+
+    // ── Déjà vérifié ──
+    if (status === 'success' || status === 'verified') {
+        card.innerHTML = brand() + `
+            <div class="state-icon state-success">✅</div>
+            <div class="card-title">Email <span>vérifié</span> !</div>
+            <div class="card-sub">Votre compte est maintenant actif.<br>+5 coins de bienvenue ajoutés.</div>
+            <div class="alert alert-success"><i class="fas fa-gift"></i> <span><strong>+5 coins</strong> crédités sur votre compte !</span></div>
+            <a href="/login" class="btn-verify" style="text-decoration:none; margin-top:4px;">
+                <i class="fas fa-sign-in-alt"></i> Accéder à mon compte
+            </a>
+            <hr class="divider">
+            <div class="card-footer"><a href="/">← Retour à l'accueil</a></div>
+        `;
+        return;
+    }
+
+    // ── Pas d'email dans l'URL ──
+    if (!email) {
+        card.innerHTML = brand() + `
+            <div class="state-icon state-error">❌</div>
+            <div class="card-title">Lien <span>invalide</span></div>
+            <div class="card-sub">Ce lien de vérification est invalide ou expiré.<br>Créez un nouveau compte pour recevoir un lien valide.</div>
+            <a href="/register" class="btn-verify" style="text-decoration:none; margin-top:8px;">
+                <i class="fas fa-user-plus"></i> S'inscrire
+            </a>
+            <hr class="divider">
+            <div class="card-footer"><a href="/login">Déjà un compte ? Se connecter</a></div>
+        `;
+        return;
+    }
+
+    // ── Interface principale ──
+    let countdown = 15 * 60;
+    let countInterval;
+    let resendSecs = 60;
+    let resendInterval;
+
+    card.innerHTML = brand() + `
+        <div class="hero-icon">📧</div>
+        <div class="card-title">Vérifiez votre <span>email</span></div>
+        <div class="card-sub">Un code à 6 chiffres a été envoyé à :</div>
+
+        <div class="email-pill">
+            <i class="fas fa-envelope"></i>
+            <span>${email}</span>
+        </div>
+
+        <div class="timer-wrap" id="timerWrap">
+            <i class="fas fa-clock"></i>
+            <span>Expire dans</span>
+            <span class="timer-num" id="timerNum">15:00</span>
+        </div>
+
+        <div id="alertBox"></div>
+
+        <div class="code-group" id="codeGroup">
+            ${[0,1,2,3,4,5].map(i => `<input class="code-box" id="cb${i}" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="${i === 0 ? 'one-time-code' : 'off'}">`).join('')}
+        </div>
+        <div class="code-hint">Entrez les 6 chiffres reçus par email</div>
+
+        <button class="btn-verify" id="btnVerify" disabled>
+            <i class="fas fa-shield-check"></i> Vérifier mon email
+        </button>
+
+        <button class="btn-resend" id="btnResend" disabled>
+            <i class="fas fa-paper-plane"></i> Renvoyer le code
+            <span class="resend-count" id="resendCount">60s</span>
+        </button>
+
+        <hr class="divider">
+        <div class="card-footer">
+            Mauvais email ? <a href="/register">Créer un autre compte</a><br><br>
+            <a href="/login">← Déjà un compte</a>
+        </div>
+    `;
+
+    const boxes    = Array.from({length:6}, (_,i) => document.getElementById(`cb${i}`));
+    const btnV     = document.getElementById('btnVerify');
+    const btnR     = document.getElementById('btnResend');
+    const timerEl  = document.getElementById('timerNum');
+    const timerWrap= document.getElementById('timerWrap');
+    const alertBox = document.getElementById('alertBox');
+    const resendCt = document.getElementById('resendCount');
+
+    // ── Alert ──
+    function showAlert(msg, type) {
+        const icons = { success: 'check-circle', error: 'times-circle', info: 'info-circle' };
+        alertBox.innerHTML = `<div class="alert alert-${type}"><i class="fas fa-${icons[type]||'info-circle'}"></i><span>${msg}</span></div>`;
+    }
+    function clearAlert() { alertBox.innerHTML = ''; }
+
+    // ── Input logic ──
+    boxes.forEach((box, i) => {
+        box.addEventListener('input', e => {
+            box.value = box.value.replace(/\D/g,'').slice(-1);
+            box.classList.toggle('filled', box.value !== '');
+            if (box.value && i < 5) boxes[i+1].focus();
+            checkAll();
+        });
+        box.addEventListener('keydown', e => {
+            if (e.key === 'Backspace' && !box.value && i > 0) {
+                boxes[i-1].value = '';
+                boxes[i-1].classList.remove('filled');
+                boxes[i-1].focus();
+                checkAll();
+            }
+        });
+        box.addEventListener('paste', e => {
+            e.preventDefault();
+            const digits = e.clipboardData.getData('text').replace(/\D/g,'');
+            digits.split('').slice(0,6).forEach((d,j) => {
+                if (boxes[j]) {
+                    boxes[j].value = d;
+                    boxes[j].classList.add('filled');
+                }
+            });
+            const next = Math.min(digits.length, 5);
+            boxes[next].focus();
+            checkAll();
+        });
+    });
+
+    function checkAll() {
+        const ok = boxes.every(b => b.value !== '');
+        btnV.disabled = !ok;
+        if (ok) clearAlert();
+    }
+
+    function shakeInputs() {
+        boxes.forEach(b => { b.classList.add('error'); b.classList.remove('filled'); });
+        setTimeout(() => boxes.forEach(b => b.classList.remove('error')), 500);
+    }
+
+    // ── Countdown ──
+    function formatTime(s) {
+        const m = Math.floor(s/60);
+        return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    }
+    function tickMain() {
+        timerEl.textContent = formatTime(countdown);
+        if (countdown <= 120) timerWrap.classList.add('warn');
+        if (countdown <= 0) {
+            clearInterval(countInterval);
+            timerWrap.classList.remove('warn');
+            timerWrap.classList.add('expired');
+            timerEl.textContent = 'Expiré';
+            btnV.disabled = true;
+            showAlert('Le code a expiré. Cliquez sur "Renvoyer" pour en obtenir un nouveau.', 'error');
+        }
+        countdown--;
+    }
+    countInterval = setInterval(tickMain, 1000);
+
+    // ── Resend timer ──
+    function tickResend() {
+        if (resendSecs <= 0) {
+            clearInterval(resendInterval);
+            btnR.disabled = false;
+            resendCt.style.display = 'none';
+        } else {
+            resendCt.textContent = `${resendSecs}s`;
+            resendSecs--;
+        }
+    }
+    resendInterval = setInterval(tickResend, 1000);
+
+    // ── Verify ──
+    btnV.addEventListener('click', async () => {
+        const code = boxes.map(b => b.value).join('');
+        if (code.length !== 6) return;
+        btnV.disabled = true;
+        btnV.classList.add('loading');
+        btnV.innerHTML = '';
+        clearAlert();
+        try {
+            const r = await fetch('/api/verify-email', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ email, code })
+            });
+            const d = await r.json();
+            if (d.success) {
+                clearInterval(countInterval); clearInterval(resendInterval);
+                card.innerHTML = brand() + `
+                    <div class="state-icon state-success">🎉</div>
+                    <div class="card-title">Email <span>vérifié</span> !</div>
+                    <div class="card-sub">Bienvenue sur FLYHOST !<br>Votre compte est maintenant actif.</div>
+                    <div class="alert alert-success"><i class="fas fa-coins"></i> <strong>+5 coins</strong> de bienvenue crédités !</div>
+                    <a href="/login?verified=true&email=${encodeURIComponent(email)}" class="btn-verify" style="text-decoration:none;">
+                        <i class="fas fa-sign-in-alt"></i> Accéder à mon compte
+                    </a>
+                `;
+            } else {
+                shakeInputs();
+                boxes.forEach(b => { b.value=''; b.classList.remove('filled'); });
+                boxes[0].focus();
+                showAlert(d.code === 'CODE_EXPIRED'
+                    ? 'Code expiré. Demandez un nouveau code ci-dessous.'
+                    : (d.error || 'Code incorrect, réessayez.'), 'error');
+                btnV.disabled = true;
+                btnV.classList.remove('loading');
+                btnV.innerHTML = '<i class="fas fa-shield-check"></i> Vérifier mon email';
+            }
+        } catch {
+            showAlert('Erreur réseau. Vérifiez votre connexion.', 'error');
+            btnV.disabled = false;
+            btnV.classList.remove('loading');
+            btnV.innerHTML = '<i class="fas fa-shield-check"></i> Vérifier mon email';
+        }
+    });
+
+    // ── Resend ──
+    btnR.addEventListener('click', async () => {
+        btnR.disabled = true;
+        clearAlert();
+        try {
+            const r = await fetch('/api/resend-verification', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ email })
+            });
+            const d = await r.json();
+            if (d.success) {
+                showAlert('Nouveau code envoyé ! Vérifiez votre boîte mail.', 'info');
+                clearInterval(countInterval); clearInterval(resendInterval);
+                countdown = 15*60; resendSecs = 60;
+                timerWrap.classList.remove('warn','expired');
+                timerEl.textContent = '15:00';
+                resendCt.style.display = '';
+                resendCt.textContent = '60s';
+                countInterval = setInterval(tickMain, 1000);
+                resendInterval = setInterval(tickResend, 1000);
+                boxes.forEach(b => { b.value=''; b.classList.remove('filled','error'); });
+                boxes[0].focus();
+                btnV.disabled = true;
+            } else {
+                showAlert(d.error || 'Erreur lors de l\'envoi.', 'error');
+                btnR.disabled = false;
+            }
+        } catch {
+            showAlert('Erreur réseau.', 'error');
+            btnR.disabled = false;
+        }
+    });
+
+    // ── Focus auto ──
+    boxes[0].focus();
+})();
+</script>
+</body>
+</html>

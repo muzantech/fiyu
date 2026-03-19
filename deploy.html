@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Déploiement — FLYHOST</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{
+            --accent:#6366f1;--accent-l:#818cf8;--accent-d:rgba(99,102,241,0.1);
+            --bg:#eef0f7;--sf:rgba(255,255,255,0.92);--sf2:rgba(255,255,255,0.98);
+            --br:rgba(99,102,241,0.18);--tx:#0f172a;--tx2:#334155;--txm:#64748b;
+            --green:#10b981;--err:#ef4444;--warn:#f59e0b;--r:12px;
+        }
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+        ::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-thumb{background:var(--accent-d);border-radius:3px;}
+        ::-webkit-scrollbar-thumb:hover{background:rgba(99,102,241,0.3);}
+        @keyframes spin{to{transform:rotate(360deg);}}.spin{animation:spin 0.8s linear infinite;display:inline-block;}
+        @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}.blink{animation:blink 1s infinite;}
+
+        /* TOPBAR */
+        .topbar{height:50px;background:#1e1e2e;border-bottom:2px solid var(--accent);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
+        .logo{width:30px;height:30px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;flex-shrink:0;}
+        .logo-t{font-weight:800;font-size:14px;color:#fff;}
+        .tsep{color:rgba(255,255,255,0.2);}
+        .tsub{color:rgba(255,255,255,0.45);font-size:13px;}
+        .tr{margin-left:auto;display:flex;align-items:center;gap:8px;}
+        .pill{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+        .pill-ok{background:rgba(16,185,129,0.15);color:var(--green);}
+        .pill-run{background:rgba(99,102,241,0.15);color:var(--accent-l);}
+        .pill-err{background:rgba(239,68,68,0.15);color:var(--err);}
+        .pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+        .tbtn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.65);padding:5px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:5px;font-family:inherit;transition:all 0.15s;}
+        .tbtn:hover{background:rgba(255,255,255,0.15);color:#fff;}
+
+        /* MAIN */
+        .wrap{display:flex;flex:1;overflow:hidden;}
+
+        /* LEFT PANEL — Deploy form */
+        .left-panel{width:320px;background:var(--sf2);border-right:1px solid var(--br);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+        .lp-section{padding:12px 14px;border-bottom:1px solid var(--br);}
+        .lp-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--txm);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+        .lp-title i{color:var(--accent);}
+        select,input[type=text],input[type=url]{width:100%;padding:7px 10px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border 0.2s;background:#fff;color:var(--tx);}
+        select:focus,input:focus{border-color:var(--accent);}
+        .fg{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+        .fg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--txm);}
+        .fg:last-child{margin-bottom:0;}
+
+        /* Method tabs */
+        .mtabs{display:flex;border:1.5px solid var(--br);border-radius:9px;overflow:hidden;margin-bottom:10px;}
+        .mtab{flex:1;padding:7px 4px;border:none;background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--txm);transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px;border-right:1px solid var(--br);}
+        .mtab:last-child{border-right:none;}
+        .mtab i{font-size:15px;}
+        .mtab.act{background:var(--accent);color:#fff;}
+        .mtab:not(.act):hover{background:var(--accent-d);}
+
+        /* Drop zone */
+        .dz{border:2px dashed var(--br);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fff;}
+        .dz:hover,.dz.over{border-color:var(--accent);background:var(--accent-d);}
+        .dz i{font-size:24px;color:var(--accent-l);display:block;margin-bottom:6px;}
+        .dz .dz-l{font-size:13px;font-weight:700;color:var(--tx);}
+        .dz .dz-s{font-size:11px;color:var(--txm);margin-top:2px;}
+
+        /* Templates grid */
+        .tpl-g{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+        .tpl-c{border:2px solid var(--br);border-radius:9px;padding:7px 10px;cursor:pointer;transition:all 0.15s;background:#fff;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--tx2);}
+        .tpl-c:hover,.tpl-c.sel{border-color:var(--accent);background:var(--accent);color:#fff;}
+        .tpl-c i{font-size:15px;}
+
+        /* Github URL field */
+        .gh-url-row{display:flex;gap:6px;}
+        .gh-url-row input{flex:1;}
+        .ibtn{padding:7px 10px;border-radius:8px;border:1.5px solid var(--br);background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--txm);white-space:nowrap;transition:all 0.15s;}
+        .ibtn:hover{border-color:var(--accent);color:var(--accent);}
+
+        /* Environment type grid */
+        .env-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px;}
+        .env-tc{border:2px solid var(--br);border-radius:8px;padding:6px 4px;cursor:pointer;transition:all 0.15s;background:#fff;display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;font-weight:700;color:var(--tx2);}
+        .env-tc:hover{border-color:var(--accent);color:var(--accent);}
+        .env-tc.sel{border-color:var(--accent);background:var(--accent);color:#fff;}
+        .env-tc i{font-size:13px;}
+
+        /* Buttons */
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s;width:100%;justify-content:center;}
+        .btn-p{background:var(--accent);color:#fff;}
+        .btn-p:hover{background:#5254d4;}
+        .btn-p:disabled{background:rgba(99,102,241,0.3);color:rgba(255,255,255,0.6);cursor:default;}
+        .btn-s{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--green);}
+        .btn-s:hover{background:rgba(16,185,129,0.2);}
+        .btn-sm{padding:5px 10px;font-size:11px;width:auto;}
+        .btn-icon{padding:5px 8px;width:auto;}
+        .btn-w{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--warn);}
+        .btn-w:hover{background:rgba(245,158,11,0.2);}
+
+        /* RIGHT PANEL */
+        .right-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+        /* TABS */
+        .tabs-bar{display:flex;background:var(--sf2);border-bottom:1px solid var(--br);padding:0 12px;flex-shrink:0;}
+        .tab-btn{padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;color:var(--txm);border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
+        .tab-btn:hover{color:var(--accent);}
+        .tab-btn.act{color:var(--accent);border-bottom-color:var(--accent);}
+        .tab-content{flex:1;overflow:hidden;display:none;}
+        .tab-content.act{display:flex;flex-direction:column;}
+
+        /* ====== FILE MANAGER — redesign complet ====== */
+        .fe-wrap{display:flex;flex:1;overflow:hidden;flex-direction:column;}
+
+        /* Toolbar */
+        .fe-toolbar{display:flex;align-items:center;gap:6px;padding:9px 14px;background:var(--sf2);border-bottom:1px solid var(--br);flex-shrink:0;flex-wrap:wrap;}
+        .fe-toolbar-title{font-size:12px;font-weight:800;color:var(--tx2);display:flex;align-items:center;gap:6px;}
+        .fe-path{padding:5px 14px;background:var(--bg);border-bottom:1px solid var(--br);font-size:11px;font-family:'Fira Code',monospace;color:var(--txm);display:flex;flex-wrap:wrap;gap:2px;align-items:center;flex-shrink:0;}
+        .path-sep{color:var(--txm);margin:0 1px;}
+        .path-seg{color:var(--accent);cursor:pointer;font-size:11px;padding:1px 3px;border-radius:4px;}
+        .path-seg:hover{background:var(--accent-d);text-decoration:none;}
+
+        /* Barre de sélection groupée */
+        .sel-bar{display:none;align-items:center;gap:8px;padding:7px 14px;background:rgba(239,68,68,0.07);border-bottom:1px solid rgba(239,68,68,0.18);flex-shrink:0;}
+        .sel-bar.show{display:flex;}
+        .sel-bar-info{font-size:12px;font-weight:700;color:#ef4444;flex:1;}
+        .btn-del-sel{background:#ef4444;color:#fff;border:none;padding:5px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background 0.15s;}
+        .btn-del-sel:hover{background:#dc2626;}
+        .btn-clr-sel{background:none;border:1.5px solid rgba(239,68,68,0.4);color:#ef4444;padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;}
+        .btn-clr-sel:hover{background:rgba(239,68,68,0.08);}
+
+        /* Body = liste + éditeur */
+        .fe-body{display:flex;flex:1;overflow:hidden;position:relative;}
+
+        /* Panneau liste de fichiers */
+        .fe-list-panel{display:flex;flex-direction:column;flex:1;overflow:hidden;transition:flex 0.25s;}
+        .fe-body.ed-open .fe-list-panel{flex:0 0 270px;}
+        @media(max-width:600px){.fe-body.ed-open .fe-list-panel{display:none;}}
+
+        /* Rows */
+        .fe-list{flex:1;overflow-y:auto;padding:6px 8px;}
+        .fi{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13px;color:var(--tx2);transition:background 0.12s,border 0.12s;margin:2px 0;border:1.5px solid transparent;}
+        .fi:hover{background:var(--accent-d);border-color:rgba(99,102,241,0.15);}
+        .fi.selected{background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.35);}
+        .fi.act{background:var(--accent);color:#fff;border-color:var(--accent);}
+        .fi-check{width:15px;height:15px;flex-shrink:0;accent-color:var(--accent);cursor:pointer;}
+        .fi-icon{font-size:14px;color:var(--accent);flex-shrink:0;width:16px;text-align:center;}
+        .fi.dir .fi-icon{color:#f59e0b;}
+        .fi.act .fi-icon,.fi.act .fi-name,.fi.act .fsz{color:#fff;}
+        .fi-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-weight:500;}
+        .fsz{font-size:10px;color:var(--txm);flex-shrink:0;background:var(--sf2);padding:1px 5px;border-radius:4px;}
+        .fi-del{background:none;border:none;cursor:pointer;color:#ef4444;font-size:12px;padding:4px 7px;border-radius:6px;flex-shrink:0;transition:background 0.12s,opacity 0.12s;opacity:0;}
+        .fi:hover .fi-del,.fi.selected .fi-del{opacity:1;}
+        .fi-del:hover{background:rgba(239,68,68,0.15);}
+        .fi.act .fi-del{opacity:0.7;}
+        .fe-empty{padding:40px 20px;text-align:center;color:var(--txm);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+        .fe-empty i{font-size:32px;color:var(--accent-l);}
+
+        /* Cases à cocher */
+        .chk-all{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+
+        /* Éditeur — glisse depuis la droite */
+        .editor-wrap{flex:1;display:none;flex-direction:column;overflow:hidden;border-left:1px solid var(--br);}
+        .fe-body.ed-open .editor-wrap{display:flex;}
+        .editor-bar{padding:8px 12px;background:var(--sf2);border-bottom:1px solid var(--br);display:flex;align-items:center;gap:8px;flex-shrink:0;}
+        .ef-name{font-size:12px;font-weight:700;color:var(--tx2);font-family:'Fira Code',monospace;}
+        .ef-status{font-size:11px;color:var(--txm);}
+        .editor-body{flex:1;overflow:hidden;position:relative;}
+        #code-editor{width:100%;height:100%;border:none;outline:none;resize:none;font-family:'Fira Code',monospace;font-size:13px;line-height:1.7;background:#1e1e2e;color:#cdd6f4;padding:14px;tab-size:2;box-sizing:border-box;}
+        .editor-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--txm);gap:12px;text-align:center;padding:20px;}
+        .editor-ph i{font-size:40px;color:var(--accent-l);}
+        .btn-back-list{background:none;border:1px solid var(--br);color:var(--txm);padding:4px 10px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+        .btn-back-list:hover{background:var(--accent-d);color:var(--accent);}
+
+
+        /* LOGS */
+        .logs-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .logs-bar{padding:6px 12px;background:#161b22;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+        .log-conn{display:flex;align-items:center;gap:5px;font-size:11px;color:#8b949e;}
+        .log-dot{width:7px;height:7px;border-radius:50%;background:#f85149;}
+        .log-dot.on{background:#3fb950;}
+        .logs-area{flex:1;overflow-y:auto;background:#0d1117;padding:10px 14px;font-family:'Fira Code',monospace;font-size:12px;line-height:1.7;}
+        .log-l{display:flex;gap:8px;margin-bottom:1px;}
+        .log-ts{color:#586069;font-size:10px;flex-shrink:0;padding-top:2px;min-width:58px;}
+        .log-m{word-break:break-all;white-space:pre-wrap;}
+        .log-info{color:#8b949e;}.log-ok{color:#3fb950;}.log-err{color:#f85149;}.log-warn{color:#d29922;}.log-sys{color:#58a6ff;}.log-dep{color:#7ee787;}.log-cmd{color:#c792ea;font-weight:700;}
+        .logs-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#586069;gap:8px;}
+        .logs-ph i{font-size:32px;}
+        /* CONSOLE INPUT */
+        .console-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+        .console-sub-tabs{display:flex;background:#161b22;border-bottom:1px solid #30363d;padding:0 10px;gap:4px;flex-shrink:0;}
+        .cst-btn{padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;color:#586069;border:none;background:none;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
+        .cst-btn:hover{color:#58a6ff;}.cst-btn.act{color:#58a6ff;border-bottom-color:#58a6ff;}
+        .console-input-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0d1117;border-top:1px solid #30363d;flex-shrink:0;}
+        .console-input-bar input{flex:1;background:#161b22;border:1px solid #30363d;border-radius:6px;color:#e6edf3;font-family:'Fira Code',monospace;font-size:12px;padding:6px 10px;outline:none;}
+        .console-input-bar input:focus{border-color:#58a6ff;}
+        .console-input-bar input::placeholder{color:#586069;}
+        .console-send-btn{background:#238636;border:none;color:#fff;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.15s;}
+        .console-send-btn:hover{background:#2ea043;}
+        .console-send-btn:disabled{background:#21262d;color:#586069;cursor:default;}
+        /* POWER CONTROLS */
+        .power-btns{display:flex;gap:5px;margin-left:auto;}
+        .pw-btn{padding:4px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid;font-family:inherit;transition:all 0.15s;}
+        .pw-start{background:rgba(35,134,54,0.12);border-color:rgba(35,134,54,0.4);color:#3fb950;}
+        .pw-start:hover{background:rgba(35,134,54,0.25);}
+        .pw-stop{background:rgba(248,81,73,0.12);border-color:rgba(248,81,73,0.4);color:#f85149;}
+        .pw-stop:hover{background:rgba(248,81,73,0.25);}
+        .pw-restart{background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.4);color:#d29922;}
+        .pw-restart:hover{background:rgba(245,158,11,0.25);}
+        .srv-status-badge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:800;background:#21262d;color:#586069;}
+        .srv-status-badge.running{background:rgba(35,134,54,0.18);color:#3fb950;}
+        .srv-status-badge.starting{background:rgba(245,158,11,0.18);color:#d29922;}
+        .srv-status-badge.stopping{background:rgba(245,158,11,0.18);color:#d29922;}
+        .srv-status-badge.offline{background:rgba(248,81,73,0.12);color:#f85149;}
+
+        /* ZIP preview */
+        .zip-preview{display:flex;flex:1;overflow:hidden;}
+        .zip-sidebar{width:220px;background:var(--sf2);border-right:1px solid var(--br);display:flex;flex-direction:column;flex-shrink:0;}
+        .zp-hdr{padding:8px 10px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;}
+        .zp-hdr h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.4px;color:var(--txm);}
+        .zip-editor-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .zip-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--txm);gap:8px;}
+        .zip-ph i{font-size:32px;color:var(--accent-l);}
+
+        /* HISTORY */
+        .history-wrap{flex:1;overflow-y:auto;padding:14px;}
+        .hist-card{background:var(--sf2);border:1px solid var(--br);border-radius:10px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+
+        /* MOBILE TOGGLE */
+        .mob-toggle{display:none;background:var(--accent);border:none;color:#fff;padding:6px 11px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;gap:5px;align-items:center;}
+        .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:40;}
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:900px){
+            .left-panel{width:280px;}
+        }
+        @media(max-width:768px){
+            body{overflow:auto;}
+            .wrap{flex-direction:column;overflow:auto;height:auto;}
+            .left-panel{
+                width:100%;border-right:none;border-bottom:1px solid var(--br);
+                max-height:none;position:static;
+            }
+            .left-panel.mob-hidden{display:none;}
+            .right-panel{height:auto;min-height:600px;}
+            .mob-toggle{display:flex;}
+            .tabs-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;}
+            .tabs-bar::-webkit-scrollbar{height:0;}
+            .tab-btn{white-space:nowrap;padding:9px 12px;font-size:11px;}
+            .console-sub-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+            .console-sub-tabs::-webkit-scrollbar{height:0;}
+            .fe-wrap{flex-direction:column;}
+            .fe-sidebar{width:100%;max-height:180px;border-right:none;border-bottom:1px solid var(--br);}
+            .zip-preview{flex-direction:column;}
+            .zip-sidebar{width:100%;max-height:160px;border-right:none;border-bottom:1px solid var(--br);}
+            .power-btns{gap:3px;}
+            .pw-btn{padding:4px 7px;font-size:10px;}
+            .console-input-bar input{font-size:11px;}
+        }
+        @media(max-width:480px){
+            .topbar{padding:0 10px;gap:6px;}
+            .logo-t,.tsep,.tsub{display:none;}
+            .tbtn span{display:none;}
+            .tbtn{padding:5px 8px;}
+            .lp-section{padding:10px 12px;}
+            .mtab{font-size:11px;padding:6px 3px;}
+        }
+        .hist-icon{font-size:18px;color:var(--accent);flex-shrink:0;}
+        .hist-info{flex:1;min-width:0;}
+        .hist-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .hist-meta{font-size:11px;color:var(--txm);}
+
+        /* Utility */
+        .hidden{display:none!important;}
+        .flx{display:flex;align-items:center;gap:8px;}
+        .ml-auto{margin-left:auto;}
+        .badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;}
+        .b-ok{background:rgba(16,185,129,0.12);color:var(--green);}
+        .b-err{background:rgba(239,68,68,0.12);color:var(--err);}
+        .b-run{background:rgba(99,102,241,0.12);color:var(--accent-l);}
+        .b-pnd{background:rgba(245,158,11,0.12);color:var(--warn);}
+        .toast-container{position:fixed;top:72px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+        .toast{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:white;border:1px solid #e5e7eb;border-left:4px solid;box-shadow:0 8px 30px rgba(0,0,0,0.1);min-width:280px;max-width:380px;pointer-events:all;animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);font-size:14px;font-weight:600;}
+        .toast.success{border-left-color:#10b981;}.toast.error{border-left-color:#ef4444;}.toast.info{border-left-color:#6366f1;}.toast.warn{border-left-color:#f59e0b;}
+        .toast i{font-size:16px;flex-shrink:0;}.toast.success i{color:#10b981;}.toast.error i{color:#ef4444;}.toast.info i{color:#6366f1;}.toast.warn i{color:#f59e0b;}
+        .toast.out{animation:toastOut .25s ease forwards;}
+        @keyframes toastIn{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
+        @keyframes toastOut{to{opacity:0;transform:translateX(100%);}}
+
+        /* ======= DEPLOY PROGRESS OVERLAY ======= */
+        .deploy-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9998;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+        .deploy-overlay.show{display:flex;}
+        .deploy-modal{background:#fff;border-radius:20px;padding:32px 36px;width:460px;max-width:90vw;box-shadow:0 30px 80px rgba(0,0,0,0.3);}
+        .deploy-modal-title{font-size:18px;font-weight:800;color:var(--tx);margin-bottom:6px;}
+        .deploy-modal-sub{font-size:13px;color:var(--txm);margin-bottom:28px;}
+        .deploy-steps{display:flex;flex-direction:column;gap:0;}
+        .deploy-step{display:flex;align-items:center;gap:14px;padding:12px 0;position:relative;}
+        .deploy-step:not(:last-child)::after{content:'';position:absolute;left:17px;top:44px;width:2px;height:calc(100% - 8px);background:var(--br);}
+        .deploy-step.done::after{background:var(--green);}
+        .deploy-step.active::after{background:rgba(99,102,241,0.3);}
+        .ds-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;z-index:1;transition:all .3s;}
+        .ds-icon.pending{background:#f1f5f9;color:#94a3b8;}
+        .ds-icon.active{background:rgba(99,102,241,0.12);color:var(--accent);animation:pulse-ring 1.5s infinite;}
+        .ds-icon.done{background:rgba(16,185,129,0.12);color:var(--green);}
+        .ds-icon.error{background:rgba(239,68,68,0.12);color:var(--err);}
+        @keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.3);}50%{box-shadow:0 0 0 6px rgba(99,102,241,.0);}}
+        .ds-text{flex:1;}
+        .ds-label{font-size:13px;font-weight:700;color:var(--tx);}
+        .ds-detail{font-size:11px;color:var(--txm);margin-top:2px;min-height:14px;font-family:'Fira Code',monospace;}
+        .deploy-progress-bar{height:4px;background:var(--br);border-radius:2px;margin-top:24px;overflow:hidden;}
+        .deploy-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#818cf8);border-radius:2px;width:0%;transition:width .6s ease;}
+        .deploy-modal-actions{margin-top:22px;display:flex;gap:10px;justify-content:flex-end;}
+
+        /* Server context pill (below dropdown) */
+        .srv-context{background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:10px;padding:10px 12px;margin-top:8px;display:none;font-size:12px;}
+        .srv-context-name{font-weight:800;font-size:13px;color:var(--tx);margin-bottom:4px;}
+        .srv-context-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+        .srv-ctx-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+        .scp-running{background:rgba(16,185,129,0.12);color:var(--green);}
+        .scp-offline{background:rgba(239,68,68,0.1);color:var(--err);}
+        .scp-type{background:rgba(99,102,241,0.1);color:var(--accent);}
+        .scp-expire{background:rgba(245,158,11,0.1);color:var(--warn);}
+
+        /* Method cards */
+        .method-cards{display:flex;flex-direction:column;gap:7px;margin-bottom:2px;}
+        .mc{border:2px solid var(--br);border-radius:11px;padding:10px 13px;cursor:pointer;transition:all .15s;background:#fff;display:flex;align-items:center;gap:11px;}
+        .mc:hover{border-color:rgba(99,102,241,0.4);background:rgba(99,102,241,0.03);}
+        .mc.act{border-color:var(--accent);background:rgba(99,102,241,0.06);}
+        .mc-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:rgba(99,102,241,0.08);color:var(--accent);}
+        .mc.act .mc-ico{background:var(--accent);color:#fff;}
+        .mc-txt{flex:1;}
+        .mc-title{font-size:13px;font-weight:700;color:var(--tx);line-height:1.2;}
+        .mc-desc{font-size:11px;color:var(--txm);margin-top:1px;}
+        .mc-check{width:16px;height:16px;border-radius:50%;border:2px solid var(--br);flex-shrink:0;transition:all .15s;}
+        .mc.act .mc-check{background:var(--accent);border-color:var(--accent);display:flex;align-items:center;justify-content:center;}
+        .mc.act .mc-check::after{content:'✓';color:#fff;font-size:9px;font-weight:900;}
+
+        /* Deploy button zone */
+        .deploy-zone{padding:14px;border-top:2px solid var(--accent-d);background:linear-gradient(to bottom,var(--sf2),rgba(255,255,255,0.95));}
+        .deploy-cost-line{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--txm);margin-bottom:10px;padding:0 2px;}
+        .btn-deploy-main{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;border:none;border-radius:12px;padding:14px 20px;font-size:14px;font-weight:800;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:all .2s;box-shadow:0 4px 16px rgba(99,102,241,0.3);}
+        .btn-deploy-main:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(99,102,241,0.4);}
+        .btn-deploy-main:disabled{background:#d1d5db;box-shadow:none;transform:none;cursor:not-allowed;color:#9ca3af;}
+        .btn-deploy-main:active{transform:translateY(0);}
+
+        /* Coin estimate — light style */
+        .coin-est-box{background:rgba(245,158,11,0.06);border:1.5px solid rgba(245,158,11,0.25);border-radius:12px;padding:14px 16px;margin-bottom:0;}
+        .coin-est-header{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--warn);margin-bottom:10px;}
+        .coin-est-row{display:flex;align-items:center;gap:8px;}
+        .coin-est-row select{flex:1;padding:9px 12px;border-radius:8px;border:1.5px solid rgba(245,158,11,0.3);background:#fff;color:var(--tx);font-size:14px;font-family:inherit;outline:none;}
+        .coin-est-row select:focus{border-color:var(--warn);}
+        .coin-est-amount{font-size:36px;font-weight:800;color:var(--warn);text-align:center;margin:12px 0 6px;}
+        .coin-est-balance{font-size:13px;color:var(--txm);text-align:center;}
+    </style>
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <button class="mob-toggle" id="mob-toggle-btn" onclick="toggleLeftPanel()"><i class="fas fa-sliders-h"></i> Config</button>
+    <div class="logo">FH</div>
+    <span class="logo-t">FLYHOST</span>
+    <span class="tsep">/</span>
+    <span class="tsub">Déploiement</span>
+    <div class="tr">
+        <span id="deploy-pill" class="pill" style="display:none"></span>
+        <a id="live-preview-btn" href="#" target="_blank" rel="noopener" class="tbtn" style="display:none;background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.3);color:#3fb950;" title="Ouvrir l'aperçu en direct"><i class="fas fa-external-link-alt"></i> <span>Voir en ligne</span></a>
+        <a href="/dashboard" class="tbtn"><i class="fas fa-arrow-left"></i> <span>Dashboard</span></a>
+    </div>
+</div>
+
+<div class="wrap">
+
+    <!-- ====== LEFT PANEL ====== -->
+    <div class="left-panel">
+
+        <!-- Serveur cible -->
+        <div class="lp-section">
+            <div class="lp-title"><i class="fas fa-server"></i> Serveur cible</div>
+            <div class="fg">
+                <label>Choisir un serveur</label>
+                <select id="srv-sel" onchange="onSrvChange()">
+                    <option value="">— Sélectionner —</option>
+                </select>
+            </div>
+            <!-- Context pill affiché après sélection -->
+            <div class="srv-context" id="srv-context">
+                <div class="srv-context-name" id="sctx-name">—</div>
+                <div class="srv-context-meta" id="sctx-meta"></div>
+            </div>
+        </div>
+
+        <!-- Méthode de déploiement — cartes visuelles -->
+        <div class="lp-section">
+            <div class="lp-title"><i class="fas fa-cog"></i> Méthode de déploiement</div>
+            <div class="method-cards">
+                <div class="mc act" id="m-github" onclick="setMethod('github')">
+                    <div class="mc-ico"><i class="fab fa-github"></i></div>
+                    <div class="mc-txt"><div class="mc-title">GitHub</div><div class="mc-desc">Déployer depuis un dépôt public ou privé</div></div>
+                    <div class="mc-check"></div>
+                </div>
+                <div class="mc" id="m-zip" onclick="setMethod('zip')">
+                    <div class="mc-ico"><i class="fas fa-file-archive"></i></div>
+                    <div class="mc-txt"><div class="mc-title">Fichier ZIP</div><div class="mc-desc">Glissez votre projet compressé</div></div>
+                    <div class="mc-check"></div>
+                </div>
+                <div class="mc" id="m-template" onclick="setMethod('template')">
+                    <div class="mc-ico"><i class="fas fa-layer-group"></i></div>
+                    <div class="mc-txt"><div class="mc-title">Template</div><div class="mc-desc">Démarrer avec un projet prêt à l'emploi</div></div>
+                    <div class="mc-check"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Champs selon la méthode -->
+        <div class="lp-section" id="method-fields-section">
+            <!-- GitHub fields -->
+            <div id="f-github">
+                <div class="fg">
+                    <label>URL du dépôt GitHub</label>
+                    <div class="gh-url-row">
+                        <input type="url" id="gh-url" placeholder="https://github.com/user/repo" oninput="onGhInput()">
+                        <button class="ibtn" onclick="loadGhFiles()"><i class="fas fa-eye"></i> Voir</button>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+                    <div class="fg">
+                        <label>Branche</label>
+                        <input type="text" id="gh-branch" value="main">
+                    </div>
+                    <div class="fg">
+                        <label>Cmd démarrage <span style="font-weight:400;text-transform:none">(optionnel)</span></label>
+                        <input type="text" id="gh-cmd" placeholder="Auto-détecté">
+                    </div>
+                </div>
+                <div class="fg" style="margin-top:4px">
+                    <label style="display:flex;align-items:center;justify-content:space-between;">
+                        <span>Environnement</span>
+                        <button class="ibtn btn-sm" onclick="autoDetectGhTech()" id="gh-detect-btn" style="padding:3px 8px;font-size:11px"><i class="fas fa-magic"></i> Auto-détecter</button>
+                    </label>
+                    <div class="env-type-grid" id="gh-env-grid">
+                        <div class="env-tc sel" id="gh-env-auto" onclick="selEnvType('gh','auto')"><i class="fas fa-magic"></i> Auto</div>
+                        <div class="env-tc" id="gh-env-nodejs" onclick="selEnvType('gh','nodejs')"><i class="fab fa-node-js"></i> Node.js</div>
+                        <div class="env-tc" id="gh-env-python" onclick="selEnvType('gh','python')"><i class="fab fa-python"></i> Python</div>
+                        <div class="env-tc" id="gh-env-php" onclick="selEnvType('gh','php')"><i class="fab fa-php"></i> PHP</div>
+                        <div class="env-tc" id="gh-env-java" onclick="selEnvType('gh','java')"><i class="fab fa-java"></i> Java</div>
+                        <div class="env-tc" id="gh-env-static" onclick="selEnvType('gh','static')"><i class="fab fa-html5"></i> Static</div>
+                    </div>
+                    <div id="gh-env-badge" style="display:none;margin-top:4px;font-size:11px;color:var(--green);font-weight:600"><i class="fas fa-check-circle"></i> <span id="gh-env-badge-text"></span></div>
+                </div>
+            </div>
+
+            <!-- ZIP fields -->
+            <div id="f-zip" class="hidden">
+                <input type="file" id="zip-inp" accept=".zip" style="display:none" onchange="onZipSelect(event)">
+                <div class="dz" id="zip-dz" onclick="document.getElementById('zip-inp').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event)">
+                    <i class="fas fa-file-archive"></i>
+                    <div class="dz-l" id="dz-label">Glissez votre ZIP ici</div>
+                    <div class="dz-s">ou cliquez pour choisir un fichier</div>
+                </div>
+                <div class="fg" style="margin-top:8px">
+                    <label>Commande de démarrage <span style="font-weight:400;text-transform:none">(optionnel)</span></label>
+                    <input type="text" id="zip-cmd" placeholder="Auto-détecté">
+                </div>
+                <div class="fg" style="margin-top:4px">
+                    <label>Environnement</label>
+                    <div class="env-type-grid" id="zip-env-grid">
+                        <div class="env-tc sel" id="zip-env-auto" onclick="selEnvType('zip','auto')"><i class="fas fa-magic"></i> Auto</div>
+                        <div class="env-tc" id="zip-env-nodejs" onclick="selEnvType('zip','nodejs')"><i class="fab fa-node-js"></i> Node.js</div>
+                        <div class="env-tc" id="zip-env-python" onclick="selEnvType('zip','python')"><i class="fab fa-python"></i> Python</div>
+                        <div class="env-tc" id="zip-env-php" onclick="selEnvType('zip','php')"><i class="fab fa-php"></i> PHP</div>
+                        <div class="env-tc" id="zip-env-java" onclick="selEnvType('zip','java')"><i class="fab fa-java"></i> Java</div>
+                        <div class="env-tc" id="zip-env-static" onclick="selEnvType('zip','static')"><i class="fab fa-html5"></i> Static</div>
+                    </div>
+                    <div id="zip-env-badge" style="display:none;margin-top:4px;font-size:11px;color:var(--green);font-weight:600"><i class="fas fa-check-circle"></i> <span id="zip-env-badge-text"></span></div>
+                </div>
+            </div>
+
+            <!-- Template fields -->
+            <div id="f-template" class="hidden">
+                <div class="tpl-g" id="tpl-grid" style="margin-bottom:10px;">
+                    <div class="tpl-c sel" id="t-nodejs-express" onclick="selTpl('nodejs-express')"><i class="fab fa-node-js"></i> Express</div>
+                    <div class="tpl-c" id="t-nodejs-discord-bot" onclick="selTpl('nodejs-discord-bot')"><i class="fab fa-discord"></i> Discord Bot</div>
+                    <div class="tpl-c" id="t-python-flask" onclick="selTpl('python-flask')"><i class="fab fa-python"></i> Flask</div>
+                    <div class="tpl-c" id="t-static-html" onclick="selTpl('static-html')"><i class="fab fa-html5"></i> HTML</div>
+                </div>
+                <div class="fg">
+                    <label>Ou URL GitHub personnalisée</label>
+                    <input type="url" id="tpl-custom-url" placeholder="https://github.com/user/repo">
+                </div>
+            </div>
+        </div>
+
+        <!-- Estimation de coins — style cohérent -->
+        <div class="lp-section" id="coin-estimate-section" style="display:none;">
+            <div class="coin-est-box">
+                <div class="coin-est-header"><i class="fas fa-coins"></i> Estimation durée</div>
+                <div class="coin-est-row">
+                    <select id="coin-duration-sel" onchange="updateCoinEstimate()">
+                        <option value="1">1 jour</option>
+                        <option value="7">7 jours</option>
+                        <option value="30" selected>30 jours</option>
+                        <option value="90">90 jours</option>
+                        <option value="365">365 jours</option>
+                    </select>
+                </div>
+                <div class="coin-est-amount" id="coin-estimate-display">–</div>
+                <div class="coin-est-balance" id="coin-estimate-balance">Solde : chargement…</div>
+            </div>
+        </div>
+
+        <!-- Zone de déploiement — bouton principal -->
+        <div class="deploy-zone">
+            <div class="deploy-cost-line" id="deploy-cost-line" style="display:none;">
+                <span><i class="fas fa-coins" style="color:var(--warn);margin-right:4px;"></i>Coût estimé</span>
+                <span id="deploy-cost-val" style="font-weight:800;color:var(--warn);">—</span>
+            </div>
+            <button class="btn-deploy-main" id="deploy-btn" onclick="confirmDeploy()" disabled>
+                <i class="fas fa-rocket"></i> Déployer maintenant
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ====== DEPLOY PROGRESS OVERLAY ====== -->
+    <div class="deploy-overlay" id="deployOverlay">
+        <div class="deploy-modal">
+            <div class="deploy-modal-title" id="deployModalTitle">Déploiement en cours…</div>
+            <div class="deploy-modal-sub" id="deployModalSub">Cela peut prendre quelques secondes.</div>
+            <div class="deploy-steps" id="deploySteps">
+                <div class="deploy-step" id="ds-prepare">
+                    <div class="ds-icon pending" id="ds-prepare-ico"><i class="fas fa-boxes"></i></div>
+                    <div class="ds-text"><div class="ds-label">Préparation</div><div class="ds-detail" id="ds-prepare-det">En attente…</div></div>
+                </div>
+                <div class="deploy-step" id="ds-upload">
+                    <div class="ds-icon pending" id="ds-upload-ico"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="ds-text"><div class="ds-label">Envoi des fichiers</div><div class="ds-detail" id="ds-upload-det">En attente…</div></div>
+                </div>
+                <div class="deploy-step" id="ds-install">
+                    <div class="ds-icon pending" id="ds-install-ico"><i class="fas fa-cogs"></i></div>
+                    <div class="ds-text"><div class="ds-label">Installation</div><div class="ds-detail" id="ds-install-det">En attente…</div></div>
+                </div>
+                <div class="deploy-step" id="ds-start">
+                    <div class="ds-icon pending" id="ds-start-ico"><i class="fas fa-play"></i></div>
+                    <div class="ds-text"><div class="ds-label">Démarrage du serveur</div><div class="ds-detail" id="ds-start-det">En attente…</div></div>
+                </div>
+            </div>
+            <div class="deploy-progress-bar"><div class="deploy-progress-fill" id="deployProgress"></div></div>
+            <div class="deploy-modal-actions">
+                <button onclick="document.getElementById('deployOverlay').classList.remove('show');showTab('logs');" style="background:none;border:1px solid var(--br);border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;color:var(--txm);font-family:inherit;" id="deployOverlayLogsBtn">Voir les logs</button>
+                <button onclick="document.getElementById('deployOverlay').classList.remove('show');" style="background:var(--accent);border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;font-family:inherit;display:none;" id="deployOverlayCloseBtn">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== RIGHT PANEL ====== -->
+    <div class="right-panel">
+        <div class="tabs-bar">
+            <button class="tab-btn act" onclick="showTab('files')" id="tb-files"><i class="fas fa-folder-open"></i> Fichiers serveur</button>
+            <button class="tab-btn" onclick="showTab('preview')" id="tb-preview"><i class="fas fa-code"></i> Aperçu avant déploi</button>
+            <button class="tab-btn" onclick="showTab('logs')" id="tb-logs"><i class="fas fa-terminal"></i> Logs temps réel</button>
+            <button class="tab-btn" onclick="showTab('history')" id="tb-history"><i class="fas fa-history"></i> Historique</button>
+            <button class="tab-btn" onclick="showTab('domain')" id="tb-domain"><i class="fas fa-globe"></i> Domaine</button>
+        </div>
+
+        <!-- FILES TAB — Pterodactyl server file explorer + editor -->
+        <div class="tab-content act" id="tab-files">
+            <div class="fe-wrap">
+                <!-- TOOLBAR -->
+                <div class="fe-toolbar">
+                    <input type="checkbox" class="chk-all" id="chk-all" title="Tout sélectionner" onchange="toggleSelectAll(this)">
+                    <span class="fe-toolbar-title"><i class="fas fa-folder-open" style="color:#f59e0b"></i> Fichiers serveur</span>
+                    <div style="flex:1"></div>
+                    <button class="tbtn btn btn-sm" onclick="refreshFiles()" title="Actualiser"><i class="fas fa-sync-alt"></i></button>
+                </div>
+                <!-- Barre sélection groupée -->
+                <div class="sel-bar" id="sel-bar">
+                    <span class="sel-bar-info"><i class="fas fa-check-square"></i> <span id="sel-count">0</span> sélectionné(s)</span>
+                    <button class="btn-del-sel" onclick="deleteSelected()"><i class="fas fa-trash"></i> Supprimer</button>
+                    <button class="btn-clr-sel" onclick="clearSelection()">✕ Annuler</button>
+                </div>
+                <!-- Breadcrumb -->
+                <div class="fe-path" id="fe-path"><span class="path-seg" onclick="navTo('/')">~</span></div>
+                <!-- BODY : liste + éditeur -->
+                <div class="fe-body" id="fe-body">
+                    <div class="fe-list-panel">
+                        <div class="fe-list" id="fe-list">
+                            <div class="fe-empty"><i class="fas fa-server"></i><span>Sélectionnez un serveur</span></div>
+                        </div>
+                    </div>
+                    <div class="editor-wrap" id="editor-wrap">
+                        <div class="editor-bar">
+                            <button class="btn-back-list" onclick="closeEditor()" title="Retour aux fichiers"><i class="fas fa-arrow-left"></i> Fichiers</button>
+                            <i class="fas fa-file-code" style="color:var(--accent)"></i>
+                            <span class="ef-name" id="ef-name">—</span>
+                            <span class="ef-status" id="ef-status"></span>
+                            <div class="ml-auto flx">
+                                <button class="btn btn-sm btn-s" id="save-btn" onclick="saveFile()" style="display:none"><i class="fas fa-save"></i> Sauvegarder</button>
+                            </div>
+                        </div>
+                        <div class="editor-body">
+                            <div class="editor-ph" id="editor-ph">
+                                <i class="fas fa-mouse-pointer"></i>
+                                <p>Cliquez sur un fichier pour l'éditer</p>
+                            </div>
+                            <textarea id="code-editor" spellcheck="false" style="display:none" oninput="onEditorChange()"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREVIEW TAB — ZIP or GitHub file viewer/editor -->
+        <div class="tab-content" id="tab-preview">
+            <div class="zip-preview">
+                <div class="zip-sidebar">
+                    <div class="zp-hdr">
+                        <h4 id="prev-title"><i class="fas fa-file-code" style="color:var(--accent);margin-right:4px"></i>Aperçu</h4>
+                    </div>
+                    <div class="fe-list" id="prev-list">
+                        <div class="zip-ph">
+                            <i class="fas fa-upload"></i>
+                            <p style="font-size:12px;text-align:center">Choisissez un ZIP ou entrez<br>une URL GitHub puis<br>cliquez <strong>Voir</strong></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="zip-editor-wrap">
+                    <div class="editor-bar">
+                        <i class="fas fa-file-code" style="color:var(--accent)"></i>
+                        <span class="ef-name" id="prev-ef-name">—</span>
+                        <span class="ef-status" id="prev-ef-status"></span>
+                        <div class="ml-auto flx">
+                            <span id="prev-badge" style="font-size:11px;color:var(--txm)"></span>
+                            <button class="btn btn-sm btn-w" id="zip-save-file-btn" onclick="saveZipFile()" style="display:none"><i class="fas fa-check"></i> Appliquer modif.</button>
+                        </div>
+                    </div>
+                    <div class="editor-body">
+                        <div class="editor-ph" id="prev-ph">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <p>Sélectionnez un fichier dans la liste</p>
+                        </div>
+                        <textarea id="prev-editor" spellcheck="false" style="display:none;width:100%;height:100%;border:none;outline:none;resize:none;font-family:'Fira Code',monospace;font-size:13px;line-height:1.7;background:#1e1e2e;color:#d4d4d4;padding:14px;tab-size:2;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGS / CONSOLE TAB -->
+        <div class="tab-content" id="tab-logs">
+            <div class="console-wrap">
+                <!-- Sub-tab bar + status + power -->
+                <div class="console-sub-tabs">
+                    <button class="cst-btn act" id="cst-deploy" onclick="switchConsoleMode('deploy')"><i class="fas fa-list-alt"></i> Logs déploiement</button>
+                    <button class="cst-btn" id="cst-console" onclick="switchConsoleMode('console')"><i class="fas fa-terminal"></i> Console interactive</button>
+                    <div class="ml-auto flx" style="gap:6px;">
+                        <span id="srv-status-badge" class="srv-status-badge">---</span>
+                        <div class="log-conn" style="margin-left:4px;">
+                            <div class="log-dot" id="log-dot"></div>
+                            <span id="log-status" style="font-size:10px;color:#8b949e;">Déconnecté</span>
+                        </div>
+                        <div class="power-btns" id="power-btns" style="display:none;">
+                            <button class="pw-btn pw-start" onclick="sendPower('start')" title="Démarrer"><i class="fas fa-play"></i></button>
+                            <button class="pw-btn pw-restart" onclick="sendPower('restart')" title="Redémarrer"><i class="fas fa-redo"></i></button>
+                            <button class="pw-btn pw-stop" onclick="sendPower('stop')" title="Arrêter"><i class="fas fa-stop"></i></button>
+                        </div>
+                        <label style="font-size:10px;color:#586069;display:flex;align-items:center;gap:3px;cursor:pointer;margin-left:6px;">
+                            <input type="checkbox" id="auto-scroll" checked> auto
+                        </label>
+                        <button onclick="clearActiveLogs()" style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);color:#f85149;padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;font-family:inherit;font-weight:700;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+
+                <!-- DEPLOY LOGS -->
+                <div id="pane-deploy" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+                    <!-- Panneau de diagnostic d'erreur -->
+                    <div id="deploy-diagnosis-panel" style="display:none; margin:8px 8px 0; border-radius:10px; overflow:hidden; border:1px solid rgba(239,68,68,0.4); background:rgba(239,68,68,0.08); flex-shrink:0;">
+                        <div style="padding:10px 14px; display:flex; align-items:flex-start; gap:10px;">
+                            <span id="ddp-icon" style="font-size:1.4em; flex-shrink:0; margin-top:1px;"></span>
+                            <div style="flex:1; min-width:0;">
+                                <div id="ddp-reason" style="font-weight:700; font-size:0.88em; color:#fca5a5;"></div>
+                                <div id="ddp-suggestion" style="font-size:0.81em; color:#fca5a5; opacity:0.9; margin-top:4px; white-space:pre-line; line-height:1.5;"></div>
+                            </div>
+                            <button onclick="document.getElementById('deploy-diagnosis-panel').style.display='none'" style="background:none;border:none;color:#fca5a5;cursor:pointer;font-size:14px;flex-shrink:0;padding:0;opacity:0.7;" title="Fermer">✕</button>
+                        </div>
+                        <div id="ddp-actions" style="padding:0 14px 10px; display:flex; gap:6px; flex-wrap:wrap;"></div>
+                    </div>
+                    <div class="logs-area" id="logs-area">
+                        <div class="logs-ph" id="logs-ph"><i class="fas fa-list-alt"></i><p style="font-size:12px">Sélectionnez un serveur</p></div>
+                    </div>
+                </div>
+
+                <!-- CONSOLE PTERODACTYL -->
+                <div id="pane-console" style="flex:1;overflow:hidden;display:none;flex-direction:column;">
+                    <div class="logs-area" id="console-area">
+                        <div class="logs-ph" id="console-ph"><i class="fas fa-terminal"></i><p style="font-size:12px">Sélectionnez un serveur pour ouvrir la console</p></div>
+                    </div>
+                    <div class="console-input-bar">
+                        <span style="color:#3fb950;font-family:'Fira Code',monospace;font-size:12px;flex-shrink:0;">$</span>
+                        <input type="text" id="console-input" placeholder="Entrez une commande... (ex: 3810000000 pour WhatsApp)" onkeydown="if(event.key==='Enter')sendConsoleCommand()">
+                        <button class="console-send-btn" id="console-send-btn" onclick="sendConsoleCommand()"><i class="fas fa-paper-plane"></i> Envoyer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="tab-history">
+            <div class="history-wrap">
+                <div id="hist-body" style="color:var(--txm);text-align:center;padding:30px;font-size:13px">
+                    <i class="fas fa-history" style="font-size:28px;display:block;margin-bottom:8px;color:var(--accent-l)"></i>Sélectionnez un serveur
+                </div>
+            </div>
+        </div>
+
+        <!-- DOMAIN TAB -->
+        <div class="tab-content" id="tab-domain">
+            <div class="history-wrap" id="domain-wrap">
+                <div id="domain-no-server" style="color:var(--txm);text-align:center;padding:40px;font-size:13px">
+                    <i class="fas fa-globe" style="font-size:32px;display:block;margin-bottom:10px;color:var(--accent-l)"></i>Sélectionnez un serveur pour gérer son domaine
+                </div>
+                <div id="domain-panel" style="display:none;padding:20px;max-width:640px;flex-direction:column;gap:20px;">
+
+                    <!-- URL actuelle -->
+                    <div style="background:var(--accent-d);border:1.5px solid rgba(99,102,241,0.3);border-radius:14px;padding:18px 20px;">
+                        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent-l);margin-bottom:10px;"><i class="fas fa-link"></i> URL ACTIVE DE VOTRE SERVEUR</div>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <div id="current-url-display" style="font-family:'Fira Code',monospace;font-size:14px;font-weight:700;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(255,255,255,0.7);border-radius:8px;padding:8px 12px;">—</div>
+                            <button onclick="copyCurrentUrl()" style="padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-copy"></i> Copier</button>
+                            <a id="current-url-link" href="#" target="_blank" rel="noopener" style="padding:8px 14px;background:rgba(16,185,129,0.1);color:var(--green);border:1.5px solid rgba(16,185,129,0.3);border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;flex-shrink:0;"><i class="fas fa-external-link-alt"></i> Ouvrir</button>
+                        </div>
+                        <div id="domain-port-info" style="font-size:11px;color:var(--txm);margin-top:8px;"><i class="fas fa-info-circle"></i> Port serveur : —</div>
+                    </div>
+
+                    <!-- Sous-domaine personnalisé -->
+                    <div style="background:var(--sf2);border:1.5px solid var(--br);border-radius:14px;padding:18px 20px;">
+                        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--txm);margin-bottom:4px;"><i class="fas fa-tag" style="color:var(--accent)"></i> SOUS-DOMAINE PERSONNALISÉ</div>
+                        <div style="font-size:12px;color:var(--txm);margin-bottom:12px;">Choisissez un nom à la place de l'identifiant technique</div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <input type="text" id="subdomain-input" placeholder="monapp" pattern="[a-z0-9-]+" maxlength="32"
+                                style="flex:1;min-width:120px;padding:8px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:'Fira Code',monospace;outline:none;">
+                            <span style="font-size:13px;font-weight:700;color:var(--txm);white-space:nowrap;">.flihost.site</span>
+                            <button onclick="saveSubdomain()" style="padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-save"></i> Enregistrer</button>
+                            <button onclick="clearSubdomain()" title="Réinitialiser" style="padding:8px 10px;background:rgba(239,68,68,0.08);color:var(--err);border:1.5px solid rgba(239,68,68,0.2);border-radius:8px;font-size:12px;cursor:pointer;flex-shrink:0;"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div style="font-size:11px;color:var(--txm);margin-top:8px;">3 à 32 caractères. Lettres minuscules, chiffres et tirets uniquement.</div>
+                    </div>
+
+                    <!-- Domaine personnalisé -->
+                    <div style="background:var(--sf2);border:1.5px solid var(--br);border-radius:14px;padding:18px 20px;">
+                        <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:var(--txm);margin-bottom:4px;"><i class="fas fa-globe" style="color:#10b981"></i> DOMAINE PERSONNALISÉ</div>
+                        <div style="font-size:12px;color:var(--txm);margin-bottom:12px;">Liez votre propre nom de domaine (ex: <code style="background:var(--accent-d);padding:1px 5px;border-radius:4px;">monsite.com</code>)</div>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <input type="text" id="custom-domain-input" placeholder="monsite.com" style="flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--br);border-radius:8px;font-size:13px;font-family:'Fira Code',monospace;outline:none;">
+                            <button onclick="saveCustomDomain()" style="padding:8px 14px;background:#10b981;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;"><i class="fas fa-save"></i> Lier</button>
+                            <button onclick="clearCustomDomain()" title="Supprimer le domaine personnalisé" style="padding:8px 10px;background:rgba(239,68,68,0.08);color:var(--err);border:1.5px solid rgba(239,68,68,0.2);border-radius:8px;font-size:12px;cursor:pointer;flex-shrink:0;"><i class="fas fa-times"></i></button>
+                        </div>
+                        <!-- Instructions DNS -->
+                        <div id="dns-instructions" style="display:none;margin-top:14px;background:rgba(245,158,11,0.08);border:1.5px solid rgba(245,158,11,0.25);border-radius:10px;padding:14px 16px;">
+                            <div style="font-size:12px;font-weight:800;color:var(--warn);margin-bottom:8px;"><i class="fas fa-exclamation-triangle"></i> Configuration DNS requise</div>
+                            <div style="font-size:12px;color:var(--tx2);line-height:1.7;">
+                                Dans votre gestionnaire DNS, ajoutez un enregistrement <strong>A</strong> :<br>
+                                <code style="background:rgba(0,0,0,0.06);padding:6px 10px;border-radius:6px;display:inline-block;margin-top:6px;font-size:12px;letter-spacing:0.3px;">
+                                    <span style="color:#10b981">@</span> &nbsp;→&nbsp; <span style="color:var(--accent)">173.212.226.118</span> &nbsp;(TTL: 300)
+                                </code><br>
+                                <span style="font-size:11px;color:var(--txm);margin-top:8px;display:block;">⏱ La propagation DNS peut prendre jusqu'à 24h.</span>
+                                <span style="font-size:11px;color:var(--txm);display:block;margin-top:4px;">🔒 Pour activer le <strong>HTTPS</strong> sur votre domaine, contactez le support FLYHOST après avoir configuré le DNS — un certificat SSL sera généré automatiquement.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const token = localStorage.getItem('flyhost_token');
+
+// Toast notification system
+function toast(message, type='info', duration=4000){
+    let c=document.getElementById('toastContainer');
+    if(!c){c=document.createElement('div');c.id='toastContainer';c.className='toast-container';document.body.appendChild(c);}
+    const icons={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle',warn:'fa-exclamation-triangle'};
+    const el=document.createElement('div');el.className=`toast ${type}`;
+    el.innerHTML=`<i class="fas ${icons[type]||icons.info}"></i><span>${message}</span>`;
+    c.appendChild(el);
+    setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},duration);
+}
+
+if (!token) location.href = '/login';
+const H = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+const HA = { 'Authorization': `Bearer ${token}` };
+
+/* --- Mobile left-panel toggle --- */
+let leftPanelVisible = true;
+function toggleLeftPanel(){
+    const lp = document.querySelector('.left-panel');
+    leftPanelVisible = !leftPanelVisible;
+    lp.classList.toggle('mob-hidden', !leftPanelVisible);
+    const btn = document.getElementById('mob-toggle-btn');
+    btn.innerHTML = leftPanelVisible
+        ? '<i class="fas fa-times"></i> Fermer'
+        : '<i class="fas fa-sliders-h"></i> Config';
+}
+// On desktop, always show left panel
+window.addEventListener('resize', () => {
+    if(window.innerWidth > 768){
+        document.querySelector('.left-panel').classList.remove('mob-hidden');
+        leftPanelVisible = true;
+        const btn = document.getElementById('mob-toggle-btn');
+        if(btn) btn.innerHTML = '<i class="fas fa-sliders-h"></i> Config';
+    }
+});
+
+let sel = null;         // selected server
+let method = 'github';  // deploy method
+let selTplName = 'nodejs-express';
+let selectedEnvType = { gh: 'auto', zip: 'auto' };
+let curPath = '/';      // file explorer path
+let openedFile = null;  // opened file path
+let fileModified = false;
+let logsWs = null, logsReconnTimer = null, logsPingInterval = null;
+let consoleWs = null, consoleReconnTimer = null, consolePingInterval = null;
+let consoleMode = 'deploy'; // 'deploy' | 'console'
+// ZIP state
+let zipFile = null;     // File object
+let zipJsObj = null;    // JSZip instance
+let zipFiles = {};      // {path: content_string}
+let zipOpenedFile = null;
+// GitHub preview state
+let ghPreviewFiles = {}; // {path: content or null}
+let ghOpenedFile = null;
+
+// ==================== INIT ====================
+async function init() {
+    const r = await fetch('/api/user/me', { headers: HA });
+    const d = await r.json();
+    if (!d.success) { localStorage.removeItem('flyhost_token'); location.href = '/login'; return; }
+    loadServerList();
+}
+
+async function loadServerList() {
+    const r = await fetch('/api/servers', { headers: HA });
+    const d = await r.json();
+    const sel = document.getElementById('srv-sel');
+    if (d.success && d.servers?.length) {
+        d.servers.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s.id;
+            o.textContent = `${s.server_name} (${s.server_type})`;
+            o.dataset.name = s.server_name;
+            o.dataset.type = s.server_type;
+            o.dataset.status = s.server_status;
+            o.dataset.expires = s.expires_at || '';
+            o.dataset.identifier = s.server_identifier || '';
+            o.dataset.customSubdomain = s.custom_subdomain || '';
+            o.dataset.customDomain = s.custom_domain || '';
+            o.dataset.allocPort = s.alloc_port || '';
+            sel.appendChild(o);
+        });
+    } else {
+        sel.innerHTML = '<option value="">Aucun serveur disponible</option>';
+    }
+}
+
+function onSrvChange() {
+    const el = document.getElementById('srv-sel');
+    const opt = el.options[el.selectedIndex];
+    disconnectConsoleWS();
+    if (!el.value) {
+        sel = null;
+        document.getElementById('deploy-btn').disabled = true;
+        document.getElementById('srv-context').style.display = 'none';
+        document.getElementById('power-btns').style.display='none';
+        document.getElementById('deploy-cost-line').style.display = 'none';
+        document.getElementById('srv-status-badge').textContent = '---';
+        document.getElementById('srv-status-badge').className = 'srv-status-badge';
+        return;
+    }
+    sel = { id: el.value, name: opt.dataset.name, type: opt.dataset.type, status: opt.dataset.status, expires_at: opt.dataset.expires, identifier: opt.dataset.identifier, custom_subdomain: opt.dataset.customSubdomain, custom_domain: opt.dataset.customDomain, alloc_port: opt.dataset.allocPort };
+    loadSubdomainInfo();
+    document.getElementById('deploy-btn').disabled = false;
+    document.getElementById('power-btns').style.display = 'flex';
+    document.getElementById('coin-estimate-section').style.display = 'block';
+
+    // Afficher la fiche contextuelle du serveur
+    const ctx = document.getElementById('srv-context');
+    ctx.style.display = 'block';
+    document.getElementById('sctx-name').textContent = sel.name;
+    const statusLabel = { running: 'En ligne', offline: 'Hors ligne', starting: 'Démarrage…', stopping: 'Arrêt…' };
+    const statusCls = sel.status === 'running' ? 'scp-running' : 'scp-offline';
+    const dot = sel.status === 'running' ? '●' : '○';
+    document.getElementById('sctx-meta').innerHTML = `
+        <span class="srv-ctx-pill ${statusCls}">${dot} ${statusLabel[sel.status] || sel.status}</span>
+        <span class="srv-ctx-pill scp-type"><i class="fas fa-server" style="font-size:9px"></i> ${sel.type || '—'}</span>
+        ${sel.expires_at ? `<span class="srv-ctx-pill scp-expire"><i class="fas fa-clock" style="font-size:9px"></i> Expire ${new Date(sel.expires_at).toLocaleDateString('fr-FR')}</span>` : ''}`;
+
+    updateCoinEstimate();
+    updateSrvStatus(sel.status === 'running' ? 'running' : 'offline');
+    loadFiles('/');
+    connectLogsWS();
+    loadHistory();
+    if (consoleMode === 'console') connectConsoleWS();
+}
+
+// ==================== COIN ESTIMATION ====================
+let _userCoins = null;
+async function updateCoinEstimate() {
+    const days = parseInt(document.getElementById('coin-duration-sel')?.value || 30);
+    const ratePerDay = sel?.type?.includes('vps') ? 2 : sel?.type?.includes('game') ? 3 : 1;
+    const total = days * ratePerDay;
+    const display = document.getElementById('coin-estimate-display');
+    const balance = document.getElementById('coin-estimate-balance');
+    if (display) display.textContent = `${total} coin${total > 1 ? 's' : ''}`;
+    // Mettre à jour la ligne de coût dans la zone déploiement
+    const costLine = document.getElementById('deploy-cost-line');
+    const costVal = document.getElementById('deploy-cost-val');
+    if (costLine) costLine.style.display = 'flex';
+    if (costVal) costVal.textContent = `${total} coins / ${days}j`;
+    // Charger le solde
+    if (_userCoins === null) {
+        try {
+            const r = await fetch('/api/user/me', { headers: H });
+            const d = await r.json();
+            _userCoins = d.user?.coins ?? 0;
+        } catch(e) { _userCoins = 0; }
+    }
+    if (balance) {
+        const canAfford = _userCoins >= total;
+        balance.innerHTML = `Solde : <strong style="color:${canAfford ? 'var(--green)' : 'var(--err)'}">${_userCoins} coins</strong> ${!canAfford ? '· <span style="color:var(--err)">Insuffisant</span>' : '· <span style="color:var(--green)">✓</span>'}`;
+    }
+}
+
+// ==================== METHODS ====================
+function setMethod(m) {
+    method = m;
+    ['github','zip','template'].forEach(x => {
+        const card = document.getElementById('m-'+x);
+        if (card) card.className = 'mc' + (x === m ? ' act' : '');
+        document.getElementById('f-'+x).classList[x === m ? 'remove' : 'add']('hidden');
+    });
+}
+
+// ==================== CONFIRM DEPLOY ====================
+function confirmDeploy() {
+    if (!sel) { toast('Sélectionnez un serveur', 'warn'); return; }
+    // Validation rapide selon la méthode
+    if (method === 'github') {
+        const url = document.getElementById('gh-url').value.trim();
+        if (!url) { toast('Entrez l\'URL du dépôt GitHub', 'warn'); return; }
+    } else if (method === 'zip') {
+        if (!zipFile) { toast('Sélectionnez un fichier ZIP', 'warn'); return; }
+    }
+    // Afficher l'overlay de progression et lancer
+    showDeployOverlay();
+    doDeploy();
+}
+
+// ==================== DEPLOY OVERLAY ====================
+const DS_STEPS = ['prepare','upload','install','start'];
+let _dsCurrentStep = -1;
+
+function showDeployOverlay() {
+    const overlay = document.getElementById('deployOverlay');
+    overlay.classList.add('show');
+    document.getElementById('deployModalTitle').textContent = 'Déploiement en cours…';
+    document.getElementById('deployModalSub').textContent = `Serveur cible : ${sel.name} · Méthode : ${method.toUpperCase()}`;
+    document.getElementById('deployProgress').style.width = '0%';
+    document.getElementById('deployOverlayCloseBtn').style.display = 'none';
+    // Reset all steps
+    DS_STEPS.forEach(s => setDsStep(s, 'pending', 'En attente…'));
+    _dsCurrentStep = -1;
+    // Lancer l'animation séquentielle
+    advanceDsStep();
+}
+
+function setDsStep(step, state, detail) {
+    const ico = document.getElementById('ds-'+step+'-ico');
+    const det = document.getElementById('ds-'+step+'-det');
+    const el  = document.getElementById('ds-'+step);
+    if (!ico) return;
+    ico.className = 'ds-icon ' + state;
+    const icons = { prepare:'fa-boxes', upload:'fa-cloud-upload-alt', install:'fa-cogs', start:'fa-play' };
+    const spinIcon = state === 'active' ? 'fa-spinner fa-spin' : icons[step];
+    ico.innerHTML = `<i class="fas ${spinIcon}"></i>`;
+    if (det) det.textContent = detail;
+    if (el) { el.classList.remove('done','active'); if (state==='done') el.classList.add('done'); if (state==='active') el.classList.add('active'); }
+}
+
+function advanceDsStep() {
+    _dsCurrentStep++;
+    if (_dsCurrentStep > 0) setDsStep(DS_STEPS[_dsCurrentStep-1], 'done', 'Terminé ✓');
+    if (_dsCurrentStep >= DS_STEPS.length) return;
+    const stepLabels = { prepare:'Analyse du projet…', upload:'Transfert des fichiers…', install:'Exécution des dépendances…', start:'Démarrage du processus…' };
+    setDsStep(DS_STEPS[_dsCurrentStep], 'active', stepLabels[DS_STEPS[_dsCurrentStep]]);
+    const prog = Math.round((_dsCurrentStep / DS_STEPS.length) * 85);
+    document.getElementById('deployProgress').style.width = prog + '%';
+}
+
+function finishDeployOverlay(success) {
+    DS_STEPS.forEach(s => setDsStep(s, success ? 'done' : (DS_STEPS.indexOf(s) <= _dsCurrentStep ? 'done' : 'pending'), 'Terminé ✓'));
+    if (!success) setDsStep(DS_STEPS[_dsCurrentStep] || DS_STEPS[DS_STEPS.length-1], 'error', 'Erreur — voir les logs');
+    document.getElementById('deployProgress').style.width = success ? '100%' : '70%';
+    document.getElementById('deployModalTitle').textContent = success ? '✅ Déploiement réussi !' : '❌ Échec du déploiement';
+    document.getElementById('deployModalSub').textContent = success ? 'Votre serveur est maintenant opérationnel.' : 'Une erreur est survenue. Consultez les logs pour plus de détails.';
+    document.getElementById('deployOverlayCloseBtn').style.display = 'inline-block';
+}
+
+function selTpl(name) {
+    selTplName = name;
+    document.querySelectorAll('.tpl-c').forEach(c => c.classList.remove('sel'));
+    document.getElementById('t-'+name)?.classList.add('sel');
+}
+
+function selEnvType(prefix, type) {
+    selectedEnvType[prefix] = type;
+    document.querySelectorAll(`#${prefix}-env-grid .env-tc`).forEach(c => c.classList.remove('sel'));
+    document.getElementById(`${prefix}-env-${type}`)?.classList.add('sel');
+    const badge = document.getElementById(`${prefix}-env-badge`);
+    if (badge) {
+        if (type !== 'auto') {
+            const labels = { nodejs: 'Node.js', python: 'Python', php: 'PHP', java: 'Java', static: 'Static HTML' };
+            document.getElementById(`${prefix}-env-badge-text`).textContent = `Environnement: ${labels[type] || type}`;
+            badge.style.display = 'block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+async function autoDetectGhTech() {
+    const url = document.getElementById('gh-url').value.trim();
+    if (!url) { toast('Entrez d\'abord une URL GitHub', 'warn'); return; }
+    const btn = document.getElementById('gh-detect-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Détection…';
+    btn.disabled = true;
+    try {
+        const r = await fetch('/api/deploy/detect-tech', {
+            method: 'POST', headers: H,
+            body: JSON.stringify({ repo_url: url, branch: document.getElementById('gh-branch').value.trim() || 'main' })
+        });
+        const d = await r.json();
+        if (d.success && d.tech) {
+            selEnvType('gh', d.tech);
+            if (d.suggestedStart && !document.getElementById('gh-cmd').value.trim()) {
+                document.getElementById('gh-cmd').value = d.suggestedStart;
+            }
+            const badge = document.getElementById('gh-env-badge');
+            if (badge) {
+                document.getElementById('gh-env-badge-text').textContent = `Auto-détecté: ${d.techName || d.tech}${d.confidence ? ' (' + d.confidence + ')' : ''}`;
+                badge.style.display = 'block';
+            }
+            toast(`Détecté: ${d.techName || d.tech}`, 'success');
+        } else {
+            toast(d.error || 'Impossible de détecter', 'warn');
+        }
+    } catch(e) {
+        toast('Erreur lors de la détection', 'error');
+    } finally {
+        btn.innerHTML = '<i class="fas fa-magic"></i> Auto-détecter';
+        btn.disabled = false;
+    }
+}
+
+let _ghDetectTimer = null;
+function onGhInput() {
+    clearTimeout(_ghDetectTimer);
+    const url = document.getElementById('gh-url').value.trim();
+    if (url.match(/github\.com\/[^\/]+\/[^\/]+/)) {
+        _ghDetectTimer = setTimeout(autoDetectGhTech, 1400);
+    }
+}
+
+// ==================== ZIP Drag & drop ====================
+function dzOver(e) { e.preventDefault(); document.getElementById('zip-dz').classList.add('over'); }
+function dzLeave(e) { document.getElementById('zip-dz').classList.remove('over'); }
+function dzDrop(e) {
+    e.preventDefault();
+    document.getElementById('zip-dz').classList.remove('over');
+    const file = e.dataTransfer.files[0];
+    if (file && (file.name.endsWith('.zip') || file.type === 'application/zip')) {
+        setZipFile(file);
+    } else {
+        toast('Seuls les fichiers .zip sont acceptés', 'error');
+    }
+}
+function onZipSelect(e) {
+    const file = e.target.files[0];
+    if (file) setZipFile(file);
+}
+async function setZipFile(file) {
+    zipFile = file;
+    document.getElementById('dz-label').textContent = file.name;
+    document.getElementById('dz-label').style.color = 'var(--accent)';
+    // parse ZIP
+    try {
+        zipJsObj = await JSZip.loadAsync(file);
+        zipFiles = {};
+        const list = document.getElementById('prev-list');
+        list.innerHTML = '';
+        const paths = Object.keys(zipJsObj.files).filter(p => !zipJsObj.files[p].dir);
+        paths.forEach(p => {
+            const parts = p.split('/');
+            const name = parts[parts.length - 1];
+            const div = document.createElement('div');
+            div.className = 'fi';
+            div.innerHTML = `<i class="fas ${getFileIcon(name)}"></i><span title="${escHtml(p)}">${escHtml(p.length > 28 ? '…'+p.slice(-26) : p)}</span>`;
+            div.onclick = () => openZipFile(p, div);
+            list.appendChild(div);
+        });
+        document.getElementById('prev-title').innerHTML = `<i class="fas fa-file-archive" style="color:var(--warn);margin-right:4px"></i>${file.name.substring(0,20)}`;
+        document.getElementById('prev-badge').textContent = `${paths.length} fichiers`;
+        showTab('preview');
+    } catch(e) { toast('Erreur lecture ZIP: ' + e.message, 'error'); }
+}
+async function openZipFile(path, el) {
+    document.querySelectorAll('#prev-list .fi').forEach(f => f.classList.remove('act'));
+    el?.classList.add('act');
+    zipOpenedFile = path;
+    const ph = document.getElementById('prev-ph');
+    const ed = document.getElementById('prev-editor');
+    const saveBtn = document.getElementById('zip-save-file-btn');
+
+    ph.style.display = 'none';
+    ed.style.display = 'block';
+    document.getElementById('prev-ef-name').textContent = path;
+    document.getElementById('prev-ef-status').textContent = 'Chargement...';
+
+    if (zipFiles[path] !== undefined) {
+        ed.value = zipFiles[path];
+        document.getElementById('prev-ef-status').textContent = `${ed.value.split('\n').length} lignes`;
+    } else {
+        try {
+            const txt = await zipJsObj.files[path]?.async('string');
+            if (txt !== undefined) {
+                zipFiles[path] = txt;
+                ed.value = txt;
+                document.getElementById('prev-ef-status').textContent = `${txt.split('\n').length} lignes`;
+            } else {
+                ed.value = '// Fichier binaire — non éditable';
+                ed.disabled = true;
+            }
+        } catch(e) { ed.value = '// Erreur: ' + e.message; }
+    }
+    saveBtn.style.display = 'flex';
+}
+function saveZipFile() {
+    if (!zipOpenedFile) return;
+    zipFiles[zipOpenedFile] = document.getElementById('prev-editor').value;
+    document.getElementById('prev-ef-status').textContent = '✓ Modifié';
+    document.getElementById('zip-save-file-btn').innerHTML = '<i class="fas fa-check"></i> Sauvegardé';
+    setTimeout(() => { document.getElementById('zip-save-file-btn').innerHTML = '<i class="fas fa-check"></i> Appliquer modif.'; }, 1500);
+}
+
+// ==================== GitHub Preview ====================
+async function loadGhFiles() {
+    const url = document.getElementById('gh-url').value.trim();
+    const branch = document.getElementById('gh-branch').value.trim() || 'main';
+    if (!url) { toast('Entrez l\'URL du dépôt', 'warn'); return; }
+    const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
+    if (!match) { toast('URL GitHub invalide', 'error'); return; }
+    const [, owner, repo] = match;
+    const cleanRepo = repo.replace(/\.git$/, '');
+
+    showTab('preview');
+    const list = document.getElementById('prev-list');
+    list.innerHTML = '<div class="fe-empty"><i class="fas fa-spinner spin"></i> Chargement...</div>';
+    document.getElementById('prev-title').innerHTML = `<i class="fab fa-github" style="margin-right:4px"></i>${owner}/${cleanRepo}`;
+    document.getElementById('prev-badge').textContent = '';
+    ghPreviewFiles = {};
+
+    try {
+        const r = await fetch(`https://api.github.com/repos/${owner}/${cleanRepo}/git/trees/${branch}?recursive=1`);
+        const d = await r.json();
+        if (!d.tree) { list.innerHTML = '<div class="fe-empty">Repo introuvable ou privé</div>'; return; }
+        const files = d.tree.filter(f => f.type === 'blob').slice(0, 200);
+        document.getElementById('prev-badge').textContent = `${files.length} fichiers`;
+        list.innerHTML = '';
+        files.forEach(f => {
+            const parts = f.path.split('/');
+            const name = parts[parts.length - 1];
+            const div = document.createElement('div');
+            div.className = 'fi';
+            div.innerHTML = `<i class="fas ${getFileIcon(name)}"></i><span title="${escHtml(f.path)}">${escHtml(f.path.length > 28 ? '…'+f.path.slice(-26) : f.path)}</span>`;
+            div.onclick = () => openGhFile(f.path, `https://raw.githubusercontent.com/${owner}/${cleanRepo}/${branch}/${f.path}`, div);
+            list.appendChild(div);
+        });
+    } catch(e) { list.innerHTML = `<div class="fe-empty">Erreur: ${e.message}</div>`; }
+}
+async function openGhFile(path, rawUrl, el) {
+    document.querySelectorAll('#prev-list .fi').forEach(f => f.classList.remove('act'));
+    el?.classList.add('act');
+    ghOpenedFile = path;
+    const ph = document.getElementById('prev-ph');
+    const ed = document.getElementById('prev-editor');
+    ph.style.display = 'none';
+    ed.style.display = 'block';
+    ed.disabled = true;
+    document.getElementById('prev-ef-name').textContent = path;
+    document.getElementById('prev-ef-status').textContent = 'Chargement...';
+    document.getElementById('zip-save-file-btn').style.display = 'none';
+
+    if (ghPreviewFiles[path] !== undefined) {
+        ed.value = ghPreviewFiles[path];
+        ed.disabled = false;
+        document.getElementById('prev-ef-status').textContent = `${ed.value.split('\n').length} lignes (lecture seule)`;
+        return;
+    }
+    try {
+        const r = await fetch(rawUrl);
+        if (!r.ok) throw new Error('Fichier introuvable');
+        const txt = await r.text();
+        ghPreviewFiles[path] = txt;
+        ed.value = txt;
+        ed.disabled = false;
+        document.getElementById('prev-ef-status').textContent = `${txt.split('\n').length} lignes (lecture seule)`;
+    } catch(e) { ed.value = '// Erreur chargement: ' + e.message; }
+}
+
+// ==================== FILE EXPLORER (Pterodactyl) ====================
+async function loadFiles(dir) {
+    if (!sel) return;
+    curPath = dir;
+    updatePathBar(dir);
+    const list = document.getElementById('fe-list');
+    list.innerHTML = '<div class="fe-empty"><i class="fas fa-spinner spin"></i></div>';
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/files/list?directory=${encodeURIComponent(dir)}`, { headers: HA });
+        const d = await r.json();
+        if (!d.success) {
+            const msg = d.error || 'Erreur';
+            const detail = d.details ? ` (${d.details})` : '';
+            list.innerHTML = `<div class="fe-empty">${escHtml(msg + detail)}</div>`;
+            return;
+        }
+        const files = (d.files || []).sort((a,b) => {
+            if (a.is_directory !== b.is_directory) return a.is_directory ? -1 : 1;
+            return a.name.localeCompare(b.name);
+        });
+        if (!files.length) { list.innerHTML = '<div class="fe-empty">Dossier vide</div>'; clearSelection(); return; }
+        clearSelection();
+        list.innerHTML = dir !== '/' ? `<div class="fi dir" onclick="navUp()"><span style="width:14px"></span><i class="fi-icon fas fa-arrow-left"></i><span class="fi-name">..</span></div>` : '';
+        files.forEach(f => {
+            const fp = dir.replace(/\/$/, '') + '/' + f.name;
+            const div = document.createElement('div');
+            div.className = 'fi' + (f.is_directory ? ' dir' : '');
+            div.dataset.path = fp;
+            div.dataset.name = f.name;
+            div.innerHTML = `<input type="checkbox" class="fi-check" onclick="event.stopPropagation();toggleSelect(this,'${escAttr(fp)}')"><i class="fi-icon fas ${f.is_directory ? 'fa-folder' : getFileIcon(f.name)}"></i><span class="fi-name">${escHtml(f.name)}</span>${!f.is_directory && f.size ? `<span class="fsz">${fmtSize(f.size)}</span>` : ''}<button class="fi-del" title="Supprimer" onclick="event.stopPropagation();deleteFileOrFolder('${escAttr(fp)}','${escAttr(f.name)}')"><i class="fas fa-trash-alt"></i></button>`;
+            div.onclick = (e) => { if (e.target.type==='checkbox'||e.target.tagName==='BUTTON'||e.target.tagName==='I') return; f.is_directory ? loadFiles(fp) : openFile(fp, f.name, div); };
+            list.appendChild(div);
+        });
+    } catch(e) { list.innerHTML = `<div class="fe-empty">${escHtml(e.message)}</div>`; }
+}
+
+function navUp() {
+    const parts = curPath.split('/').filter(Boolean);
+    parts.pop();
+    loadFiles('/' + parts.join('/') || '/');
+}
+function navTo(path) { loadFiles(path); }
+function refreshFiles() { loadFiles(curPath); }
+
+// ---- SÉLECTION MULTIPLE ----
+let selectedPaths = new Set();
+
+function toggleSelect(chk, fp) {
+    const div = chk.closest('.fi');
+    if (chk.checked) { selectedPaths.add(fp); div.classList.add('selected'); }
+    else { selectedPaths.delete(fp); div.classList.remove('selected'); }
+    updateSelBar();
+}
+function toggleSelectAll(masterChk) {
+    selectedPaths.clear();
+    document.querySelectorAll('#fe-list .fi-check').forEach(chk => {
+        chk.checked = masterChk.checked;
+        const div = chk.closest('.fi');
+        if (masterChk.checked) { selectedPaths.add(div.dataset.path); div.classList.add('selected'); }
+        else div.classList.remove('selected');
+    });
+    updateSelBar();
+}
+function updateSelBar() {
+    const bar = document.getElementById('sel-bar');
+    const cnt = document.getElementById('sel-count');
+    cnt.textContent = selectedPaths.size;
+    bar.classList.toggle('show', selectedPaths.size > 0);
+}
+function clearSelection() {
+    selectedPaths.clear();
+    document.querySelectorAll('#fe-list .fi-check').forEach(c => { c.checked = false; c.closest('.fi').classList.remove('selected'); });
+    const chkAll = document.getElementById('chk-all');
+    if (chkAll) chkAll.checked = false;
+    const bar = document.getElementById('sel-bar');
+    if (bar) bar.classList.remove('show');
+}
+
+// ---- SUPPRIMER UN FICHIER ----
+async function deleteFileOrFolder(fp, name) {
+    if (!confirm(`Supprimer "${name}" ?\nCette action est irréversible.`)) return;
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/files/delete`, {
+            method: 'POST',
+            headers: { ...HA, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: fp })
+        });
+        const d = await r.json();
+        if (d.success) { toast(`"${name}" supprimé`, 'success'); selectedPaths.delete(fp); loadFiles(curPath); }
+        else toast(d.error || 'Erreur suppression', 'error');
+    } catch(e) { toast(e.message, 'error'); }
+}
+
+// ---- SUPPRIMER LA SÉLECTION ----
+async function deleteSelected() {
+    if (!selectedPaths.size) return;
+    const names = [...document.querySelectorAll('#fe-list .fi.selected .fi-name')].map(s => s.textContent).join(', ');
+    if (!confirm(`Supprimer ${selectedPaths.size} élément(s) :\n${names}\n\nCette action est irréversible.`)) return;
+    let ok = 0, fail = 0;
+    for (const fp of [...selectedPaths]) {
+        try {
+            const r = await fetch(`/api/servers/${sel.id}/files/delete`, {
+                method: 'POST',
+                headers: { ...HA, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: fp })
+            });
+            const d = await r.json();
+            d.success ? ok++ : fail++;
+        } catch { fail++; }
+    }
+    if (ok) toast(`${ok} élément(s) supprimé(s)`, 'success');
+    if (fail) toast(`${fail} échec(s)`, 'error');
+    loadFiles(curPath);
+}
+function updatePathBar(dir) {
+    const parts = dir.split('/').filter(Boolean);
+    const bar = document.getElementById('fe-path');
+    let h = `<span class="path-seg" onclick="navTo('/')">~</span>`;
+    let cum = '';
+    parts.forEach(p => { cum += '/'+p; const c=cum; h += ` <span style="color:var(--txm)">/</span> <span class="path-seg" onclick="navTo('${escAttr(c)}')">${escHtml(p)}</span>`; });
+    bar.innerHTML = h;
+}
+function closeEditor() {
+    document.getElementById('fe-body').classList.remove('ed-open');
+    document.querySelectorAll('#fe-list .fi').forEach(f => f.classList.remove('act'));
+    openedFile = null;
+    fileModified = false;
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('ef-name').textContent = '—';
+    document.getElementById('editor-ph').style.display = '';
+    document.getElementById('code-editor').style.display = 'none';
+}
+async function openFile(fp, name, el) {
+    if (fileModified && !confirm('Modifications non sauvegardées. Continuer ?')) return;
+    document.querySelectorAll('#fe-list .fi').forEach(f => f.classList.remove('act'));
+    el?.classList.add('act');
+    document.getElementById('fe-body').classList.add('ed-open');
+    showTab('files');
+    openedFile = fp;
+    fileModified = false;
+    const ph = document.getElementById('editor-ph');
+    const ed = document.getElementById('code-editor');
+    ph.style.display = 'none';
+    ed.style.display = 'block';
+    ed.disabled = true;
+    ed.value = 'Chargement…';
+    document.getElementById('ef-name').textContent = name;
+    document.getElementById('ef-status').textContent = '';
+    document.getElementById('save-btn').style.display = 'none';
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/files/content?path=${encodeURIComponent(fp)}`, { headers: HA });
+        const d = await r.json();
+        if (d.success) {
+            ed.value = d.content || '';
+            ed.disabled = false;
+            document.getElementById('ef-status').textContent = `${(d.content||'').split('\n').length} lignes`;
+            document.getElementById('save-btn').style.display = 'flex';
+        } else {
+            ed.value = `// Erreur: ${d.error}`;
+            document.getElementById('ef-status').textContent = 'Erreur lecture';
+        }
+    } catch(e) { ed.value = `// ${e.message}`; }
+}
+function onEditorChange() {
+    fileModified = true;
+    document.getElementById('ef-status').textContent = '● Modifié';
+}
+async function saveFile() {
+    if (!openedFile || !sel) return;
+    const btn = document.getElementById('save-btn');
+    const content = document.getElementById('code-editor').value;
+    btn.innerHTML = '<i class="fas fa-spinner spin"></i>';
+    btn.disabled = true;
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/files/write`, {
+            method: 'POST', headers: H,
+            body: JSON.stringify({ path: openedFile, content })
+        });
+        const d = await r.json();
+        if (d.success) {
+            fileModified = false;
+            document.getElementById('ef-status').textContent = 'Sauvegardé ✓';
+            btn.innerHTML = '<i class="fas fa-check"></i> OK';
+            setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Ctrl+S'; btn.disabled = false; document.getElementById('ef-status').textContent = `${content.split('\n').length} lignes`; }, 2000);
+        } else { toast(d.error || 'Erreur sauvegarde', 'error'); btn.innerHTML = '<i class="fas fa-save"></i> Ctrl+S'; btn.disabled = false; }
+    } catch(e) { toast(e.message, 'error'); btn.innerHTML = '<i class="fas fa-save"></i> Ctrl+S'; btn.disabled = false; }
+}
+document.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key === 's') { e.preventDefault(); saveFile(); } });
+
+// ==================== TABS ====================
+function showTab(name) {
+    ['files','preview','logs','history','domain'].forEach(n => {
+        document.getElementById('tab-'+n).className = 'tab-content' + (n === name ? ' act' : '');
+        document.getElementById('tb-'+n).className = 'tab-btn' + (n === name ? ' act' : '');
+    });
+    if (name === 'domain') loadSubdomainInfo();
+}
+
+// ==================== LOGS SSE ====================
+function connectLogsWS() {   // garde le même nom pour compatibilité
+    disconnectLogsWS();
+    if (!sel) return;
+    logsWs = new EventSource(`/api/servers/${sel.id}/logs/sse?token=${encodeURIComponent(token)}`);
+    logsWs.onopen = () => { setLogConn(true); };
+    logsWs.onerror = () => {
+        setLogConn(false);
+        logsWs.close(); logsWs = null;
+        addLog('⚡ SSE déconnecté — retry 5s…', 'warn');
+        logsReconnTimer = setTimeout(connectLogsWS, 5000);
+    };
+    logsWs.onmessage = (e) => {
+        try {
+            const d = JSON.parse(e.data);
+            if (d.type === 'hb') return;
+            if (d.type === 'connected') { setLogConn(true); addLog(d.message, 'sys'); }
+            else if (d.type === 'log') addLog(d.message, lcls(d.level));
+            else if (d.type === 'deploy_status') {
+                addLog(`🚀 ${d.message}`, d.status === 'failed' ? 'err' : 'dep');
+                setDeployPill(d.status, d.message);
+                if (d.status === 'failed' && d.diagnosis) {
+                    showDeployDiagnosis(d.diagnosis);
+                }
+            }
+        } catch(ex) {}
+    };
+}
+function disconnectLogsWS() {
+    clearTimeout(logsReconnTimer);
+    clearInterval(logsPingInterval);
+    if (logsWs) { logsWs.close(); logsWs = null; }
+    setLogConn(false);
+}
+function setLogConn(on) {
+    document.getElementById('log-dot').className = 'log-dot' + (on ? ' on' : '');
+    document.getElementById('log-status').textContent = on ? 'Connecté' : 'Déconnecté';
+}
+function lcls(l) {
+    if (!l) return 'info';
+    const x = l.toLowerCase();
+    if (x === 'error' || x === 'err') return 'err';
+    if (x === 'warn' || x === 'warning') return 'warn';
+    if (x === 'success' || x === 'ok') return 'ok';
+    if (x === 'sys' || x === 'system') return 'sys';
+    if (x === 'deploy') return 'dep';
+    return 'info';
+}
+function addLog(msg, cls = 'info') {
+    const area = document.getElementById('logs-area');
+    document.getElementById('logs-ph')?.remove();
+    const now = new Date().toTimeString().substring(0, 8);
+    const d = document.createElement('div');
+    d.className = 'log-l';
+    d.innerHTML = `<span class="log-ts">${now}</span><span class="log-m log-${cls}">${escHtml(String(msg))}</span>`;
+    area.appendChild(d);
+    if (document.getElementById('auto-scroll')?.checked) area.scrollTop = area.scrollHeight;
+}
+function clearLogs() { document.getElementById('logs-area').innerHTML = ''; }
+function clearActiveLogs() {
+    if (consoleMode === 'console') document.getElementById('console-area').innerHTML = '';
+    else clearLogs();
+}
+
+// ==================== CONSOLE MODE ====================
+function switchConsoleMode(mode) {
+    consoleMode = mode;
+    document.getElementById('cst-deploy').className = 'cst-btn' + (mode === 'deploy' ? ' act' : '');
+    document.getElementById('cst-console').className = 'cst-btn' + (mode === 'console' ? ' act' : '');
+    document.getElementById('pane-deploy').style.display = mode === 'deploy' ? 'flex' : 'none';
+    document.getElementById('pane-deploy').style.flexDirection = 'column';
+    document.getElementById('pane-console').style.display = mode === 'console' ? 'flex' : 'none';
+    if (mode === 'console' && sel && !consoleWs) connectConsoleWS();
+}
+
+// ==================== CONSOLE SSE ====================
+function connectConsoleWS() {  // garde le même nom pour compatibilité
+    disconnectConsoleWS();
+    if (!sel) return;
+    consoleWs = new EventSource(`/api/servers/${sel.id}/console/sse?token=${encodeURIComponent(token)}`);
+    consoleWs.onopen = () => {};
+    consoleWs.onerror = () => {
+        consoleWs.close(); consoleWs = null;
+        addConsoleLine('⚡ Console SSE déconnectée — retry 8s…', 'warn');
+        consoleReconnTimer = setTimeout(connectConsoleWS, 8000);
+    };
+    consoleWs.onmessage = (e) => {
+        try {
+            const d = JSON.parse(e.data);
+            if (d.type === 'hb') return;
+            if (d.type === 'console') addConsoleLine(d.message, 'info');
+            else if (d.type === 'cmd_echo') addConsoleLine(d.message, 'cmd');
+            else if (d.type === 'sys') addConsoleLine(d.message, 'sys');
+            else if (d.type === 'error') addConsoleLine(d.message, 'err');
+            else if (d.type === 'warn') addConsoleLine(d.message, 'warn');
+            else if (d.type === 'status') updateSrvStatus(d.status);
+        } catch(ex) {}
+    };
+}
+function disconnectConsoleWS() {
+    clearTimeout(consoleReconnTimer);
+    clearInterval(consolePingInterval);
+    if (consoleWs) { consoleWs.close(); consoleWs = null; }
+}
+function addConsoleLine(msg, cls = 'info') {
+    const area = document.getElementById('console-area');
+    document.getElementById('console-ph')?.remove();
+    const now = new Date().toTimeString().substring(0, 8);
+    const d = document.createElement('div');
+    d.className = 'log-l';
+    d.innerHTML = `<span class="log-ts">${now}</span><span class="log-m log-${cls}">${escHtml(String(msg))}</span>`;
+    area.appendChild(d);
+    if (document.getElementById('auto-scroll')?.checked) area.scrollTop = area.scrollHeight;
+}
+async function sendConsoleCommand() {
+    const inp = document.getElementById('console-input');
+    const cmd = inp.value.trim();
+    if (!cmd || !sel) return;
+    inp.value = '';
+    inp.focus();
+    addConsoleLine(`> ${cmd}`, 'cmd');
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/console/command`, {
+            method: 'POST', headers: H, body: JSON.stringify({ command: cmd })
+        });
+        const d = await r.json();
+        if (!d.success) addConsoleLine(`❌ ${d.error || 'Erreur envoi commande'}`, 'err');
+    } catch(e) { addConsoleLine('❌ Erreur réseau', 'err'); }
+}
+function updateSrvStatus(status) {
+    const badge = document.getElementById('srv-status-badge');
+    if (!badge) return;
+    const labels = { running: '● En ligne', starting: '○ Démarrage…', stopping: '○ Arrêt…', offline: '● Hors ligne' };
+    badge.textContent = labels[status] || status;
+    badge.className = 'srv-status-badge ' + (status || '');
+    // Live preview button
+    const pvBtn = document.getElementById('live-preview-btn');
+    if (pvBtn && sel) {
+        if (status === 'running') {
+            const proto = location.protocol === 'https:' ? 'https' : 'http';
+            const sub = sel.custom_subdomain || sel.identifier;
+            const url = sel.custom_domain ? `${proto}://${sel.custom_domain}` : `${proto}://${sub}.flihost.site`;
+            pvBtn.href = url;
+            pvBtn.style.display = 'flex';
+        } else {
+            pvBtn.style.display = 'none';
+        }
+    }
+}
+
+// ==================== POWER CONTROLS ====================
+async function sendPower(action) {
+    if (!sel) return;
+    const labels = { start: 'Démarrage', stop: 'Arrêt', restart: 'Redémarrage' };
+    addConsoleLine(`⚡ ${labels[action] || action} du serveur…`, 'warn');
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/power`, { method: 'POST', headers: H, body: JSON.stringify({ action }) });
+        const d = await r.json();
+        if (d.success) addConsoleLine(`✅ ${labels[action]} envoyé`, 'ok');
+        else addConsoleLine(`❌ Erreur: ${d.error}`, 'err');
+    } catch(e) { addConsoleLine(`❌ Erreur réseau`, 'err'); }
+}
+
+function setDeployPill(status, msg) {
+    const p = document.getElementById('deploy-pill');
+    p.style.display = 'flex';
+    const map = { success: ['pill-ok',''], deployed: ['pill-ok',''], running: ['pill-run','blink'], building: ['pill-run','blink'], failed: ['pill-err',''] };
+    const [cls, dot] = map[status] || ['', ''];
+    const labels = { success: 'Déployé ✓', deployed: 'Déployé ✓', running: 'En cours…', building: 'Build…', failed: 'Échec ✗' };
+    p.className = 'pill ' + cls;
+    p.innerHTML = `<div class="pill-dot ${dot}"></div> ${labels[status] || status}`;
+}
+
+function showDeployDiagnosis(diag) {
+    const panel = document.getElementById('deploy-diagnosis-panel');
+    if (!panel || !diag) return;
+    document.getElementById('ddp-icon').textContent = diag.icon || '❌';
+    document.getElementById('ddp-reason').textContent = diag.reason || 'Erreur de déploiement';
+    document.getElementById('ddp-suggestion').textContent = diag.suggestion || '';
+    // Boutons d'action
+    const actionsEl = document.getElementById('ddp-actions');
+    let btns = '';
+    if (diag.alt_tech) {
+        const label = diag.alt_tech === 'python' ? 'Python' : diag.alt_tech === 'nodejs' ? 'Node.js' : diag.alt_tech;
+        btns += `<button onclick="toast('Changez l\\'environnement en ${label} dans les paramètres puis redéployez.','info')" 
+            style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">
+            <i class="fas fa-exchange-alt"></i> Utiliser ${label}
+        </button>`;
+    }
+    if (actionsEl) actionsEl.innerHTML = btns;
+    panel.style.display = 'block';
+    // Aller à l'onglet logs pour voir le diagnostic
+    showTab('logs');
+}
+
+// Analyse rapide côté client d'un message d'erreur de déploiement
+function quickDiagnoseClient(msg) {
+    const e = (msg || '').toLowerCase();
+    if (e.includes('coins') || e.includes('insuffisant') || e.includes('balance')) {
+        return { icon: '💰', reason: 'Solde de coins insuffisant', suggestion: 'Rechargez votre solde depuis la page Boutique pour pouvoir déployer.', alt_tech: null };
+    }
+    if (e.includes('server not found') || e.includes('serveur introuvable')) {
+        return { icon: '🖥️', reason: 'Serveur introuvable', suggestion: 'Le serveur sélectionné n\'existe plus ou n\'est pas accessible.', alt_tech: null };
+    }
+    if (e.includes('github') && (e.includes('404') || e.includes('not found'))) {
+        return { icon: '🔗', reason: 'Dépôt GitHub introuvable', suggestion: 'Vérifiez que l\'URL GitHub est correcte et que le dépôt est accessible (public ou connecté).', alt_tech: null };
+    }
+    if (e.includes('timeout') || e.includes('timed out')) {
+        return { icon: '⏱️', reason: 'Délai dépassé', suggestion: 'Le déploiement a pris trop de temps. Vérifiez que votre repo n\'est pas trop volumineux.', alt_tech: null };
+    }
+    if (e.includes('zip') || e.includes('fichier')) {
+        return { icon: '📦', reason: 'Erreur avec le fichier ZIP', suggestion: 'Assurez-vous que le fichier est bien un ZIP valide et non corrompu.', alt_tech: null };
+    }
+    return { icon: '❌', reason: 'Erreur de déploiement', suggestion: msg || 'Consultez les logs pour plus de détails.', alt_tech: null };
+}
+
+// ==================== DEPLOY ====================
+async function doDeploy() {
+    if (!sel) return;
+    const btn = document.getElementById('deploy-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Déploiement…';
+
+    const p = document.getElementById('deploy-pill');
+    p.style.display = 'flex';
+    p.className = 'pill pill-run';
+    p.innerHTML = '<div class="pill-dot blink"></div> En cours…';
+
+    // Cacher le panneau de diagnostic précédent
+    const _ddp = document.getElementById('deploy-diagnosis-panel');
+    if (_ddp) _ddp.style.display = 'none';
+
+    addLog('🚀 Démarrage du déploiement…', 'dep');
+
+    // Étape 1 — Préparation
+    advanceDsStep();
+    await delay(600);
+    // Étape 2 — Upload
+    advanceDsStep();
+
+    try {
+        let r, d;
+        if (method === 'github') {
+            const url = document.getElementById('gh-url').value.trim();
+            const branch = document.getElementById('gh-branch').value.trim() || 'main';
+            const cmd = document.getElementById('gh-cmd').value.trim();
+            const envType = selectedEnvType.gh !== 'auto' ? selectedEnvType.gh : undefined;
+            addLog(`📦 GitHub: ${url} (${branch})${envType ? ' [' + envType + ']' : ''}`, 'info');
+            r = await fetch('/api/deploy/github', {
+                method: 'POST', headers: H,
+                body: JSON.stringify({ server_id: sel.id, repo_url: url, branch, start_cmd: cmd || undefined, env_type: envType })
+            });
+        } else if (method === 'zip') {
+            addLog(`📦 ZIP: ${zipFile.name}`, 'info');
+            let fileToSend = zipFile;
+            if (Object.keys(zipFiles).length && zipJsObj) {
+                addLog('📝 Application des modifications…', 'info');
+                const newZip = new JSZip();
+                for (const [path, entry] of Object.entries(zipJsObj.files)) {
+                    if (entry.dir) { newZip.folder(path); continue; }
+                    newZip.file(path, zipFiles[path] !== undefined ? zipFiles[path] : await entry.async('arraybuffer'));
+                }
+                const blob = await newZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+                fileToSend = new File([blob], zipFile.name, { type: 'application/zip' });
+            }
+            const form = new FormData();
+            form.append('file', fileToSend);
+            form.append('server_id', sel.id);
+            const cmd = document.getElementById('zip-cmd').value.trim();
+            if (cmd) form.append('start_cmd', cmd);
+            const zipEnvType = selectedEnvType.zip !== 'auto' ? selectedEnvType.zip : undefined;
+            if (zipEnvType) form.append('env_type', zipEnvType);
+            r = await fetch('/api/deploy/zip', { method: 'POST', headers: HA, body: form });
+        } else {
+            const customUrl = document.getElementById('tpl-custom-url').value.trim();
+            addLog(`📦 Template: ${customUrl || selTplName}`, 'info');
+            r = await fetch('/api/deploy/template', {
+                method: 'POST', headers: H,
+                body: JSON.stringify({ server_id: sel.id, template: selTplName, template_url: customUrl || undefined })
+            });
+        }
+
+        // Étape 3 — Installation
+        advanceDsStep();
+        await delay(800);
+
+        d = await r.json();
+
+        // Étape 4 — Démarrage
+        advanceDsStep();
+        await delay(600);
+
+        if (d.success) {
+            addLog('✅ Déploiement lancé ! ' + (d.message || ''), 'ok');
+            if (d.deployment_id) addLog(`ID: ${d.deployment_id}`, 'sys');
+            setDeployPill('success', '');
+            finishDeployOverlay(true);
+            loadHistory();
+            setTimeout(() => loadFiles(curPath), 4000);
+        } else {
+            const errMsg = d.error || 'Échec du déploiement';
+            addLog('❌ Erreur: ' + errMsg, 'err');
+            setDeployPill('failed', '');
+            finishDeployOverlay(false);
+            // Afficher diagnostic immédiat si disponible, sinon analyser le message
+            if (d.diagnosis) {
+                showDeployDiagnosis(d.diagnosis);
+            } else {
+                // Analyse côté client basique
+                const diag = quickDiagnoseClient(errMsg);
+                if (diag) showDeployDiagnosis(diag);
+            }
+        }
+    } catch(e) {
+        addLog('❌ Erreur réseau: ' + e.message, 'err');
+        setDeployPill('failed', '');
+        finishDeployOverlay(false);
+    }
+    resetBtn();
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function resetBtn() {
+    const btn = document.getElementById('deploy-btn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-rocket"></i> Déployer maintenant';
+}
+
+// ==================== DOMAIN ====================
+function loadSubdomainInfo() {
+    const panel = document.getElementById('domain-panel');
+    const noSrv = document.getElementById('domain-no-server');
+    if (!sel || !sel.identifier) {
+        panel.style.display = 'none';
+        noSrv.style.display = 'block';
+        return;
+    }
+    noSrv.style.display = 'none';
+    panel.style.display = 'flex';
+
+    const proto = location.protocol === 'https:' ? 'https' : 'http';
+    const sub = sel.custom_subdomain || sel.identifier;
+    const activeUrl = proto + '://' + sub + '.flihost.site';
+    document.getElementById('current-url-display').textContent = activeUrl;
+    document.getElementById('current-url-link').href = activeUrl;
+    document.getElementById('domain-port-info').innerHTML = `<i class="fas fa-info-circle"></i> Port interne Pterodactyl : <strong>${sel.alloc_port || 'non assigné'}</strong>`;
+
+    document.getElementById('subdomain-input').value = sel.custom_subdomain || '';
+    document.getElementById('custom-domain-input').value = sel.custom_domain || '';
+    updateDnsInstructions(sel.custom_domain);
+}
+
+function updateCurrentUrlDisplay() {
+    if (!sel) return;
+    const proto = location.protocol === 'https:' ? 'https' : 'http';
+    const sub = document.getElementById('subdomain-input').value.trim() || sel.custom_subdomain || sel.identifier;
+    const cd = sel.custom_domain;
+    const activeUrl = cd ? proto + '://' + cd : proto + '://' + sub + '.flihost.site';
+    document.getElementById('current-url-display').textContent = activeUrl;
+    document.getElementById('current-url-link').href = activeUrl;
+}
+
+function copyCurrentUrl() {
+    const url = document.getElementById('current-url-display').textContent;
+    navigator.clipboard.writeText(url).then(() => toast('URL copiée !', 'success')).catch(() => {
+        const el = document.createElement('textarea');
+        el.value = url; document.body.appendChild(el); el.select(); document.execCommand('copy'); el.remove();
+        toast('URL copiée !', 'success');
+    });
+}
+
+async function saveSubdomain() {
+    if (!sel) return toast('Aucun serveur sélectionné', 'warn');
+    const val = document.getElementById('subdomain-input').value.trim().toLowerCase();
+    if (val && !/^[a-z0-9-]{3,32}$/.test(val)) { toast('Format invalide : lettres minuscules, chiffres, tirets (3-32 car.)', 'warn'); return; }
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/subdomain`, { method: 'PUT', headers: H, body: JSON.stringify({ subdomain: val || null }) });
+        const d = await r.json();
+        if (d.success) {
+            sel.custom_subdomain = val || '';
+            toast('Sous-domaine enregistré : ' + d.subdomain, 'success');
+            updateCurrentUrlDisplay();
+        } else { toast(d.error || 'Erreur', 'error'); }
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+async function clearSubdomain() {
+    document.getElementById('subdomain-input').value = '';
+    await saveSubdomain();
+}
+
+function updateDnsInstructions(domain) {
+    const box = document.getElementById('dns-instructions');
+    if (domain) { box.style.display = 'block'; } else { box.style.display = 'none'; }
+}
+
+async function saveCustomDomain() {
+    if (!sel) return toast('Aucun serveur sélectionné', 'warn');
+    const val = document.getElementById('custom-domain-input').value.trim().toLowerCase();
+    if (val && !/^([a-z0-9-]+\.)+[a-z]{2,}$/.test(val)) { toast('Domaine invalide. Exemple : monsite.com', 'warn'); return; }
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/custom-domain`, { method: 'PUT', headers: H, body: JSON.stringify({ domain: val || null }) });
+        const d = await r.json();
+        if (d.success) {
+            sel.custom_domain = val || '';
+            toast(val ? `Domaine lié : ${val}` : 'Domaine personnalisé supprimé', 'success');
+            updateDnsInstructions(val);
+            updateCurrentUrlDisplay();
+        } else { toast(d.error || 'Erreur', 'error'); }
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+async function clearCustomDomain() {
+    if (!confirm('Supprimer le domaine personnalisé ? Votre site redeviendra accessible via sous-domaine.flihost.site uniquement.')) return;
+    document.getElementById('custom-domain-input').value = '';
+    await saveCustomDomain();
+}
+
+// ==================== HISTORY ====================
+async function loadHistory() {
+    if (!sel) return;
+    const body = document.getElementById('hist-body');
+    body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--txm);font-size:13px"><i class="fas fa-spinner spin"></i></div>';
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/deployments`, { headers: HA });
+        const d = await r.json();
+        if (!d.success || !d.deployments?.length) { body.innerHTML = '<div style="text-align:center;padding:24px;color:var(--txm);font-size:13px">Aucun déploiement</div>'; return; }
+        const icons = { github: 'fab fa-github', zip: 'fas fa-file-archive', template: 'fas fa-layer-group' };
+        const bcls = { running: 'b-run', success: 'b-ok', deployed: 'b-ok', failed: 'b-err', building: 'b-run', pending: 'b-pnd' };
+        body.innerHTML = d.deployments.map(dep => {
+            const statusLabel = ({success:'Réussi',deployed:'Déployé',failed:'Échec',running:'Actif',building:'Build…',pending:'En attente'})[dep.status] || dep.status || '?';
+            const statusIcon = dep.status === 'running' || dep.status === 'deployed' || dep.status === 'success' ? '✅' : dep.status === 'failed' ? '❌' : '⏳';
+            const techName = dep.env_type ? ({nodejs:'Node.js',python:'Python',php:'PHP',java:'Java',static:'Static'})[dep.env_type] || dep.env_type : null;
+            return `<div class="hist-card" style="flex-wrap:wrap;gap:8px;">
+                <i class="hist-icon ${icons[dep.deploy_type] || 'fas fa-rocket'}"></i>
+                <div class="hist-info" style="flex:1;min-width:120px;">
+                    <div class="hist-name">${escHtml(dep.project_name || dep.repo_url || dep.template || 'Déploiement')}</div>
+                    <div class="hist-meta">
+                        ${(dep.deploy_type||'').toUpperCase()}
+                        ${techName ? ` · <span style="color:var(--accent);font-weight:700">${techName}</span>` : ''}
+                        · ${dep.created_at ? new Date(dep.created_at).toLocaleString('fr-FR') : '—'}
+                    </div>
+                </div>
+                <span class="badge ${bcls[dep.status] || ''}">${statusIcon} ${statusLabel}</span>
+                <button onclick="showTab('logs')" title="Voir les logs temps réel" style="padding:4px 9px;border-radius:8px;border:1px solid rgba(88,166,255,0.35);background:transparent;color:#58a6ff;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;"><i class="fas fa-terminal"></i> Logs</button>
+                <button onclick="rollbackDeployment(${dep.id})" title="Rollback vers ce déploiement" style="padding:4px 9px;border-radius:8px;border:1px solid var(--accent-l);background:transparent;color:var(--accent-l);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;"><i class="fas fa-undo"></i></button>
+            </div>`;
+        }).join('');
+    } catch(e) { body.innerHTML = '<div style="text-align:center;padding:20px;color:var(--err)">Erreur chargement</div>'; }
+}
+
+async function rollbackDeployment(deploymentId) {
+    if (!sel) return toast('Aucun serveur sélectionné','warn');
+    if (!confirm('Effectuer un rollback vers ce déploiement ? Le serveur sera redémarré.')) return;
+    try {
+        const r = await fetch(`/api/servers/${sel.id}/rollback`, { method: 'POST', headers: H, body: JSON.stringify({ deployment_id: deploymentId }) });
+        const d = await r.json();
+        if (d.success) { toast(d.message || 'Rollback effectué !', 'success'); loadHistory(); }
+        else toast(d.error || 'Erreur rollback', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+// ==================== UTILS ====================
+function getFileIcon(n) {
+    const e = (n.split('.').pop() || '').toLowerCase();
+    const m = { js:'fa-file-code',ts:'fa-file-code',jsx:'fa-file-code',tsx:'fa-file-code',json:'fa-file-code',html:'fa-file-code',css:'fa-file-code',scss:'fa-file-code',py:'fa-file-code',php:'fa-file-code',sh:'fa-terminal',bash:'fa-terminal',md:'fa-file-alt',txt:'fa-file-alt',env:'fa-key',yml:'fa-cogs',yaml:'fa-cogs',xml:'fa-file-code',log:'fa-list-alt',png:'fa-file-image',jpg:'fa-file-image',gif:'fa-file-image',svg:'fa-file-image',mp4:'fa-file-video',zip:'fa-file-archive',tar:'fa-file-archive',gz:'fa-file-archive' };
+    return m[e] || 'fa-file';
+}
+function fmtSize(b) { return b < 1024 ? b+'B' : b < 1048576 ? (b/1024).toFixed(1)+'KB' : (b/1048576).toFixed(1)+'MB'; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s) { return String(s).replace(/"/g,'&quot;'); }
+
+init();
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

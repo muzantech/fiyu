@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parrainage - FLYHOST</title>
+    <meta name="description" content="Programme de parrainage FLYHOST - Gagnez des coins gratuits en invitant vos amis">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dim: rgba(99, 102, 241, 0.1);
+            --bg: #eef0f7;
+            --surface: rgba(255, 255, 255, 0.75);
+            --surface-strong: rgba(255, 255, 255, 0.92);
+            --border: rgba(99, 102, 241, 0.18);
+            --border-strong: rgba(99, 102, 241, 0.35);
+            --text: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --green: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 18px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 8px 20px -8px rgba(99, 102, 241, 0.2);
+            --shadow-hover: 0 20px 30px -12px rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        /* ========== FOND ANIMÉ ========== */
+        .animated-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+        .orb1 { width: 600px; height: 600px; background: rgba(99,102,241,0.6); top: -200px; left: -100px; animation-duration: 20s; }
+        .orb2 { width: 500px; height: 500px; background: rgba(139,92,246,0.5); bottom: -150px; right: -100px; animation-duration: 28s; animation-delay: -5s; }
+        .orb3 { width: 400px; height: 400px; background: rgba(45,212,191,0.5); top: 40%; left: 40%; animation-duration: 22s; animation-delay: -2s; }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes float { 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(80px,-60px) scale(1.3);} }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes glowPulse { 0%,100%{box-shadow:0 0 5px var(--accent-dim);} 50%{box-shadow:0 0 20px var(--accent),0 0 30px var(--accent-light);} }
+        @keyframes zoomIn { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+        @keyframes slideInLeft { from{opacity:0;transform:translateX(-30px);} to{opacity:1;transform:translateX(0);} }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--accent-dim); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+
+        /* ========== TOPBAR ========== */
+        .topbar {
+            position: fixed;
+            top: 0; width: 100%; height: 64px;
+            background: #1e1e2e;
+            border-top: 3px solid var(--accent);
+            z-index: 90;
+            display: flex; align-items: center;
+            padding: 0 24px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease-out;
+        }
+        .hamburger {
+            background: transparent; border: none;
+            width: 42px; height: 42px;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 6px; cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
+        .hamburger span {
+            display: block; width: 22px; height: 2px;
+            background-color: white; border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .hamburger:hover span { background: var(--accent-light); }
+        .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .logo-area { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+        .logo-mark {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+            animation: glowPulse 3s infinite;
+            flex-shrink: 0;
+        }
+        .logo-text { font-weight: 800; font-size: 18px; color: white; white-space: nowrap; }
+        .topbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .avatar-circle {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: white;
+            cursor: pointer; border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            flex-shrink: 0;
+        }
+        .avatar-circle:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
+
+        /* ========== DRAWER ========== */
+        .drawer {
+            position: fixed; top: 0; left: 0;
+            width: 300px; height: 100vh;
+            background: rgba(238,240,247,0.97);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 40px rgba(99,102,241,0.15);
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            overflow-y: auto; overflow-x: hidden;
+            padding: 0; display: flex; flex-direction: column;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .drawer-logo { display: flex; align-items: center; gap: 10px; }
+        .drawer-logo .logo-mark { width: 36px; height: 36px; font-size: 14px; }
+        .drawer-logo span { font-weight: 800; font-size: 18px; color: var(--text); }
+        .close-drawer {
+            background: transparent; border: none; font-size: 28px;
+            color: var(--text-muted); cursor: pointer;
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .close-drawer:hover { color: var(--error); background: rgba(239,68,68,0.1); }
+
+        .drawer-user {
+            display: flex; align-items: center; gap: 16px;
+            padding: 20px; border-bottom: 1px solid var(--border);
+        }
+        .drawer-avatar {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 22px; color: white;
+            flex-shrink: 0;
+        }
+        .drawer-user-info { flex: 1; min-width: 0; }
+        .drawer-username { font-weight: 700; font-size: 16px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .drawer-coins { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--warning); font-weight: 600; margin: 4px 0; }
+        .drawer-role-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 30px;
+            font-size: 11px; font-weight: 700;
+            background: var(--accent-dim); color: var(--accent);
+        }
+        .drawer-role-badge.admin { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .drawer-role-badge.superadmin { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        .drawer-nav { flex: 1; padding: 16px 12px; }
+        .nav-section { margin: 20px 0 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .nav-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 16px; border-radius: 12px;
+            color: var(--text-secondary); text-decoration: none;
+            font-weight: 600; font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer; margin-bottom: 2px;
+            position: relative; overflow: hidden;
+        }
+        .nav-item::before {
+            content: ''; position: absolute; left: 0; top: 0;
+            height: 100%; width: 3px; background: var(--accent);
+            transform: scaleY(0); transition: transform 0.3s ease;
+        }
+        .nav-item:hover::before, .nav-item.active::before { transform: scaleY(1); }
+        .nav-item i { width: 20px; font-size: 16px; color: var(--accent); transition: all 0.3s ease; }
+        .nav-item:hover i { transform: scale(1.2); }
+        .nav-item:hover { background: var(--accent-dim); color: var(--accent); }
+        .nav-item.active { background: var(--accent); color: white; }
+        .nav-item.active i { color: white; }
+
+        .drawer-footer { padding: 20px; border-top: 1px solid var(--border); }
+        .drawer-stats { display: flex; justify-content: space-between; text-align: center; margin-bottom: 20px; }
+        .stat-item { flex: 1; }
+        .stat-item .value { font-weight: 800; font-size: 18px; color: var(--accent); display: block; line-height: 1.3; }
+        .stat-item .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+        .logout-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; width: 100%; padding: 14px; border-radius: 30px;
+            background: rgba(239,68,68,0.1); border: none;
+            color: var(--error); font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.2); }
+
+        /* ========== OVERLAY ========== */
+        .drawer-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 199; display: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .drawer-overlay.active { display: block; opacity: 1; }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            padding: 80px 24px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative; z-index: 5;
+            width: 100%;
+        }
+
+        /* ========== TABLES — TOUJOURS SCROLLABLES ========== */
+        .table-container,
+        .table-responsive,
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            max-width: 100%;
+        }
+        .table-container table,
+        .table-responsive table,
+        .table-wrapper table {
+            min-width: 600px;
+            width: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* ========== RESPONSIVE ========== */
+
+        /* Tablette large */
+        @media (max-width: 1200px) {
+            .main-content { padding: 80px 20px 20px; }
+        }
+
+        /* Tablette */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .quick-actions { grid-template-columns: repeat(3, 1fr) !important; }
+            .servers-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+            table { font-size: 13px; }
+        }
+
+        /* Mobile (768px) */
+        @media (max-width: 768px) {
+            .topbar { padding: 0 14px; gap: 8px; }
+            .logo-text { display: none; }
+            .topbar-right { gap: 8px; }
+            .drawer { width: min(300px, 85vw); }
+            .main-content { padding: 72px 12px 20px !important; max-width: 100% !important; }
+
+            /* Grilles */
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .servers-grid { grid-template-columns: 1fr !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: 1fr !important; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+
+            /* Flex */
+            .section-header { flex-wrap: wrap; gap: 10px; }
+            .server-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+            .server-actions { grid-template-columns: 1fr 1fr !important; }
+            .profile-grid { grid-template-columns: 1fr !important; }
+            .info-grid { grid-template-columns: 1fr !important; }
+            .form-row { flex-direction: column !important; gap: 12px !important; }
+            .form-grid { grid-template-columns: 1fr !important; }
+            .btn-group { flex-direction: column !important; width: 100% !important; }
+            .btn-group .btn { width: 100% !important; justify-content: center; }
+
+            /* Filtres */
+            .filter-row, .filters-bar, .filter-bar, .filters {
+                flex-direction: column !important;
+                gap: 8px !important;
+                align-items: stretch !important;
+            }
+            .filter-select, .filter-input { width: 100% !important; }
+            .search-bar, .search-input { width: 100% !important; }
+
+            /* Tables — renforcement mobile */
+            .table-container,
+            .table-responsive,
+            .table-wrapper {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            table { font-size: 12px !important; }
+            th, td { padding: 8px 10px !important; white-space: nowrap; }
+            .table-actions { display: flex; gap: 4px; }
+
+            /* Modals */
+            .modal-content {
+                width: 96% !important; max-width: 96vw !important;
+                padding: 16px !important; margin: 8px auto;
+                max-height: 92vh; overflow-y: auto;
+            }
+            .modal-actions { flex-direction: column !important; gap: 8px !important; }
+            .modal-actions .btn { width: 100% !important; justify-content: center; }
+            .modal-header h3 { font-size: 16px !important; }
+
+            /* Cards */
+            .card { padding: 16px !important; border-radius: 16px !important; }
+
+            /* Onglets */
+            .tabs, .admin-tabs, .modal-tabs {
+                overflow-x: auto !important; -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap !important; padding-bottom: 4px;
+                scrollbar-width: none;
+            }
+            .tabs::-webkit-scrollbar, .admin-tabs::-webkit-scrollbar { display: none; }
+            .tab-btn, .tab { flex-shrink: 0 !important; }
+
+            /* Pages spécifiques */
+            .file-toolbar { flex-direction: column !important; gap: 8px !important; }
+            .file-path { width: 100% !important; }
+            .file-grid { grid-template-columns: 1fr !important; }
+            .terminal { font-size: 12px !important; }
+            .action-card { padding: 14px 8px !important; }
+            .action-card i { font-size: 20px !important; }
+            .action-card span { font-size: 12px !important; }
+            h1 { font-size: clamp(20px, 6vw, 36px) !important; }
+            h2 { font-size: clamp(16px, 5vw, 24px) !important; }
+
+            /* Résolution boutons sélection + export */
+            .selection-actions, .export-bar {
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+        }
+
+        /* Petit mobile (480px) */
+        @media (max-width: 480px) {
+            .topbar { padding: 0 10px; }
+            .hamburger { margin-right: 10px; }
+            .main-content { padding: 70px 10px 16px !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .card { padding: 12px !important; border-radius: 14px !important; }
+            .section-header h2 { font-size: 15px !important; }
+            .modal-content { padding: 12px !important; }
+            .btn { padding: 10px 14px !important; font-size: 13px !important; }
+            .drawer { width: 88vw; }
+            .drawer-stats .value { font-size: 15px !important; }
+            th, td { padding: 6px 8px !important; font-size: 11px !important; }
+        }
+
+        /* Très petit (360px) */
+        @media (max-width: 360px) {
+            .logo-mark { width: 34px; height: 34px; font-size: 13px; }
+            .avatar-circle { width: 32px; height: 32px; font-size: 13px; }
+            .main-content { padding: 68px 8px 12px !important; }
+            .drawer { width: 92vw; }
+        }
+
+        /* ========== STYLES SPÉCIFIQUES ========== */
+        
+
+        
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Fond animé */
+        
+
+        
+
+        
+
+        
+
+        
+
+
+        /* Navbar */
+        
+
+        
+
+        
+        
+
+        
+        .nav-links a {
+            padding: 7px 14px;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .coins-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--surface-strong);
+            border: 1px solid var(--border-strong);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .coins-badge i { color: var(--warning); }
+        .btn-logout {
+            padding: 8px 18px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--error);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-decoration: none;
+        }
+        .btn-logout:hover { background: var(--error); color: white; }
+
+        /* Page */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 5%;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* En-tête */
+        .referral-header {
+            margin-bottom: 40px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .referral-header h1 {
+            font-size: 44px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .referral-header p {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        /* Statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 26px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-6px) scale(1.02);
+        }
+        .stat-value {
+            font-size: 44px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Cartes principales */
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 26px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        .card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-4px) scale(1.01);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        .card-header i { color: var(--accent); }
+
+        /* Étapes */
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255,255,255,0.5);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .step:hover {
+            border-color: var(--border-strong);
+            transform: translateX(8px);
+        }
+        .step-number {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 5px 12px rgba(99,102,241,0.3);
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-content h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+        .step-content p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        /* Code et URL */
+        .code-box {
+            background: white;
+            border: 1px solid var(--border-strong);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+        .url-box {
+            background: white;
+            border: 1px solid var(--border-strong);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            word-break: break-all;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        /* Boutons de partage */
+        .share-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .share-btn {
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        .share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .btn-facebook { background: #1877f2; }
+        .btn-twitter { background: #1da1f2; }
+        .btn-whatsapp { background: #25d366; }
+        .btn-telegram { background: #0088cc; }
+        .btn-copy { background: var(--accent); }
+
+        /* Liste des filleuls */
+        .referrals-list {
+            margin-top: 20px;
+        }
+        .referral-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+        }
+        .referral-username {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .referral-date {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .referral-reward {
+            background: var(--accent-dim);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Alertes */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        .alert-success {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.2);
+            color: var(--green);
+        }
+        .alert-error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.2);
+            color: var(--error);
+        }
+
+        /* Animations */
+        
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .share-buttons { grid-template-columns: 1fr; }
+            .step { flex-direction: column; align-items: center; text-align: center; }
+            .code-box { flex-direction: column; gap: 12px; }
+        }
+        .toast-container{position:fixed;top:72px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+        .toast{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:white;border:1px solid #e5e7eb;border-left:4px solid;box-shadow:0 8px 30px rgba(0,0,0,0.1);min-width:280px;max-width:380px;pointer-events:all;animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);font-size:14px;font-weight:600;}
+        .toast.success{border-left-color:#10b981;}.toast.error{border-left-color:#ef4444;}.toast.info{border-left-color:#6366f1;}
+        .toast i{font-size:16px;flex-shrink:0;}.toast.success i{color:#10b981;}.toast.error i{color:#ef4444;}.toast.info i{color:#6366f1;}
+        .toast.out{animation:toastOut .25s ease forwards;}
+        @keyframes toastIn{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
+        @keyframes toastOut{to{opacity:0;transform:translateX(100%);}}
+
+        /* Milestone badges */
+        .milestone-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border-radius: 50px;
+            background: var(--accent-dim); border: 1px solid var(--border);
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
+            transition: all .3s;
+        }
+        .milestone-badge.achieved {
+            background: linear-gradient(135deg, rgba(99,102,241,.2), rgba(139,92,246,.2));
+            border-color: var(--accent); color: var(--accent); font-weight: 700;
+        }
+    </style>
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- FOND ANIMÉ -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb1"></div>
+        <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="logo-area">
+            <div class="logo-mark">FH</div>
+            <span class="logo-text">FLYHOST</span>
+        </div>
+        <div class="topbar-right">
+            <div class="avatar-circle" id="topbarAvatar" onclick="openSidebar()">?</div>
+        </div>
+    </header>
+
+    <!-- OVERLAY -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeSidebar()"></div>
+
+    <!-- DRAWER -->
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">
+                <div class="logo-mark">FH</div>
+                <span>FLYHOST</span>
+            </div>
+            <button class="close-drawer" onclick="closeSidebar()">&times;</button>
+        </div>
+
+        <div class="drawer-user" id="drawerUser">
+            <div class="drawer-avatar" id="drawerAvatar">?</div>
+            <div class="drawer-user-info">
+                <div class="drawer-username" id="drawerUsername">Chargement...</div>
+                <div class="drawer-coins">
+                    <i class="fas fa-coins"></i>
+                    <span id="drawerCoins">0</span>
+                </div>
+                <span class="drawer-role-badge" id="drawerRole">Utilisateur</span>
+            </div>
+        </div>
+
+        <nav class="drawer-nav" id="drawerNav">
+            <div class="nav-section">PRINCIPAL</div>
+            <a href="/dashboard" class="nav-item" data-page="dashboard">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/payment" class="nav-item" data-page="payment">
+                <i class="fas fa-credit-card"></i>
+                <span>Paiement</span>
+            </a>
+            <a href="/deploy" class="nav-item" data-page="deploy">
+                <i class="fas fa-rocket"></i>
+                <span>Déploiement</span>
+            </a>
+            <a href="/profile" class="nav-item" data-page="profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="/api-keys" class="nav-item" data-page="api">
+                <i class="fas fa-key"></i>
+                <span>API</span>
+            </a>
+            <a href="/dev" class="nav-item" data-page="info">
+                <i class="fas fa-info-circle"></i>
+                <span>Informations</span>
+            </a>
+            <a href="/chat" class="nav-item" data-page="chat">
+                <i class="fas fa-comment"></i>
+                <span>Chat</span>
+            </a>
+
+            <div class="nav-section" id="resellerSectionTitle">REVENDEUR</div>
+            <a href="/panel-admin" class="nav-item" id="resellerDashboardLink" data-page="reseller">
+                <i class="fas fa-store"></i>
+                <span>Espace Revendeur</span>
+            </a>
+
+            <div class="nav-section" id="adminSectionTitle">ADMINISTRATION</div>
+            <a href="/root" class="nav-item" id="adminDashboardLink" data-page="admin">
+                <i class="fas fa-crown"></i>
+                <span>Administration</span>
+            </a>
+        </nav>
+
+        <div class="drawer-footer">
+            <div class="drawer-stats" id="drawerStats">
+                <div class="stat-item">
+                    <span class="value" id="statServersDrawer">0</span>
+                    <span class="label">Serveurs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statReferralsDrawer">0</span>
+                    <span class="label">Filleuls</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statStreakDrawer">0</span>
+                    <span class="label">Série</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+    </aside>
+
+    <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <div class="page">
+        <div class="referral-header">
+            <h1>Programme de Parrainage</h1>
+            <p>Invitez vos amis et gagnez des coins gratuits pour vos serveurs</p>
+        </div>
+
+
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="width:48px;height:48px;border-radius:14px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px;color:var(--accent);"><i class="fas fa-users"></i></div>
+                <div class="stat-value" id="total-referrals">0</div>
+                <div class="stat-label">Filleuls</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="width:48px;height:48px;border-radius:14px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px;color:#d97706;"><i class="fas fa-coins"></i></div>
+                <div class="stat-value" id="earned-coins">0</div>
+                <div class="stat-label">Coins gagnés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon-wrap" style="width:48px;height:48px;border-radius:14px;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:20px;color:var(--green);"><i class="fas fa-clock"></i></div>
+                <div class="stat-value" id="pending-referrals">0</div>
+                <div class="stat-label">En attente</div>
+            </div>
+        </div>
+
+        <!-- Comment ça marche -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-gift"></i> Comment ça marche ?</h2>
+            </div>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Partagez votre code</h3>
+                        <p>Utilisez votre code unique ou votre lien de parrainage pour inviter vos amis</p>
+                        <div class="code-box">
+                            <span id="referral-code">CHARGEMENT...</span>
+                            <button class="btn-copy" onclick="copyReferralCode()" style="padding: 6px 12px; border-radius: 8px; border: none; background: var(--accent); color: white; font-size: 12px; cursor: pointer;">
+                                <i class="fas fa-copy"></i> Copier
+                            </button>
+                        </div>
+                        <div class="url-box">
+                            <span id="referral-url">CHARGEMENT...</span>
+                            <button class="btn-copy" onclick="copyReferralUrl()" style="padding: 6px 12px; border-radius: 8px; border: none; background: var(--accent); color: white; font-size: 12px; cursor: pointer; margin-left: 8px;">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <!-- Partage rapide WhatsApp & Telegram -->
+                        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+                            <button onclick="shareWhatsApp()" style="flex:1;min-width:130px;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:12px;border:none;background:#25D366;color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(37,211,102,0.35);transition:all .2s;">
+                                <i class="fab fa-whatsapp" style="font-size:18px;"></i> WhatsApp
+                            </button>
+                            <button onclick="shareTelegram()" style="flex:1;min-width:130px;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 16px;border-radius:12px;border:none;background:#0088cc;color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(0,136,204,0.35);transition:all .2s;">
+                                <i class="fab fa-telegram-plane" style="font-size:18px;"></i> Telegram
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Votre ami s'inscrit</h3>
+                        <p>Lors de l'inscription, il utilise votre code ou clique sur votre lien</p>
+                        <ul style="list-style: none; margin-top: 8px;">
+                            <li style="color: var(--text-secondary); margin-bottom: 4px;">
+                                <i class="fas fa-check-circle" style="color: var(--green); margin-right: 8px;"></i>
+                                Vous recevez <strong>10 coins</strong> immédiatement
+                            </li>
+                            <li style="color: var(--text-secondary);">
+                                <i class="fas fa-check-circle" style="color: var(--green); margin-right: 8px;"></i>
+                                Votre ami reçoit <strong>10 coins</strong> de bonus
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Profitez des bonus</h3>
+                        <p>Utilisez vos coins pour créer des serveurs ou les revendre sur le marché</p>
+                        <div style="margin-top: 8px;">
+                            <span class="badge" style="background: var(--accent-dim); padding: 4px 12px; border-radius: 50px; font-size: 12px;">
+                                <i class="fas fa-infinity"></i> Pas de limite de filleuls
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partage sur les réseaux -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-share-alt"></i> Partagez sur les réseaux</h2>
+            </div>
+            <div class="share-buttons">
+                <button class="share-btn btn-facebook" onclick="shareFacebook()">
+                    <i class="fab fa-facebook-f"></i> Facebook
+                </button>
+                <button class="share-btn btn-twitter" onclick="shareTwitter()">
+                    <i class="fab fa-twitter"></i> Twitter
+                </button>
+                <button class="share-btn btn-whatsapp" onclick="shareWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button class="share-btn btn-telegram" onclick="shareTelegram()">
+                    <i class="fab fa-telegram-plane"></i> Telegram
+                </button>
+            </div>
+        </div>
+
+        <!-- PROGRESSION & JALONS -->
+        <div class="card" id="milestoneCard" style="animation-delay:.4s;">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-line"></i> Progression & Jalons</h2>
+                <span id="totalEarnedLabel" style="font-size:13px;font-weight:700;color:var(--accent);">0 coins gagnés</span>
+            </div>
+            <!-- Barre de progression vers prochain jalon -->
+            <div style="margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px;">
+                    <span id="milestoneFrom">0 filleuls</span>
+                    <span id="milestoneNext">Prochain jalon : 5 filleuls</span>
+                </div>
+                <div style="height:10px;border-radius:5px;background:rgba(99,102,241,.1);overflow:hidden;">
+                    <div id="milestoneBar" style="height:100%;border-radius:5px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width .8s ease;width:0%;"></div>
+                </div>
+            </div>
+            <!-- Jalons visuels -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+                <div id="milestone-1" class="milestone-badge">🥉 1 filleul = 10 coins</div>
+                <div id="milestone-5" class="milestone-badge">🥈 5 filleuls = 50 coins</div>
+                <div id="milestone-10" class="milestone-badge">🥇 10 filleuls = 100 coins</div>
+                <div id="milestone-25" class="milestone-badge">💎 25 filleuls = 250 coins</div>
+            </div>
+            <!-- Graphique barres -->
+            <div style="height:180px;position:relative;">
+                <canvas id="referralChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Liste des filleuls -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-users"></i> Vos filleuls</h2>
+            </div>
+            <div class="referrals-list" id="referrals-list">
+                <div class="referral-item">
+                    <div class="referral-username">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Chargement...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="card" style="text-align: center; animation-delay:.5s;">
+            <div class="card-header">
+                <h2><i class="fas fa-qrcode"></i> QR Code de parrainage</h2>
+            </div>
+            <div id="qrcode-container" style="margin: 20px auto; max-width: 200px;">
+                <img id="qrcode-img" src="" alt="QR Code" style="width: 100%; border-radius: 12px;">
+            </div>
+            <button class="share-btn btn-copy" onclick="downloadQRCode()" style="width: 100%; margin-top: 12px;">
+                <i class="fas fa-download"></i> Télécharger le QR Code
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            API_BASE_URL: window.location.origin,
+            SITE_URL: window.location.origin
+        };
+
+        let authToken = localStorage.getItem('flyhost_token');
+        let currentUser = null;
+        let referralData = null;
+
+        if (!authToken) {
+            window.location.href = '/login';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReferralData();
+            loadUserCoins();
+        });
+
+        async function loadReferralData() {
+            try {
+                const response = await fetch('/api/referral/info', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    referralData = data;
+                    updateUI(data);
+                } else {
+                    showError('Erreur chargement des données de parrainage');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de connexion');
+            }
+        }
+
+        async function loadUserCoins() {
+            try {
+                const response = await fetch('/api/user/me', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = data.user;
+                    const _nc2 = document.getElementById('nav-coins-value'); if(_nc2) _nc2.textContent = data.user.coins || 0;
+                }
+            } catch (error) {
+                console.error('Erreur coins:', error);
+            }
+        }
+
+        function updateUI(data) {
+            // Statistiques
+            const count = data.referral_count || 0;
+            document.getElementById('total-referrals').textContent = count;
+            document.getElementById('earned-coins').textContent = count * 10;
+            
+            // Code et URL
+            document.getElementById('referral-code').textContent = data.referral_code;
+            document.getElementById('referral-url').textContent = data.referral_url;
+            
+            // QR Code
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.referral_url)}`;
+            document.getElementById('qrcode-img').src = qrUrl;
+
+            // Milestones & chart
+            updateMilestones(count);
+            renderReferralChart(count, data.recent_referrals || []);
+
+            // Liste des filleuls
+            displayReferrals(data.recent_referrals || []);
+        }
+
+        function updateMilestones(count) {
+            const milestones = [1, 5, 10, 25];
+            const earned = count * 10;
+            const earned_el = document.getElementById('totalEarnedLabel');
+            if (earned_el) earned_el.textContent = `${earned} coins gagnés`;
+
+            // Prochain jalon
+            const nextM = milestones.find(m => m > count) || null;
+            const prevM = [...milestones].reverse().find(m => m <= count) || 0;
+            const fromEl = document.getElementById('milestoneFrom');
+            const nextEl = document.getElementById('milestoneNext');
+            const barEl = document.getElementById('milestoneBar');
+            if (nextM) {
+                const pct = Math.min(100, (count - prevM) / (nextM - prevM) * 100);
+                if (fromEl) fromEl.textContent = `${count} filleul${count!==1?'s':''}`;
+                if (nextEl) nextEl.textContent = `Prochain : ${nextM} filleuls`;
+                if (barEl) setTimeout(() => { barEl.style.width = pct + '%'; }, 300);
+            } else {
+                if (fromEl) fromEl.textContent = `${count} filleuls`;
+                if (nextEl) nextEl.textContent = `Tous les jalons atteints ! 🏆`;
+                if (barEl) setTimeout(() => { barEl.style.width = '100%'; }, 300);
+            }
+
+            // Badge states
+            milestones.forEach(m => {
+                const el = document.getElementById(`milestone-${m}`);
+                if (el) el.classList.toggle('achieved', count >= m);
+            });
+        }
+
+        let referralChartInst = null;
+        function renderReferralChart(count, referrals) {
+            const canvas = document.getElementById('referralChart');
+            if (!canvas) return;
+
+            // Build data: coins earned per month from referrals list
+            const months = [];
+            const coinsPerMonth = [];
+            const now = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const label = d.toLocaleDateString('fr-FR', {month:'short', year:'2-digit'});
+                months.push(label);
+                const monthRefs = referrals.filter(r => {
+                    const rd = new Date(r.created_at || r.registered_at || 0);
+                    return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear();
+                });
+                coinsPerMonth.push(monthRefs.length * 10);
+            }
+            // If no referral date data, just show total split evenly
+            const hasData = coinsPerMonth.some(v => v > 0);
+            if (!hasData && count > 0) {
+                coinsPerMonth[coinsPerMonth.length - 1] = count * 10;
+            }
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+            const textColor = isDark ? '#8b949e' : '#64748b';
+
+            if (referralChartInst) referralChartInst.destroy();
+            const ctx = canvas.getContext('2d');
+            referralChartInst = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Coins gagnés',
+                        data: coinsPerMonth,
+                        backgroundColor: 'rgba(99,102,241,.75)',
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function displayReferrals(referrals) {
+            const container = document.getElementById('referrals-list');
+            
+            if (!referrals.length) {
+                container.innerHTML = `
+                    <div class="referral-item">
+                        <div class="referral-username">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Aucun filleul pour le moment</span>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <p style="color: var(--text-secondary);">Partagez votre lien pour commencer à gagner des coins !</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = referrals.map(r => `
+                <div class="referral-item">
+                    <div>
+                        <div class="referral-username">
+                            <i class="fas fa-user-circle"></i>
+                            <span>${r.username}</span>
+                        </div>
+                        <div class="referral-date">
+                            <i class="far fa-calendar"></i> ${new Date(r.created_at).toLocaleDateString('fr-FR')}
+                        </div>
+                    </div>
+                    <div class="referral-reward">
+                        <i class="fas fa-coins"></i> +${r.coins_rewarded || 10} coins
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function copyReferralCode() {
+            const code = document.getElementById('referral-code').textContent;
+            if (code && code !== 'CHARGEMENT...') {
+                navigator.clipboard.writeText(code);
+                showSuccess('✅ Code de parrainage copié !');
+            }
+        }
+
+        function copyReferralUrl() {
+            const url = document.getElementById('referral-url').textContent;
+            if (url && url !== 'CHARGEMENT...') {
+                navigator.clipboard.writeText(url);
+                showSuccess('✅ Lien de parrainage copié !');
+            }
+        }
+
+        function shareFacebook() {
+            if (!referralData) return;
+            const url = encodeURIComponent(referralData.referral_url);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+        }
+
+        function shareTwitter() {
+            if (!referralData) return;
+            const url = encodeURIComponent(referralData.referral_url);
+            const text = encodeURIComponent("Rejoins FLYHOST - Hébergement gratuit de serveurs ! 🚀 Utilise mon lien pour 10 coins de bonus !");
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        }
+
+        function shareWhatsApp() {
+            if (!referralData) return;
+            const text = encodeURIComponent(`Rejoins FLYHOST - Hébergement gratuit de serveurs Minecraft, Discord, applications ! 🚀\n\nInscris-toi avec mon lien et reçois 10 coins gratuits :\n${referralData.referral_url}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function shareTelegram() {
+            if (!referralData) return;
+            const text = encodeURIComponent(`🚀 Rejoins FLYHOST - Hébergement gratuit !\n\nAvec mon lien : ${referralData.referral_url}\n\nTu reçois 10 coins de bonus à l'inscription !`);
+            const url = encodeURIComponent(referralData.referral_url);
+            window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+        }
+
+        function downloadQRCode() {
+            const img = document.getElementById('qrcode-img');
+            if (img.src) {
+                const link = document.createElement('a');
+                link.download = 'flyhost-referral-qrcode.png';
+                link.href = img.src;
+                link.click();
+            }
+        }
+
+        // Gestion des notifications — toast system
+        function toast(message, type='info', duration=4000){
+            let c=document.getElementById('toastContainer');
+            if(!c){c=document.createElement('div');c.id='toastContainer';c.className='toast-container';document.body.appendChild(c);}
+            const icons={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};
+            const el=document.createElement('div');el.className=`toast ${type}`;
+            el.innerHTML=`<i class="fas ${icons[type]||icons.info}"></i><span>${message}</span>`;
+            c.appendChild(el);
+            setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},duration);
+        }
+        function showSuccess(msg){toast(msg,'success');}
+        function showError(msg){toast(msg,'error',5000);}
+        function showInfo(msg){toast(msg,'info',3000);}
+
+
+        // WebSocket pour mise à jour en temps réel des coins
+        function setupWebSocket() {
+            if (authToken) {
+                const ws = new WebSocket(`wss://flihost.site/ws/notifications?token=${authToken}`);
+                
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'notification' && data.title?.includes('coins')) {
+                        loadUserCoins(); // Recharger les coins
+                        loadReferralData(); // Recharger les stats
+                        showSuccess(data.message);
+                    }
+                };
+            }
+        }
+
+        // Appeler le WebSocket après chargement
+        setTimeout(setupWebSocket, 1000);
+    
+        // ========== DRAWER / SIDEBAR ==========
+        function toggleSidebar() {
+            const drawer = document.getElementById('drawer');
+            if (drawer.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
+        }
+        function openSidebar() {
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('hamburgerBtn').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('hamburgerBtn').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        window.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebar(); });
+
+        // Chargement infos utilisateur dans le drawer
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('flyhost_user') || '{}');
+                if (user.username) {
+                    const init = user.username.charAt(0).toUpperCase();
+                    const a1 = document.getElementById('topbarAvatar');
+                    const a2 = document.getElementById('drawerAvatar');
+                    if (a1) a1.textContent = init;
+                    if (a2) a2.textContent = init;
+                    const un = document.getElementById('drawerUsername');
+                    if (un) un.textContent = user.username;
+                    const co = document.getElementById('drawerCoins');
+                    if (co) co.textContent = user.coins || 0;
+                    const ro = document.getElementById('drawerRole');
+                    if (ro) {
+                        ro.textContent = user.role === 'superadmin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : 'Utilisateur';
+                        ro.className = 'drawer-role-badge' + (user.role ? ' ' + user.role : '');
+                    }
+                }
+                // Highlight active page
+                const page = window.location.pathname.replace('/', '').split('/')[0] || 'dashboard';
+                document.querySelectorAll('.nav-item[data-page]').forEach(function(el) {
+                    if (el.dataset.page === page) el.classList.add('active');
+                    else el.classList.remove('active');
+                });
+            } catch(e) {}
+        })();
+
+        if (typeof logout === 'undefined') {
+            function logout() {
+                localStorage.removeItem('flyhost_token');
+                localStorage.removeItem('flyhost_user');
+                window.location.href = '/login';
+            }
+        }
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

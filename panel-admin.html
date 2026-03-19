@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLYHOST — Espace Revendeur</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+    --accent:#6366f1;--accent-light:#818cf8;--accent-dim:rgba(99,102,241,0.1);
+    --bg:#f1f3fa;--surface:#fff;--surface2:rgba(255,255,255,0.8);
+    --border:rgba(99,102,241,0.14);--border2:rgba(99,102,241,0.28);
+    --text:#0f172a;--text2:#334155;--text3:#64748b;
+    --green:#10b981;--green-dim:rgba(16,185,129,0.1);
+    --orange:#f59e0b;--orange-dim:rgba(245,158,11,0.1);
+    --red:#ef4444;--red-dim:rgba(239,68,68,0.1);
+    --blue:#3b82f6;--blue-dim:rgba(59,130,246,0.1);
+    --purple:#8b5cf6;--purple-dim:rgba(139,92,246,0.1);
+    --sidebar-w:260px;
+    --topbar-h:60px;
+    --radius:14px;--radius-lg:20px;
+    --shadow:0 4px 20px -4px rgba(99,102,241,0.15);
+    --shadow-lg:0 12px 40px -8px rgba(99,102,241,0.22);
+}
+
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;overflow-x:hidden;}
+
+/* ——— ANIMATED BG ——— */
+.bg-orbs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.25;animation:orb-float 20s infinite alternate ease-in-out;}
+.orb1{width:500px;height:500px;background:#6366f1;top:-180px;left:-100px;animation-duration:22s;}
+.orb2{width:420px;height:420px;background:#8b5cf6;bottom:-140px;right:-80px;animation-duration:26s;animation-delay:-6s;}
+.orb3{width:350px;height:350px;background:#2dd4bf;top:45%;left:38%;animation-duration:18s;animation-delay:-3s;}
+@keyframes orb-float{0%{transform:translate(0,0) scale(1);}100%{transform:translate(60px,-50px) scale(1.25);}}
+
+/* ——— SCROLLBAR ——— */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.3);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+
+/* ——— TOPBAR ——— */
+.topbar{
+    position:fixed;top:0;left:0;right:0;height:var(--topbar-h);
+    background:rgba(15,23,42,0.97);backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    z-index:200;display:flex;align-items:center;gap:14px;padding:0 20px;
+}
+.hamburger{display:none;background:none;border:none;cursor:pointer;width:36px;height:36px;
+    flex-direction:column;justify-content:center;align-items:center;gap:5px;border-radius:8px;transition:background 0.2s;}
+.hamburger:hover{background:rgba(255,255,255,0.08);}
+.hamburger span{display:block;width:20px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.topbar-logo{display:flex;align-items:center;gap:10px;flex:1;}
+.logo-badge{width:36px;height:36px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;box-shadow:0 0 16px rgba(99,102,241,0.45);}
+.logo-name{font-weight:800;font-size:17px;color:#fff;letter-spacing:0.02em;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-badge{padding:4px 12px;border-radius:20px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.4);color:var(--accent-light);font-size:12px;font-weight:700;letter-spacing:0.04em;}
+.topbar-avatar{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;cursor:pointer;border:2px solid rgba(255,255,255,0.15);transition:all 0.2s;flex-shrink:0;}
+.topbar-avatar:hover{transform:scale(1.1);box-shadow:0 0 16px var(--accent);}
+
+/* ——— SIDEBAR ——— */
+.sidebar{
+    position:fixed;top:var(--topbar-h);left:0;bottom:0;
+    width:var(--sidebar-w);background:var(--surface);
+    border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+    z-index:150;overflow-y:auto;overflow-x:hidden;
+    transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow:4px 0 24px rgba(99,102,241,0.06);
+}
+.sidebar-top{padding:20px 16px 12px;}
+.sidebar-user{display:flex;align-items:center;gap:12px;padding:14px;background:var(--accent-dim);border-radius:12px;border:1px solid var(--border2);}
+.sidebar-avatar{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;flex-shrink:0;}
+.sidebar-username{font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-role{font-size:11px;color:var(--text3);margin-top:2px;}
+.sidebar-coins{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--orange);margin-top:3px;}
+
+.sidebar-nav{flex:1;padding:8px 12px 12px;}
+.nav-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);padding:16px 8px 6px;}
+.nav-item{
+    display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;
+    color:var(--text2);text-decoration:none;font-weight:600;font-size:14px;
+    transition:all 0.2s;cursor:pointer;margin-bottom:2px;border:1px solid transparent;
+    position:relative;
+}
+.nav-item i{width:18px;font-size:15px;color:var(--text3);transition:all 0.2s;text-align:center;}
+.nav-item:hover{background:var(--accent-dim);color:var(--accent);border-color:var(--border);}
+.nav-item:hover i{color:var(--accent);}
+.nav-item.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 4px 14px rgba(99,102,241,0.35);}
+.nav-item.active i{color:#fff;}
+.nav-pill{margin-left:auto;background:rgba(255,255,255,0.25);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;}
+.nav-item:not(.active) .nav-pill{background:var(--accent-dim);color:var(--accent);}
+
+.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.sidebar-stats{display:flex;gap:0;margin-bottom:12px;background:var(--bg);border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.sidebar-stat{flex:1;text-align:center;padding:10px 6px;border-right:1px solid var(--border);}
+.sidebar-stat:last-child{border-right:none;}
+.sidebar-stat .val{font-weight:800;font-size:16px;color:var(--accent);display:block;}
+.sidebar-stat .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;}
+.sidebar-links-bottom{display:flex;flex-direction:column;gap:4px;}
+.sidebar-link-sm{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;color:var(--text2);text-decoration:none;font-size:13px;font-weight:600;transition:all 0.2s;border:none;background:none;cursor:pointer;width:100%;}
+.sidebar-link-sm i{width:16px;font-size:13px;color:var(--text3);}
+.sidebar-link-sm:hover{background:var(--red-dim);color:var(--red);}
+.sidebar-link-sm:hover i{color:var(--red);}
+
+/* ——— OVERLAY ——— */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);z-index:140;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.overlay.show{opacity:1;pointer-events:all;}
+
+/* ——— MAIN ——— */
+.main{
+    margin-left:var(--sidebar-w);
+    padding:calc(var(--topbar-h) + 24px) 28px 32px;
+    min-height:100vh;
+    transition:margin-left 0.3s;
+}
+
+/* ——— HERO ——— */
+.hero{
+    background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%);
+    border-radius:var(--radius-lg);padding:28px 32px;margin-bottom:24px;
+    position:relative;overflow:hidden;
+    box-shadow:var(--shadow-lg);
+}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.03'%3E%3Cpath d='M0 0h20v20H0zm20 20h20v20H20z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none;}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.hero-title{font-size:13px;font-weight:700;color:rgba(165,180,252,0.8);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;}
+.hero-name{font-size:26px;font-weight:800;color:#fff;margin-bottom:2px;}
+.hero-sub{font-size:14px;color:rgba(199,210,254,0.7);}
+.hero-badge{padding:6px 16px;border-radius:20px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#e0e7ff;font-size:12px;font-weight:700;backdrop-filter:blur(8px);white-space:nowrap;}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;}
+.hero-stat{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:16px 18px;backdrop-filter:blur(8px);}
+.hero-stat-label{font-size:12px;color:rgba(199,210,254,0.7);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.hero-stat-val{font-size:22px;font-weight:800;color:#fff;line-height:1;}
+.hero-stat-unit{font-size:11px;color:rgba(165,180,252,0.7);margin-top:2px;}
+
+/* ——— SECTION HEADER ——— */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
+.section-hd h2{font-size:17px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;}
+.section-hd h2 i{color:var(--accent);font-size:16px;}
+
+/* ——— STAT CARDS GRID ——— */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;transition:all 0.25s;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--c,var(--accent));}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--border2);}
+.stat-icon{width:40px;height:40px;border-radius:10px;background:var(--ic,var(--accent-dim));display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--c,var(--accent));margin-bottom:12px;}
+.stat-label{font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;}
+.stat-value{font-size:22px;font-weight:800;color:var(--text);}
+.stat-unit{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* ——— TABS ——— */
+.tabs-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px;display:flex;gap:4px;margin-bottom:24px;overflow-x:auto;scrollbar-width:none;}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:none;background:none;color:var(--text3);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;}
+.tab-btn i{font-size:13px;}
+.tab-btn:hover{background:var(--accent-dim);color:var(--accent);}
+.tab-btn.active{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(99,102,241,0.3);}
+
+/* ——— TAB PANES ——— */
+.tab-pane{display:none;animation:fadeUp 0.3s ease-out;}
+.tab-pane.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* ——— CARD ——— */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:var(--shadow);}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.card-hd h3{font-size:15px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;}
+.card-hd h3 i{color:var(--accent);font-size:14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+
+/* ——— TABLE ——— */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;min-width:500px;}
+thead tr{background:var(--bg);}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:11px 14px;font-size:13px;color:var(--text2);border-bottom:1px solid rgba(99,102,241,0.06);}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background 0.15s;}
+tbody tr:hover{background:var(--accent-dim);}
+
+/* ——— BADGES ——— */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-green{background:var(--green-dim);color:var(--green);}
+.badge-red{background:var(--red-dim);color:var(--red);}
+.badge-orange{background:var(--orange-dim);color:var(--orange);}
+.badge-blue{background:var(--blue-dim);color:var(--blue);}
+
+/* ——— EMPTY STATE ——— */
+.empty{text-align:center;padding:48px 20px;}
+.empty-icon{font-size:40px;color:var(--text3);opacity:0.4;margin-bottom:14px;}
+.empty-title{font-size:15px;font-weight:700;color:var(--text2);margin-bottom:6px;}
+.empty-sub{font-size:13px;color:var(--text3);}
+
+/* ——— FORMS ——— */
+.form-group{margin-bottom:16px;}
+label.form-label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;}
+.form-control{width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:10px;font-family:inherit;font-size:14px;color:var(--text);background:var(--bg);transition:all 0.2s;outline:none;}
+.form-control:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);background:var(--surface);}
+select.form-control{cursor:pointer;}
+textarea.form-control{resize:vertical;min-height:80px;}
+
+/* ——— PRICING BOX ——— */
+.pricing-box{background:linear-gradient(135deg,var(--accent-dim),rgba(139,92,246,0.08));border:1px solid var(--border2);border-radius:12px;padding:16px 18px;margin:12px 0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;}
+.pricing-item{display:flex;flex-direction:column;align-items:center;flex:1;min-width:80px;}
+.pricing-item .pi-val{font-size:20px;font-weight:800;color:var(--accent);}
+.pricing-item .pi-lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+.pricing-sep{width:1px;height:40px;background:var(--border2);}
+
+/* ——— BUTTONS ——— */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:none;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(99,102,241,0.35);}
+.btn-primary:hover{background:#5254d4;transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,102,241,0.45);}
+.btn-outline{background:transparent;color:var(--accent);border:1px solid var(--border2);}
+.btn-outline:hover{background:var(--accent-dim);}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.btn-danger:hover{background:var(--red);color:#fff;}
+.btn-sm{padding:7px 14px;font-size:12px;border-radius:8px;}
+.btn-full{width:100%;justify-content:center;}
+.btn-icon{width:34px;height:34px;padding:0;border-radius:8px;justify-content:center;}
+
+/* ——— AFFILIATE BOX ——— */
+.aff-box{background:linear-gradient(135deg,#0f172a,#1e1b4b);border-radius:14px;padding:24px;text-align:center;color:#fff;position:relative;overflow:hidden;}
+.aff-box::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:rgba(99,102,241,0.2);border-radius:50%;}
+.aff-code{font-family:monospace;font-size:20px;font-weight:800;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:12px 20px;display:inline-block;cursor:pointer;transition:all 0.2s;letter-spacing:0.08em;color:#c7d2fe;margin:12px 0;}
+.aff-code:hover{background:rgba(255,255,255,0.18);}
+.aff-url{font-size:12px;color:rgba(165,180,252,0.7);word-break:break-all;margin:6px 0 16px;}
+.aff-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+.aff-stat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.aff-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.aff-stat .asv{font-size:22px;font-weight:800;color:var(--accent);}
+.aff-stat .asl{font-size:11px;color:var(--text3);}
+
+/* ——— TOASTS ——— */
+.toast-container{position:fixed;top:72px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-lg);min-width:280px;max-width:380px;pointer-events:all;animation:toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1);font-size:14px;font-weight:600;}
+.toast.success{border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.05);}
+.toast.error{border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.05);}
+.toast.info{border-color:rgba(99,102,241,0.3);background:var(--accent-dim);}
+.toast i{font-size:16px;flex-shrink:0;}
+.toast.success i{color:var(--green);}
+.toast.error i{color:var(--red);}
+.toast.info i{color:var(--accent);}
+.toast-out{animation:toast-out 0.3s ease forwards;}
+@keyframes toast-in{from{opacity:0;transform:translateX(40px) scale(0.9);}to{opacity:1;transform:translateX(0) scale(1);}}
+@keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(40px);}}
+
+/* ——— MODAL ——— */
+.modal-wrap{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,0.45);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.modal-wrap.show{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:0;width:100%;max-width:560px;max-height:90vh;overflow:auto;box-shadow:var(--shadow-lg);border:1px solid var(--border);transform:scale(0.95);transition:transform 0.25s;}
+.modal-wrap.show .modal{transform:scale(1);}
+.modal-header{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between;}
+.modal-header h3{font-size:17px;font-weight:800;color:var(--text);}
+.modal-close{background:none;border:none;font-size:20px;color:var(--text3);cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.modal-close:hover{background:var(--red-dim);color:var(--red);}
+.modal-body{padding:20px 24px 24px;}
+
+/* ——— LOADING ——— */
+.loader{text-align:center;padding:32px;color:var(--text3);}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ——— RESPONSIVE ——— */
+@media(max-width:1100px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){
+    .hero-stats{grid-template-columns:repeat(2,1fr);}
+    .grid2{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+    .hamburger{display:flex;}
+    .topbar-badge{display:none;}
+    .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));}
+    .sidebar.open{transform:translateX(0);}
+    .main{margin-left:0;padding:calc(var(--topbar-h) + 16px) 14px 24px;}
+    .hero{padding:20px;}
+    .hero-stats{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .hero-stat{padding:12px 14px;}
+    .hero-stat-val{font-size:18px;}
+    .stats-row{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .grid3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:480px){
+    .stats-row{grid-template-columns:1fr 1fr;gap:8px;}
+    .grid3{grid-template-columns:1fr 1fr;}
+    .hero-stats{grid-template-columns:1fr 1fr;}
+    .hero-name{font-size:20px;}
+}
+
+/* ——— PLAN CARDS ——— */
+.plan-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+@media(max-width:900px){.plan-cards{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:500px){.plan-cards{grid-template-columns:repeat(2,1fr);}}
+.plan-card{padding:14px;border-radius:11px;border:2px solid var(--border);background:var(--bg);cursor:pointer;transition:all 0.2s;text-align:center;}
+.plan-card:hover{border-color:var(--accent-light);background:var(--accent-dim);}
+.plan-card.selected{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+.plan-card .pn{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.plan-card .pp{font-size:11px;color:var(--text3);}
+
+/* ——— QTY CONTROL ——— */
+.qty-control{display:flex;align-items:center;gap:0;border:1px solid var(--border2);border-radius:10px;overflow:hidden;width:fit-content;}
+.qty-btn{width:38px;height:38px;border:none;background:var(--bg);cursor:pointer;font-size:18px;color:var(--accent);display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
+.qty-btn:hover{background:var(--accent-dim);}
+.qty-input{width:70px;height:38px;border:none;border-left:1px solid var(--border2);border-right:1px solid var(--border2);text-align:center;font-family:inherit;font-size:15px;font-weight:700;color:var(--text);background:var(--surface);outline:none;}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-logo">
+        <div class="logo-badge">FH</div>
+        <span class="logo-name">FLYHOST</span>
+    </div>
+    <div class="topbar-right">
+        <div class="topbar-badge" id="topbarRate"><i class="fas fa-percentage"></i> <span id="rateVal">—</span>% comm.</div>
+        <div class="topbar-avatar" id="topbarAvatar" onclick="toggleSidebar()">?</div>
+    </div>
+</header>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+            <div style="min-width:0;flex:1;">
+                <div class="sidebar-username" id="sidebarUsername">Chargement…</div>
+                <div class="sidebar-role">Revendeur</div>
+                <div class="sidebar-coins"><i class="fas fa-coins"></i> <span id="sidebarCoins">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Revendeur</div>
+        <a class="nav-item active" onclick="switchTab('dashboard')" id="nav-dashboard">
+            <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('clients')" id="nav-clients">
+            <i class="fas fa-users"></i> <span>Clients</span>
+            <span class="nav-pill" id="navPillClients">0</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('commissions')" id="nav-commissions">
+            <i class="fas fa-chart-line"></i> <span>Commissions</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('bulk')" id="nav-bulk">
+            <i class="fas fa-cubes"></i> <span>Achat en gros</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('promo')" id="nav-promo">
+            <i class="fas fa-tags"></i> <span>Codes promo</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('withdraw')" id="nav-withdraw">
+            <i class="fas fa-credit-card"></i> <span>Retraits</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('affiliate')" id="nav-affiliate">
+            <i class="fas fa-link"></i> <span>Affiliation</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('tickets')" id="nav-tickets">
+            <i class="fas fa-ticket-alt"></i> <span>Tickets clients</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('revenue')" id="nav-revenue">
+            <i class="fas fa-chart-area"></i> <span>Graphique revenus</span>
+        </a>
+        <a class="nav-item" onclick="switchTab('templates')" id="nav-templates">
+            <i class="fas fa-cube"></i> <span>Templates custom</span>
+        </a>
+
+        <div class="nav-section-label">Application</div>
+        <a class="nav-item" href="/dashboard">
+            <i class="fas fa-home"></i> <span>Mon espace</span>
+        </a>
+        <a class="nav-item" href="/deploy">
+            <i class="fas fa-rocket"></i> <span>Déploiement</span>
+        </a>
+        <a class="nav-item" href="/root" id="adminNavItem" style="display:none">
+            <i class="fas fa-crown"></i> <span>Administration</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-stats">
+            <div class="sidebar-stat"><span class="val" id="ssStat1">0</span><span class="lbl">Clients</span></div>
+            <div class="sidebar-stat"><span class="val" id="ssStat2">0</span><span class="lbl">Serveurs</span></div>
+            <div class="sidebar-stat"><span class="val" id="ssStat3">0</span><span class="lbl">Codes</span></div>
+        </div>
+        <div class="sidebar-links-bottom">
+            <button class="sidebar-link-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </button>
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+    <!-- HERO -->
+    <div class="hero" id="heroSection">
+        <div class="hero-top">
+            <div>
+                <div class="hero-title">Espace Revendeur</div>
+                <div class="hero-name" id="heroName">Bonjour…</div>
+                <div class="hero-sub" id="heroBusiness">Gérez vos clients et commissions</div>
+            </div>
+            <div class="hero-badge" id="heroBadge">Commission <span id="heroRate">—</span>%</div>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-label"><i class="fas fa-wallet"></i> Solde commissions</div>
+                <div class="hero-stat-val" id="hBalance">0</div>
+                <div class="hero-stat-unit">XOF</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-label"><i class="fas fa-arrow-trend-up"></i> Revenu ce mois</div>
+                <div class="hero-stat-val" id="hMonthly">0</div>
+                <div class="hero-stat-unit">XOF</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-label"><i class="fas fa-coins"></i> Total gagné</div>
+                <div class="hero-stat-val" id="hTotal">0</div>
+                <div class="hero-stat-unit">XOF</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-row" id="statsRow">
+        <div class="stat-card" style="--c:#10b981;--ic:rgba(16,185,129,0.1)">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-label">Clients total</div>
+            <div class="stat-value" id="sc-clients">0</div>
+        </div>
+        <div class="stat-card" style="--c:#3b82f6;--ic:rgba(59,130,246,0.1)">
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+            <div class="stat-label">Clients actifs</div>
+            <div class="stat-value" id="sc-active">0</div>
+        </div>
+        <div class="stat-card" style="--c:#8b5cf6;--ic:rgba(139,92,246,0.1)">
+            <div class="stat-icon"><i class="fas fa-server"></i></div>
+            <div class="stat-label">Serveurs gérés</div>
+            <div class="stat-value" id="sc-servers">0</div>
+        </div>
+        <div class="stat-card" style="--c:#f59e0b;--ic:rgba(245,158,11,0.1)">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-label">Retraits en attente</div>
+            <div class="stat-value" id="sc-pending">0</div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-wrap">
+        <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+        <button class="tab-btn" onclick="switchTab('clients')" id="tab-clients"><i class="fas fa-users"></i> Clients</button>
+        <button class="tab-btn" onclick="switchTab('commissions')" id="tab-commissions"><i class="fas fa-chart-line"></i> Commissions</button>
+        <button class="tab-btn" onclick="switchTab('bulk')" id="tab-bulk"><i class="fas fa-cubes"></i> Achat en gros</button>
+        <button class="tab-btn" onclick="switchTab('promo')" id="tab-promo"><i class="fas fa-tags"></i> Codes promo</button>
+        <button class="tab-btn" onclick="switchTab('withdraw')" id="tab-withdraw"><i class="fas fa-credit-card"></i> Retraits</button>
+        <button class="tab-btn" onclick="switchTab('affiliate')" id="tab-affiliate"><i class="fas fa-link"></i> Affiliation</button>
+        <button class="tab-btn" onclick="switchTab('tickets')" id="tab-tickets"><i class="fas fa-ticket-alt"></i> Tickets</button>
+        <button class="tab-btn" onclick="switchTab('revenue')" id="tab-revenue"><i class="fas fa-chart-area"></i> Revenus</button>
+        <button class="tab-btn" onclick="switchTab('templates')" id="tab-templates"><i class="fas fa-cube"></i> Templates</button>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="tab-pane active" id="pane-dashboard">
+        <div class="grid2">
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-bolt"></i> Dernières commissions</h3></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Client</th><th>Montant</th><th>Taux</th><th>Date</th></tr></thead>
+                        <tbody id="recent-commissions-body">
+                            <tr><td colspan="4"><div class="loader"><div class="spinner"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-trophy"></i> Top clients</h3></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Client</th><th>Serveurs</th><th>Actifs</th><th>Coins</th></tr></thead>
+                        <tbody id="top-clients-body">
+                            <tr><td colspan="4"><div class="loader"><div class="spinner"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CLIENTS ===== -->
+    <div class="tab-pane" id="pane-clients">
+        <div class="card">
+            <div class="card-hd">
+                <h3><i class="fas fa-users"></i> Mes clients</h3>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <input type="text" class="form-control" style="width:200px;padding:8px 12px;font-size:13px;" placeholder="Rechercher…" id="client-search" oninput="loadClients(0)">
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Utilisateur</th><th>Email</th><th>Coins</th><th>Serveurs</th><th>Actifs</th><th>Depuis</th><th></th></tr></thead>
+                    <tbody id="clients-body">
+                        <tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:8px;">
+                <span id="clients-info" style="font-size:13px;color:var(--text3);"></span>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-outline btn-sm" onclick="loadClients(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <button class="btn btn-outline btn-sm" onclick="loadClients(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== COMMISSIONS ===== -->
+    <div class="tab-pane" id="pane-commissions">
+        <div class="card">
+            <div class="card-hd"><h3><i class="fas fa-chart-line"></i> Historique des commissions</h3></div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Client</th><th>Montant (XOF)</th><th>Taux</th><th>Base</th><th>Description</th><th>Date</th></tr></thead>
+                    <tbody id="commissions-body">
+                        <tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BULK ===== -->
+    <div class="tab-pane" id="pane-bulk">
+        <div class="grid2">
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-cubes"></i> Acheter en gros</h3></div>
+
+                <label class="form-label">Choisissez un plan</label>
+                <div class="plan-cards" id="planCards">
+                    <div class="plan-card selected" data-plan="1gb" data-price="50" onclick="selectPlan(this)"><div class="pn">1 GB</div><div class="pp">50 coins</div></div>
+                    <div class="plan-card" data-plan="2gb" data-price="80" onclick="selectPlan(this)"><div class="pn">2 GB</div><div class="pp">80 coins</div></div>
+                    <div class="plan-card" data-plan="4gb" data-price="130" onclick="selectPlan(this)"><div class="pn">4 GB</div><div class="pp">130 coins</div></div>
+                    <div class="plan-card" data-plan="8gb" data-price="170" onclick="selectPlan(this)"><div class="pn">8 GB</div><div class="pp">170 coins</div></div>
+                    <div class="plan-card" data-plan="unlimited" data-price="200" onclick="selectPlan(this)"><div class="pn">∞</div><div class="pp">200 coins</div></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Quantité</label>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="adjustQty(-1)">−</button>
+                        <input type="number" id="bulk-qty" class="qty-input" value="1" min="1" oninput="updateBulkPricing()">
+                        <button class="qty-btn" onclick="adjustQty(1)">+</button>
+                    </div>
+                </div>
+
+                <div class="pricing-box" id="pricingBox">
+                    <div class="pricing-item"><div class="pi-val" id="pricingDiscount">0%</div><div class="pi-lbl">Remise</div></div>
+                    <div class="pricing-sep"></div>
+                    <div class="pricing-item"><div class="pi-val" id="pricingUnit">50</div><div class="pi-lbl">coins/unité</div></div>
+                    <div class="pricing-sep"></div>
+                    <div class="pricing-item"><div class="pi-val" id="pricingTotal">50</div><div class="pi-lbl">Total coins</div></div>
+                </div>
+
+                <button class="btn btn-primary btn-full" onclick="bulkPurchase()"><i class="fas fa-shopping-cart"></i> Confirmer l'achat</button>
+            </div>
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-history"></i> Historique des achats</h3></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Plan</th><th>Qté</th><th>Prix/u</th><th>Total</th><th>Remise</th><th>Date</th></tr></thead>
+                        <tbody id="bulk-history-body">
+                            <tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PROMO ===== -->
+    <div class="tab-pane" id="pane-promo">
+        <div class="grid2">
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-tags"></i> Créer un code promo</h3></div>
+                <div class="form-group">
+                    <label class="form-label">Type de serveur</label>
+                    <select id="promo-server-type" class="form-control" onchange="updatePromoCost()">
+                        <option value="1gb">1 GB — 50 coins</option>
+                        <option value="2gb">2 GB — 80 coins</option>
+                        <option value="4gb">4 GB — 130 coins</option>
+                        <option value="8gb">8 GB — 170 coins</option>
+                        <option value="unlimited">Unlimited — 200 coins</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Durée (heures)</label>
+                    <input type="number" id="promo-duration" class="form-control" min="1" max="8760" value="24">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Utilisations max</label>
+                    <input type="number" id="promo-max-uses" class="form-control" min="1" value="1" oninput="updatePromoCost()">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expiration (optionnel)</label>
+                    <input type="datetime-local" id="promo-expires" class="form-control">
+                </div>
+                <div class="pricing-box" style="margin-bottom:14px;">
+                    <div class="pricing-item"><div class="pi-val" id="promo-cost">0</div><div class="pi-lbl">coins à débiter</div></div>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="createPromoCode()"><i class="fas fa-plus"></i> Créer le code</button>
+            </div>
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-list"></i> Mes codes promo</h3></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Code</th><th>Type</th><th>Durée</th><th>Utilisations</th><th>Statut</th><th>Expire</th></tr></thead>
+                        <tbody id="promo-codes-body">
+                            <tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== RETRAITS ===== -->
+    <div class="tab-pane" id="pane-withdraw">
+        <div class="grid2">
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-money-bill-wave"></i> Demander un retrait</h3></div>
+                <div style="background:var(--green-dim);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:14px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+                    <i class="fas fa-wallet" style="color:var(--green);font-size:20px;"></i>
+                    <div>
+                        <div style="font-size:11px;color:var(--text3);">Solde disponible</div>
+                        <div style="font-size:20px;font-weight:800;color:var(--green);" id="withdrawBalance">0 XOF</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Montant (min. 5 000 XOF)</label>
+                    <input type="number" id="withdraw-amount" class="form-control" min="5000" placeholder="5000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Méthode de paiement</label>
+                    <select id="withdraw-method" class="form-control">
+                        <option value="wave">Wave</option>
+                        <option value="orange_money">Orange Money</option>
+                        <option value="mtn_money">MTN Money</option>
+                        <option value="bank">Virement bancaire</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Numéro / RIB / Détails</label>
+                    <textarea id="withdraw-details" class="form-control" rows="3" placeholder="Entrez les informations de réception…"></textarea>
+                </div>
+                <button class="btn btn-primary btn-full" onclick="requestWithdrawal()"><i class="fas fa-paper-plane"></i> Demander le retrait</button>
+            </div>
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-history"></i> Historique des retraits</h3></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Montant</th><th>Méthode</th><th>Informations</th><th>Statut / Motif</th><th>Référence</th><th>Date</th></tr></thead>
+                        <tbody id="withdrawals-body">
+                            <tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== AFFILIATION ===== -->
+    <div class="tab-pane" id="pane-affiliate">
+        <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08));border:1px solid var(--accent-dim);">
+            <div class="card-hd" style="margin-bottom:16px;"><h3><i class="fas fa-store" style="color:var(--accent)"></i> Ma boutique Marketplace</h3></div>
+            <p style="font-size:14px;color:var(--text3);margin-bottom:16px;">Partagez ce lien avec vos clients. Ils pourront voir et acheter vos produits sans compte, et devront s'inscrire pour finaliser l'achat.</p>
+            <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.2);border:1px solid var(--accent-dim);border-radius:12px;padding:12px 16px;margin-bottom:16px;flex-wrap:wrap;">
+                <i class="fas fa-link" style="color:var(--accent);flex-shrink:0;"></i>
+                <span id="shopLinkDisplay" style="font-family:monospace;font-size:13px;color:#e0e7ff;flex:1;word-break:break-all;">Chargement...</span>
+                <button onclick="copyShopLink()" style="background:var(--accent);border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-copy"></i> Copier</button>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button onclick="openShop()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e0e7ff;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-external-link-alt"></i> Voir ma boutique</button>
+                <a href="/marketplace" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e0e7ff;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;"><i class="fas fa-plus"></i> Gérer mes produits</a>
+            </div>
+        </div>
+        <div class="grid2">
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-link"></i> Mon lien d'affiliation</h3></div>
+                <div class="aff-box">
+                    <div style="font-size:12px;color:rgba(165,180,252,0.7);margin-bottom:4px;">Votre code personnel</div>
+                    <div class="aff-code" id="affiliate-code" onclick="copyText(this.innerText,'Code copié !')">AFF_XXXXXX</div>
+                    <div class="aff-url" id="affiliate-url">https://flihost.site/register?aff=…</div>
+                    <div class="aff-actions">
+                        <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:#e0e7ff;" onclick="copyAffUrl()"><i class="fas fa-copy"></i> Copier le lien</button>
+                        <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.2);color:#e0e7ff;" onclick="showQR()"><i class="fas fa-qrcode"></i> QR Code</button>
+                    </div>
+                </div>
+                <div class="aff-stat-row">
+                    <div class="aff-stat"><div class="asv" id="aff-conversions">0</div><div class="asl">Conversions</div></div>
+                    <div class="aff-stat"><div class="asv" id="aff-earnings">0</div><div class="asl">Gains affiliation (XOF)</div></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-hd"><h3><i class="fas fa-info-circle"></i> Comment ça marche ?</h3></div>
+                <div style="display:flex;flex-direction:column;gap:16px;padding-top:4px;">
+                    <div style="display:flex;gap:14px;align-items:flex-start;">
+                        <div style="width:36px;height:36px;background:var(--accent-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--accent);">1</div>
+                        <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Partagez votre lien</div><div style="font-size:13px;color:var(--text3);">Envoyez votre lien unique à vos prospects.</div></div>
+                    </div>
+                    <div style="display:flex;gap:14px;align-items:flex-start;">
+                        <div style="width:36px;height:36px;background:var(--green-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--green);">2</div>
+                        <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Ils s'inscrivent</div><div style="font-size:13px;color:var(--text3);">Ils créent leur compte via votre lien et deviennent vos clients.</div></div>
+                    </div>
+                    <div style="display:flex;gap:14px;align-items:flex-start;">
+                        <div style="width:36px;height:36px;background:var(--orange-dim);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;color:var(--orange);">3</div>
+                        <div><div style="font-weight:700;font-size:14px;margin-bottom:2px;">Vous gagnez des commissions</div><div style="font-size:13px;color:var(--text3);">À chaque achat de vos clients, vous gagnez votre taux de commission.</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TICKETS ===== -->
+    <div class="tab-pane" id="pane-tickets">
+        <div class="card-hd" style="margin-bottom:16px;"><h3><i class="fas fa-ticket-alt"></i> Tickets de mes clients</h3></div>
+        <div class="table-wrap" style="margin-bottom:24px;">
+            <table>
+                <thead><tr><th>#</th><th>Sujet</th><th>Client</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody id="tickets-tbody"><tr><td colspan="6" style="text-align:center;padding:20px;color:rgba(255,255,255,.4);">Chargement...</td></tr></tbody>
+            </table>
+        </div>
+        <div id="ticket-reply-area" style="display:none;">
+            <div class="card">
+                <div class="card-hd" style="margin-bottom:16px;"><h3 id="ticket-reply-title"><i class="fas fa-comments"></i> Répondre au ticket</h3></div>
+                <div id="ticket-thread" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;max-height:300px;overflow-y:auto;"></div>
+                <textarea id="ticket-reply-msg" placeholder="Votre réponse..." style="width:100%;min-height:80px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px;color:#e2e8f0;font-family:inherit;font-size:13px;resize:vertical;margin-bottom:10px;outline:none;"></textarea>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="sendTicketReply()"><i class="fas fa-paper-plane"></i> Envoyer la réponse</button>
+                    <button class="btn btn-outline" onclick="document.getElementById('ticket-reply-area').style.display='none'"><i class="fas fa-times"></i> Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CUSTOM TEMPLATES ===== -->
+    <div class="tab-pane" id="pane-templates">
+        <div class="card-hd" style="margin-bottom:16px;"><h3><i class="fas fa-cube"></i> Mes templates personnalisés</h3></div>
+        <div class="card" style="margin-bottom:16px;">
+            <div class="card-hd" style="margin-bottom:12px;"><h4><i class="fas fa-plus"></i> Créer un template</h4></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div>
+                    <label style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px;display:block;">Nom *</label>
+                    <input id="tpl-name" class="input" placeholder="Ex: Minecraft Survival" style="margin-bottom:0;">
+                </div>
+                <div>
+                    <label style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px;display:block;">Jeu *</label>
+                    <input id="tpl-game" class="input" placeholder="Ex: minecraft" style="margin-bottom:0;">
+                </div>
+                <div>
+                    <label style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px;display:block;">RAM (MB)</label>
+                    <input id="tpl-ram" class="input" type="number" value="512" style="margin-bottom:0;">
+                </div>
+                <div>
+                    <label style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px;display:block;">Disque (MB)</label>
+                    <input id="tpl-disk" class="input" type="number" value="1024" style="margin-bottom:0;">
+                </div>
+                <div style="grid-column:1/-1;">
+                    <label style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px;display:block;">Description</label>
+                    <input id="tpl-desc" class="input" placeholder="Description courte du template" style="margin-bottom:0;">
+                </div>
+            </div>
+            <div style="margin-top:12px;">
+                <button class="btn btn-primary" onclick="createTemplate()"><i class="fas fa-plus"></i> Créer le template</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-hd" style="margin-bottom:12px;"><h4><i class="fas fa-list"></i> Templates existants</h4></div>
+            <div id="templates-list"><div style="text-align:center;color:rgba(255,255,255,.3);padding:20px;">Chargement...</div></div>
+        </div>
+    </div>
+
+    <!-- ===== REVENUE CHART ===== -->
+    <div class="tab-pane" id="pane-revenue">
+        <div class="card-hd" style="margin-bottom:16px;"><h3><i class="fas fa-chart-area"></i> Graphique de mes revenus</h3></div>
+        <div class="card" style="margin-bottom:16px;">
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+                <button class="btn btn-outline btn-sm" onclick="loadResellerChart(7)" id="rc-btn-7">7 jours</button>
+                <button class="btn btn-primary btn-sm" onclick="loadResellerChart(30)" id="rc-btn-30">30 jours</button>
+                <button class="btn btn-outline btn-sm" onclick="loadResellerChart(90)" id="rc-btn-90">90 jours</button>
+                <span id="rc-total" style="margin-left:auto;font-weight:800;font-size:17px;color:var(--accent);">—</span>
+            </div>
+            <canvas id="resellerRevenueChart" height="90"></canvas>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">
+            <div class="card" style="text-align:center;padding:14px;"><div style="font-size:24px;font-weight:800;color:var(--accent);" id="rc-stat-total">—</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px;">Total XOF</div></div>
+            <div class="card" style="text-align:center;padding:14px;"><div style="font-size:24px;font-weight:800;color:var(--green);" id="rc-stat-count">—</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px;">Transactions</div></div>
+            <div class="card" style="text-align:center;padding:14px;"><div style="font-size:24px;font-weight:800;color:var(--orange);" id="rc-stat-avg">—</div><div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px;">Moy/jour</div></div>
+        </div>
+    </div>
+
+</main>
+
+<!-- MODAL CLIENT -->
+<div class="modal-wrap" id="clientModal" onclick="e=>{if(e.target===this)closeClientModal()}">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="clientModalTitle">Détails du client</h3>
+            <button class="modal-close" onclick="closeClientModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" id="clientModalBody"></div>
+    </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let token = localStorage.getItem('flyhost_token');
+let currentUser = null;
+let resellerProfile = null;
+let clientsOffset = 0;
+const CLIENTS_LIMIT = 20;
+let selectedPlan = { plan:'1gb', price:50 };
+const PLAN_COINS = { '1gb':50, '2gb':80, '4gb':130, '8gb':170, 'unlimited':200 };
+const DISCOUNT_TIERS = [{min:5,d:5},{min:10,d:10},{min:20,d:15},{min:50,d:20}];
+
+/* ——— INIT ——— */
+document.addEventListener('DOMContentLoaded', () => {
+    if (!token) { window.location.href = '/login'; return; }
+    init();
+    updateBulkPricing();
+    updatePromoCost();
+});
+
+async function init() {
+    try {
+        const [meRes, dashRes] = await Promise.all([
+            fetch('/api/user/me', { headers:{ Authorization:`Bearer ${token}` } }),
+            fetch('/api/reseller/dashboard', { headers:{ Authorization:`Bearer ${token}` } })
+        ]);
+        const meData = await meRes.json();
+        const dashData = await dashRes.json();
+
+        if (!meData.success) { logout(); return; }
+        currentUser = meData.user;
+
+        if (!dashData.success) {
+            window.location.href = '/reseller-contract.html';
+            return;
+        }
+        resellerProfile = dashData.dashboard;
+
+        renderUser();
+        renderHero();
+        renderStats();
+        loadAllTabs();
+    } catch(e) { logout(); }
+}
+
+function renderUser() {
+    const u = currentUser;
+    const init = (u.username||'?').charAt(0).toUpperCase();
+    document.getElementById('topbarAvatar').textContent = init;
+    document.getElementById('sidebarAvatar').textContent = init;
+    document.getElementById('sidebarUsername').textContent = u.username;
+    document.getElementById('sidebarCoins').textContent = (u.coins||0).toLocaleString();
+    if (u.role === 'superadmin' || u.role === 'admin') {
+        document.getElementById('adminNavItem').style.display = 'flex';
+    }
+    localStorage.setItem('flyhost_user', JSON.stringify(u));
+}
+
+function renderHero() {
+    const p = resellerProfile;
+    document.getElementById('heroName').textContent = `Bonjour, ${currentUser.username} 👋`;
+    document.getElementById('heroBusiness').textContent = p.business_name || 'FLYHOST Revendeur';
+    const rate = p.commission_rate || 0;
+    document.getElementById('heroRate').textContent = rate;
+    document.getElementById('topbarRate').querySelector('span').textContent = rate;
+    document.getElementById('heroBadge').innerHTML = `Commission <strong>${rate}%</strong>`;
+    animateNum('hBalance', p.commission_balance || 0);
+    animateNum('hMonthly', p.monthly_revenue || 0);
+    animateNum('hTotal', p.total_earned || 0);
+    document.getElementById('withdrawBalance').textContent = (p.commission_balance||0).toFixed(2) + ' XOF';
+}
+
+function renderStats() {
+    const p = resellerProfile;
+    animateNum('sc-clients', p.clients_count || 0);
+    animateNum('sc-active', p.active_clients || 0);
+    animateNum('sc-servers', p.servers_under_management || 0);
+    animateNum('sc-pending', p.pending_withdrawals?.count || 0);
+    document.getElementById('navPillClients').textContent = p.clients_count || 0;
+    document.getElementById('ssStat1').textContent = p.clients_count || 0;
+    document.getElementById('ssStat2').textContent = p.servers_under_management || 0;
+}
+
+function animateNum(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const start = 0, dur = 700;
+    const t0 = performance.now();
+    const step = now => {
+        const progress = Math.min((now - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        const val = start + (target - start) * ease;
+        el.textContent = Number.isInteger(target) ? Math.round(val).toLocaleString() : val.toFixed(2);
+        if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+}
+
+/* ——— TABS ——— */
+function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const tabBtn = document.getElementById('tab-' + name);
+    const pane = document.getElementById('pane-' + name);
+    const nav = document.getElementById('nav-' + name);
+    if (tabBtn) tabBtn.classList.add('active');
+    if (pane) pane.classList.add('active');
+    if (nav) nav.classList.add('active');
+    if (window.innerWidth <= 768) closeSidebar();
+    if (name === 'tickets') loadTickets();
+    else if (name === 'revenue') loadResellerChart(30);
+    else if (name === 'templates') loadTemplates();
+}
+
+/* ——— LOAD ALL ——— */
+function loadAllTabs() {
+    loadRecentCommissions();
+    loadTopClients();
+    loadClients(0);
+    loadCommissions();
+    loadBulkHistory();
+    loadPromoCodes();
+    loadWithdrawals();
+    loadAffiliateInfo();
+}
+
+/* ——— DASHBOARD ——— */
+function loadRecentCommissions() {
+    const p = resellerProfile;
+    const tbody = document.getElementById('recent-commissions-body');
+    tbody.innerHTML = '';
+    if (!p?.recent_commissions?.length) {
+        tbody.innerHTML = emptyRow(4, 'Aucune commission pour le moment');
+        return;
+    }
+    p.recent_commissions.forEach(c => {
+        tbody.innerHTML += `<tr>
+            <td><strong>${c.client_username}</strong></td>
+            <td><span style="color:var(--green);font-weight:700;">+${c.amount} XOF</span></td>
+            <td><span class="badge badge-blue">${c.rate}%</span></td>
+            <td style="color:var(--text3);font-size:12px;">${timeAgo(c.created_at)}</td>
+        </tr>`;
+    });
+}
+
+function loadTopClients() {
+    const p = resellerProfile;
+    const tbody = document.getElementById('top-clients-body');
+    tbody.innerHTML = '';
+    if (!p?.top_clients?.length) {
+        tbody.innerHTML = emptyRow(4, 'Aucun client pour le moment');
+        return;
+    }
+    p.top_clients.forEach((c, i) => {
+        const medals = ['🥇','🥈','🥉'];
+        tbody.innerHTML += `<tr>
+            <td>${medals[i]||''} <strong>${c.username}</strong></td>
+            <td>${c.server_count}</td>
+            <td><span class="badge badge-green">${c.active_servers}</span></td>
+            <td><span style="color:var(--orange);font-weight:700;">🪙 ${c.coins}</span></td>
+        </tr>`;
+    });
+}
+
+/* ——— CLIENTS ——— */
+async function loadClients(delta = 0) {
+    if (delta !== 0) clientsOffset = Math.max(0, clientsOffset + delta * CLIENTS_LIMIT);
+    const search = document.getElementById('client-search').value;
+    const tbody = document.getElementById('clients-body');
+    tbody.innerHTML = `<tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr>`;
+    try {
+        const res = await fetch(`/api/reseller/clients?limit=${CLIENTS_LIMIT}&offset=${clientsOffset}&search=${encodeURIComponent(search)}`, { headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        tbody.innerHTML = '';
+        if (!data.success || !data.clients?.length) { tbody.innerHTML = emptyRow(7, 'Aucun client trouvé'); return; }
+        data.clients.forEach(c => {
+            tbody.innerHTML += `<tr>
+                <td><strong>${c.username}</strong></td>
+                <td style="font-size:12px;color:var(--text3);">${c.email}</td>
+                <td><span style="color:var(--orange);font-weight:700;">🪙 ${c.coins}</span></td>
+                <td>${c.server_count}</td>
+                <td><span class="badge badge-green">${c.active_servers}</span></td>
+                <td style="font-size:12px;color:var(--text3);">${new Date(c.acquired_at).toLocaleDateString('fr')}</td>
+                <td><button class="btn btn-outline btn-sm btn-icon" onclick="viewClient(${c.id})" title="Voir détails"><i class="fas fa-eye"></i></button></td>
+            </tr>`;
+        });
+        document.getElementById('clients-info').textContent = `${clientsOffset+1}–${Math.min(clientsOffset+CLIENTS_LIMIT,data.total)} sur ${data.total} clients`;
+    } catch(e) { tbody.innerHTML = emptyRow(7, 'Erreur de chargement'); }
+}
+
+window.viewClient = async function(id) {
+    try {
+        const res = await fetch(`/api/reseller/clients/${id}`, { headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        if (!data.success) { toast('Erreur chargement client','error'); return; }
+        const cl = data.client;
+        document.getElementById('clientModalTitle').textContent = `👤 ${cl.user.username}`;
+        let serversHtml = cl.servers?.length
+            ? cl.servers.map(s=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+                <div><strong>${s.server_name}</strong> <span class="badge badge-blue" style="margin-left:6px;">${s.server_type}</span></div>
+                <span class="badge ${s.is_active?'badge-green':'badge-red'}">${s.is_active?'Actif':'Inactif'}</span>
+              </div>`).join('')
+            : '<p style="color:var(--text3);font-size:13px;">Aucun serveur</p>';
+        document.getElementById('clientModalBody').innerHTML = `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+                <div style="background:var(--bg);border-radius:10px;padding:12px;text-align:center;">
+                    <div style="font-size:11px;color:var(--text3);">Coins</div>
+                    <div style="font-size:20px;font-weight:800;color:var(--orange);">🪙 ${cl.user.coins}</div>
+                </div>
+                <div style="background:var(--bg);border-radius:10px;padding:12px;text-align:center;">
+                    <div style="font-size:11px;color:var(--text3);">Commissions générées</div>
+                    <div style="font-size:20px;font-weight:800;color:var(--green);">${cl.commissions_generated?.total||0} XOF</div>
+                </div>
+            </div>
+            <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Serveurs</div>
+            ${serversHtml}
+        `;
+        document.getElementById('clientModal').classList.add('show');
+    } catch(e) { toast('Erreur','error'); }
+};
+
+function closeClientModal() {
+    document.getElementById('clientModal').classList.remove('show');
+}
+
+/* ——— COMMISSIONS ——— */
+async function loadCommissions() {
+    const tbody = document.getElementById('commissions-body');
+    try {
+        const res = await fetch('/api/reseller/commissions?limit=50', { headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        tbody.innerHTML = '';
+        if (!data.success || !data.commissions?.length) { tbody.innerHTML = emptyRow(6,'Aucune commission'); return; }
+        data.commissions.forEach(c => {
+            tbody.innerHTML += `<tr>
+                <td><strong>${c.client_username}</strong></td>
+                <td><span style="color:var(--green);font-weight:700;">+${c.amount}</span></td>
+                <td><span class="badge badge-blue">${c.rate}%</span></td>
+                <td style="color:var(--text3);">${c.base_amount}</td>
+                <td style="font-size:12px;color:var(--text3);">${c.description||'—'}</td>
+                <td style="font-size:12px;color:var(--text3);">${timeAgo(c.created_at)}</td>
+            </tr>`;
+        });
+    } catch(e) { tbody.innerHTML = emptyRow(6,'Erreur'); }
+}
+
+/* ——— BULK ——— */
+function selectPlan(el) {
+    document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPlan = { plan: el.dataset.plan, price: parseInt(el.dataset.price) };
+    updateBulkPricing();
+}
+
+function adjustQty(delta) {
+    const inp = document.getElementById('bulk-qty');
+    inp.value = Math.max(1, (parseInt(inp.value)||1) + delta);
+    updateBulkPricing();
+}
+
+function updateBulkPricing() {
+    const qty = Math.max(1, parseInt(document.getElementById('bulk-qty')?.value)||1);
+    const base = selectedPlan.price || 50;
+    let discount = 0;
+    for (const t of DISCOUNT_TIERS) { if (qty >= t.min) discount = t.d; }
+    const unit = Math.floor(base * (1 - discount/100));
+    const total = unit * qty;
+    const d = document.getElementById('pricingDiscount');
+    const u = document.getElementById('pricingUnit');
+    const t2 = document.getElementById('pricingTotal');
+    if(d) d.textContent = discount + '%';
+    if(u) u.textContent = unit;
+    if(t2) t2.textContent = total.toLocaleString();
+}
+
+async function bulkPurchase() {
+    const qty = parseInt(document.getElementById('bulk-qty').value) || 1;
+    try {
+        const res = await fetch('/api/reseller/bulk-purchase', {
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
+            body: JSON.stringify({ plan_key: selectedPlan.plan, quantity: qty })
+        });
+        const data = await res.json();
+        if (data.success) {
+            toast(data.message || 'Achat effectué avec succès !','success');
+            loadBulkHistory();
+        } else {
+            toast(data.error || 'Erreur lors de l\'achat','error');
+        }
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+
+async function loadBulkHistory() {
+    const tbody = document.getElementById('bulk-history-body');
+    try {
+        const res = await fetch('/api/reseller/bulk-purchases', { headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        tbody.innerHTML = '';
+        if (!data.success || !data.purchases?.length) { tbody.innerHTML = emptyRow(6,'Aucun achat'); return; }
+        data.purchases.forEach(p => {
+            tbody.innerHTML += `<tr>
+                <td><span class="badge badge-blue">${p.plan_key}</span></td>
+                <td><strong>×${p.quantity}</strong></td>
+                <td>${p.unit_price}</td>
+                <td><strong>${p.total_price}</strong></td>
+                <td><span class="badge badge-green">${p.discount_applied}%</span></td>
+                <td style="font-size:12px;color:var(--text3);">${timeAgo(p.created_at)}</td>
+            </tr>`;
+        });
+    } catch(e) { tbody.innerHTML = emptyRow(6,'Erreur'); }
+}
+
+/* ——— PROMO ——— */
+function updatePromoCost() {
+    const plan = document.getElementById('promo-server-type')?.value;
+    const uses = parseInt(document.getElementById('promo-max-uses')?.value) || 1;
+    const cost = (PLAN_COINS[plan]||0) * uses;
+    const el = document.getElementById('promo-cost');
+    if(el) el.textContent = cost.toLocaleString();
+}
+
+async function createPromoCode() {
+    const body = {
+        server_type: document.getElementById('promo-server-type').value,
+        duration_hours: parseInt(document.getElementById('promo-duration').value),
+        max_uses: parseInt(document.getElementById('promo-max-uses').value),
+        expires_at: document.getElementById('promo-expires').value || null
+    };
+    try {
+        const res = await fetch('/api/reseller/promo-codes/create', {
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+            toast(`Code créé : ${data.code}`,'success');
+            loadPromoCodes();
+        } else {
+            toast(data.error || 'Erreur création','error');
+        }
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+
+async function loadPromoCodes() {
+    const tbody = document.getElementById('promo-codes-body');
+    try {
+        const res = await fetch('/api/reseller/promo-codes', { headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        tbody.innerHTML = '';
+        if (!data.success || !data.promo_codes?.length) { tbody.innerHTML = emptyRow(6,'Aucun code promo'); return; }
+        data.promo_codes.forEach(p => {
+            tbody.innerHTML += `<tr>
+                <td><code style="background:var(--bg);padding:3px 8px;border-radius:6px;font-size:12px;">${p.code}</code></td>
+                <td><span class="badge badge-blue">${p.server_type}</span></td>
+                <td>${p.duration_hours}h</td>
+                <td>${p.current_uses}/${p.max_uses}</td>
+                <td><span class="badge ${p.is_active?'badge-green':'badge-red'}">${p.is_active?'Actif':'Inactif'}</span></td>
+                <td style="font-size:12px;color:var(--text3);">${p.expires_at?new Date(p.expires_at).toLocaleDateString('fr'):'Jamais'}</td>
+            </tr>`;
+        });
+        document.getElementById('ssStat3').textContent = data.promo_codes.length;
+    } catch(e) { tbody.innerHTML = emptyRow(6,'Erreur'); }
+}
+
+/* ——— RETRAITS ——— */
+async function requestWithdrawal() {
+    const amount = parseFloat(document.getElementById('withdraw-amount').value);
+    const method = document.getElementById('withdraw-method').value;
+    const details = document.getElementById('withdraw-details').value;
+    if (!amount || amount < 5000) { toast('Minimum 5 000 XOF requis','error'); return; }
+    if (!details.trim()) { toast('Les informations de réception sont obligatoires','error'); return; }
+    const btn = document.querySelector('#pane-withdraw .btn-primary');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi…'; }
+    try {
+        const res = await fetch('/api/reseller/withdraw', {
+            method:'POST',
+            headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},
+            body: JSON.stringify({ amount, payment_method:method, payment_details:details })
+        });
+        const data = await res.json();
+        if (data.success) {
+            toast(`Demande de ${amount.toLocaleString()} XOF envoyée ! Traitement sous ${data.estimated_processing||'2-5 jours'}.`,'success');
+            document.getElementById('withdraw-amount').value = '';
+            document.getElementById('withdraw-details').value = '';
+            loadWithdrawals();
+            init();
+        } else {
+            toast(data.error || 'Erreur lors de la demande','error');
+        }
+    } catch(e) { toast('Erreur réseau','error'); }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Demander le retrait'; } }
+}
+
+async function loadWithdrawals() {
+    const tbody = document.getElementById('withdrawals-body');
+    try {
+        const res = await fetch('/api/reseller/withdrawals', { headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        tbody.innerHTML = '';
+        if (!data.success || !data.withdrawals?.length) {
+            tbody.innerHTML = emptyRow(6,'Aucune demande de retrait pour le moment');
+            return;
+        }
+        data.withdrawals.forEach(w => {
+            const statusCfg = {
+                approved: { cls:'badge-green', icon:'fa-check-circle', label:'Approuvé' },
+                pending:  { cls:'badge-orange', icon:'fa-clock', label:'En attente' },
+                rejected: { cls:'badge-red', icon:'fa-times-circle', label:'Refusé' }
+            }[w.status] || { cls:'badge-blue', icon:'fa-question-circle', label:w.status };
+
+            let detailsText = w.payment_details || '—';
+            try { const p = JSON.parse(detailsText); detailsText = typeof p === 'string' ? p : JSON.stringify(p); } catch(e){}
+
+            const noteHtml = w.admin_note
+                ? w.status === 'rejected'
+                    ? `<div style="margin-top:6px;padding:8px 10px;background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);border-radius:8px;">
+                         <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:2px;"><i class="fas fa-comment-alt"></i> Motif du refus :</div>
+                         <div style="font-size:12px;color:var(--text2);">${w.admin_note}</div>
+                       </div>`
+                    : `<div style="margin-top:4px;font-size:11px;color:var(--text3);font-style:italic;"><i class="fas fa-sticky-note"></i> ${w.admin_note}</div>`
+                : '';
+
+            tbody.innerHTML += `<tr>
+                <td><strong>${(w.amount||0).toLocaleString()} XOF</strong></td>
+                <td><span class="badge badge-blue">${formatMethodName(w.payment_method)}</span></td>
+                <td style="font-size:12px;color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${detailsText}">${detailsText}</td>
+                <td>
+                    <span class="badge ${statusCfg.cls}"><i class="fas ${statusCfg.icon}"></i> ${statusCfg.label}</span>
+                    ${noteHtml}
+                </td>
+                <td style="font-size:12px;color:var(--text3);">${w.reference ? `<span style="color:var(--green);font-weight:600;">${w.reference}</span>` : '—'}</td>
+                <td style="font-size:12px;color:var(--text3);">${timeAgo(w.created_at)}</td>
+            </tr>`;
+        });
+    } catch(e) { tbody.innerHTML = emptyRow(6,'Erreur de chargement'); }
+}
+
+function formatMethodName(m) {
+    return { wave:'Wave', orange_money:'Orange Money', mtn_money:'MTN Money', bank:'Virement bancaire' }[m] || m || '—';
+}
+
+/* ——— AFFILIATION ——— */
+async function loadAffiliateInfo() {
+    try {
+        const username = currentUser?.username;
+        if (username) {
+            const shopUrl = `${window.location.origin}/shop/${username.toLowerCase()}`;
+            document.getElementById('shopLinkDisplay').textContent = shopUrl;
+        }
+    } catch(e) {}
+    // original load continues below
+    try {
+        const res = await fetch('/api/reseller/affiliate-info', { headers:{Authorization:`Bearer ${token}`} });
+        const data = await res.json();
+        if (!data.success) return;
+        document.getElementById('affiliate-code').innerText = data.affiliate_code;
+        document.getElementById('affiliate-url').innerText = data.affiliate_url;
+        document.getElementById('aff-conversions').innerText = data.total_conversions || 0;
+        document.getElementById('aff-earnings').innerText = (data.earnings_from_affiliate||0).toLocaleString();
+    } catch(e) {}
+}
+
+function copyAffUrl() { copyText(document.getElementById('affiliate-url').innerText,'Lien copié !'); }
+function showQR() { window.open(`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(document.getElementById('affiliate-url').innerText)}`,'_blank'); }
+function copyShopLink() { const url = document.getElementById('shopLinkDisplay').textContent; navigator.clipboard.writeText(url); toast('Lien boutique copié !','success'); }
+function openShop() { const url = document.getElementById('shopLinkDisplay').textContent; if(url && !url.includes('Chargement')) window.open(url,'_blank'); }
+
+/* ——— SIDEBAR ——— */
+function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    sb.classList.contains('open') ? closeSidebar() : openSidebar();
+}
+function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('hamburgerBtn').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('hamburgerBtn').classList.remove('open');
+    document.body.style.overflow = '';
+}
+window.addEventListener('keydown', e => { if(e.key==='Escape') closeSidebar(); });
+
+/* ——— TOAST ——— */
+function toast(msg, type='info', dur=3500) {
+    const icons = {success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info'};
+    const div = document.createElement('div');
+    div.className = `toast ${type}`;
+    div.innerHTML = `<i class="fas ${icons[type]||icons.info}"></i><span>${msg}</span>`;
+    document.getElementById('toastContainer').appendChild(div);
+    setTimeout(()=>{ div.classList.add('toast-out'); setTimeout(()=>div.remove(),300); }, dur);
+}
+
+/* ——— UTILS ——— */
+function copyText(text, msg='Copié !') {
+    navigator.clipboard.writeText(text).then(()=>toast(msg,'success'));
+}
+function emptyRow(cols, msg) {
+    return `<tr><td colspan="${cols}"><div class="empty"><div class="empty-icon"><i class="fas fa-inbox"></i></div><div class="empty-title">${msg}</div></div></td></tr>`;
+}
+function timeAgo(dt) {
+    const d = new Date(dt), now = new Date(), diff = (now - d) / 1000;
+    if (diff < 60) return 'à l\'instant';
+    if (diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
+    if (diff < 86400) return `il y a ${Math.floor(diff/3600)} h`;
+    if (diff < 604800) return `il y a ${Math.floor(diff/86400)} j`;
+    return d.toLocaleDateString('fr');
+}
+function logout() {
+    localStorage.removeItem('flyhost_token');
+    localStorage.removeItem('flyhost_user');
+    window.location.href = '/login';
+}
+
+/* ——— TICKETS ——— */
+let currentTicketId = null;
+async function loadTickets() {
+    try {
+        const r = await fetch('/api/reseller/tickets', { headers: { Authorization: `Bearer ${token}` } });
+        const d = await r.json();
+        const tbody = document.getElementById('tickets-tbody');
+        if (!d.success || !d.tickets?.length) {
+            tbody.innerHTML = emptyRow(6, 'Aucun ticket de vos clients');
+            return;
+        }
+        const STATUS_COLORS = { open:'#f59e0b', waiting:'#3b82f6', answered:'#10b981', closed:'#94a3b8' };
+        const STATUS_LABELS = { open:'Ouvert', waiting:'En attente', answered:'Répondu', closed:'Fermé' };
+        tbody.innerHTML = d.tickets.map(t => `
+            <tr>
+                <td>#${t.id}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">${t.subject}</td>
+                <td>${t.username || '—'}</td>
+                <td><span style="background:${STATUS_COLORS[t.status]||'#94a3b8'}22;color:${STATUS_COLORS[t.status]||'#94a3b8'};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">${STATUS_LABELS[t.status]||t.status}</span></td>
+                <td style="font-size:12px;">${timeAgo(t.created_at)}</td>
+                <td><button class="btn btn-primary btn-sm" onclick="openTicketReply(${t.id}, '${(t.subject||'').replace(/'/g,'')}')"><i class="fas fa-reply"></i> Répondre</button></td>
+            </tr>`).join('');
+    } catch(e) { toast('Erreur chargement tickets','error'); }
+}
+
+async function openTicketReply(id, subject) {
+    currentTicketId = id;
+    document.getElementById('ticket-reply-title').innerHTML = `<i class="fas fa-comments"></i> Ticket #${id} — ${subject}`;
+    document.getElementById('ticket-reply-area').style.display = '';
+    document.getElementById('ticket-reply-msg').value = '';
+    await loadTicketThread(id);
+    document.getElementById('ticket-reply-area').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function loadTicketThread(id) {
+    try {
+        const r = await fetch(`/api/tickets/${id}/replies`, { headers: { Authorization: `Bearer ${token}` } });
+        const d = await r.json();
+        const thread = document.getElementById('ticket-thread');
+        thread.innerHTML = (d.replies || []).map(rep => `
+            <div style="display:flex;gap:10px;${rep.is_admin?'flex-direction:row-reverse;':''}">
+                <div style="width:34px;height:34px;border-radius:50%;background:${rep.is_admin?'var(--accent)':'rgba(255,255,255,.1)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">${rep.is_admin?'A':'U'}</div>
+                <div style="max-width:70%;background:${rep.is_admin?'rgba(99,102,241,.15)':'rgba(255,255,255,.06)'};border-radius:10px;padding:10px 14px;">
+                    <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:4px;">${rep.sender_name||'Utilisateur'} · ${timeAgo(rep.created_at)}</div>
+                    <div style="font-size:13px;">${rep.message}</div>
+                </div>
+            </div>`).join('') || '<div style="text-align:center;color:rgba(255,255,255,.3);font-size:13px;">Aucun message encore</div>';
+    } catch(e) {}
+}
+
+async function sendTicketReply() {
+    const msg = document.getElementById('ticket-reply-msg').value.trim();
+    if (!msg || !currentTicketId) return;
+    try {
+        const r = await fetch(`/admin/tickets/${currentTicketId}/reply`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, status: 'answered' })
+        });
+        const d = await r.json();
+        if (d.success) {
+            toast('Réponse envoyée', 'success');
+            document.getElementById('ticket-reply-msg').value = '';
+            await loadTicketThread(currentTicketId);
+            loadTickets();
+        } else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+/* ——— REVENUE CHART (reseller) ——— */
+let resellerChartInstance = null;
+async function loadResellerChart(days) {
+    ['7','30','90'].forEach(d => {
+        const b = document.getElementById(`rc-btn-${d}`);
+        if(b) b.className = `btn btn-sm ${d==days?'btn-primary':'btn-outline'}`;
+    });
+    try {
+        const r = await fetch(`/api/reseller/revenue-chart?days=${days}`, { headers: { Authorization: `Bearer ${token}` } });
+        const d = await r.json();
+        if (!d.success) { toast(d.error||'Erreur','error'); return; }
+        document.getElementById('rc-total').textContent = (d.total||0).toLocaleString('fr-FR') + ' XOF';
+        document.getElementById('rc-stat-total').textContent = (d.total||0).toLocaleString('fr-FR');
+        const count = d.chart.reduce((s,c)=>s+(c.count||0),0);
+        document.getElementById('rc-stat-count').textContent = count;
+        const avg = d.chart.length ? Math.round(d.total/d.chart.length) : 0;
+        document.getElementById('rc-stat-avg').textContent = avg.toLocaleString('fr-FR');
+        const ctx = document.getElementById('resellerRevenueChart');
+        if (!ctx) return;
+        if (resellerChartInstance) resellerChartInstance.destroy();
+        resellerChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: d.chart.map(c=>c.day), datasets: [{ label:'Revenus (XOF)', data: d.chart.map(c=>c.revenue||0), backgroundColor:'rgba(99,102,241,0.5)', borderColor:'#6366f1', borderWidth:2, borderRadius:4 }] },
+            options: { responsive:true, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',maxTicksLimit:10}}, y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8'}} } }
+        });
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+
+/* ——— CUSTOM TEMPLATES ——— */
+async function loadTemplates() {
+    try {
+        const r = await fetch('/api/reseller/templates', { headers: { Authorization: `Bearer ${token}` } });
+        const d = await r.json();
+        const el = document.getElementById('templates-list');
+        if (!d.templates?.length) { el.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.3);padding:24px;">Aucun template créé</div>'; return; }
+        el.innerHTML = `<div style="display:grid;gap:10px;">${d.templates.map(t => `
+            <div style="display:flex;align-items:center;gap:14px;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;">
+                <div style="width:38px;height:38px;background:rgba(99,102,241,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:16px;flex-shrink:0;"><i class="fas fa-gamepad"></i></div>
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:14px;">${t.name}</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;">${t.game} · ${t.ram_mb}MB RAM · ${t.disk_mb}MB Disque${t.description ? ' · ' + t.description : ''}</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="deleteTemplate(${t.id})"><i class="fas fa-trash"></i></button>
+            </div>`).join('')}</div>`;
+    } catch(e) { toast('Erreur chargement templates','error'); }
+}
+async function createTemplate() {
+    const name = document.getElementById('tpl-name').value.trim();
+    const game = document.getElementById('tpl-game').value.trim();
+    const ram_mb = parseInt(document.getElementById('tpl-ram').value) || 512;
+    const disk_mb = parseInt(document.getElementById('tpl-disk').value) || 1024;
+    const description = document.getElementById('tpl-desc').value.trim();
+    if (!name || !game) { toast('Nom et jeu requis','error'); return; }
+    try {
+        const r = await fetch('/api/reseller/templates', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, game, ram_mb, disk_mb, description })
+        });
+        const d = await r.json();
+        if (d.success) { toast('Template créé', 'success'); document.getElementById('tpl-name').value=''; document.getElementById('tpl-game').value=''; document.getElementById('tpl-desc').value=''; loadTemplates(); }
+        else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+async function deleteTemplate(id) {
+    if (!confirm('Supprimer ce template ?')) return;
+    try {
+        const r = await fetch(`/api/reseller/templates/${id}`, { method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
+        const d = await r.json();
+        if (d.success) { toast('Template supprimé','success'); loadTemplates(); }
+        else toast(d.error||'Erreur','error');
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</body>
+</html>

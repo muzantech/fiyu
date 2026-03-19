@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abonnement - FLYHOST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root{--accent:#6366f1;--accent-dim:rgba(99,102,241,0.1);--bg:#eef0f7;--surface:rgba(255,255,255,0.75);--surface-strong:rgba(255,255,255,0.92);--border:rgba(99,102,241,0.18);--text:#0f172a;--text-secondary:#334155;--text-muted:#64748b;--green:#10b981;--warning:#f59e0b;--error:#ef4444;--radius:18px;}
+        [data-theme="dark"]{--bg:#0d1117;--surface:rgba(22,27,34,0.85);--surface-strong:rgba(30,37,48,0.95);--border:rgba(99,102,241,0.25);--text:#f0f6fc;--text-secondary:#c9d1d9;--text-muted:#8b949e;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px;padding:0 20px;height:60px;background:var(--surface-strong);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);}
+        .logo-mark{width:32px;height:32px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;}
+        .logo-text{font-weight:800;font-size:16px;}
+        .topbar-nav{margin-left:auto;display:flex;gap:8px;align-items:center;}
+        .nav-link{color:var(--text-muted);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:10px;}
+        .nav-link:hover{background:var(--accent-dim);color:var(--accent);}
+        .theme-toggle{background:none;border:1px solid var(--border);border-radius:50px;padding:6px 12px;cursor:pointer;color:var(--text);}
+        .container{max-width:900px;margin:0 auto;padding:40px 16px;}
+        .page-header{text-align:center;margin-bottom:48px;}
+        .page-header h1{font-size:36px;font-weight:800;margin-bottom:10px;}
+        .page-header p{color:var(--text-muted);font-size:16px;}
+        .coins-badge{background:var(--accent-dim);color:var(--accent);border-radius:50px;padding:8px 20px;font-size:15px;font-weight:700;display:inline-block;margin-bottom:24px;}
+        
+        /* Current sub */
+        .current-sub{background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1));border:1px solid rgba(99,102,241,0.4);border-radius:var(--radius);padding:24px;margin-bottom:40px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+        .current-sub-icon{font-size:48px;}
+        .current-sub-info h3{font-size:20px;font-weight:800;margin-bottom:4px;}
+        .current-sub-info p{color:var(--text-muted);}
+        .cancel-btn{margin-left:auto;background:transparent;border:1px solid var(--error);color:var(--error);border-radius:12px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:14px;}
+        .cancel-btn:hover{background:var(--error);color:#fff;}
+        
+        /* Plans */
+        .plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;margin-bottom:40px;}
+        .plan-card{background:var(--surface-strong);border:2px solid var(--border);border-radius:24px;padding:28px;position:relative;transition:all 0.3s;}
+        .plan-card:hover{transform:translateY(-4px);}
+        .plan-card.popular{border-color:var(--accent);background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.05));}
+        .popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;border-radius:50px;padding:4px 16px;font-size:12px;font-weight:700;white-space:nowrap;}
+        .plan-name{font-size:22px;font-weight:800;margin-bottom:4px;}
+        .plan-price{font-size:36px;font-weight:800;color:var(--accent);margin-bottom:4px;}
+        .plan-price span{font-size:15px;color:var(--text-muted);font-weight:500;}
+        .plan-coins{background:var(--accent-dim);color:var(--accent);border-radius:50px;padding:4px 12px;font-size:13px;font-weight:700;display:inline-block;margin-bottom:20px;}
+        .plan-features{list-style:none;margin-bottom:24px;}
+        .plan-features li{display:flex;align-items:center;gap:8px;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border);}
+        .plan-features li:last-child{border:none;}
+        .plan-features li i{color:var(--green);font-size:13px;}
+        .subscribe-btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:700;cursor:pointer;font-family:inherit;font-size:15px;transition:all 0.2s;}
+        .subscribe-btn.primary{background:var(--accent);color:#fff;}
+        .subscribe-btn.primary:hover{opacity:0.9;}
+        .subscribe-btn.outline{background:transparent;border:2px solid var(--accent);color:var(--accent);}
+        .subscribe-btn.outline:hover{background:var(--accent);color:#fff;}
+        .subscribe-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;border:none;}
+        .active-plan{background:var(--green);color:#fff;width:100%;padding:14px;border-radius:14px;border:none;font-weight:700;font-size:15px;}
+        
+        /* Perks */
+        .perks-section{margin-top:40px;}
+        .perks-section h2{font-size:22px;font-weight:800;margin-bottom:20px;}
+        .perks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+        .perk-card{background:var(--surface-strong);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;}
+        .perk-icon{font-size:32px;margin-bottom:10px;}
+        .perk-card h4{font-size:14px;font-weight:700;margin-bottom:4px;}
+        .perk-card p{font-size:12px;color:var(--text-muted);}
+        
+        .toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+        .toast{background:var(--surface-strong);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-size:14px;min-width:200px;}
+    </style>
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <header class="topbar">
+        <div class="logo-mark">FH</div>
+        <span class="logo-text">FLYHOST</span>
+        <div class="topbar-nav">
+            <a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+            <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="themeIcon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>💎 Plans d'Abonnement</h1>
+            <p>Boostez votre expérience FLYHOST avec un abonnement mensuel payé en coins.</p>
+            <div class="coins-badge" id="coinsBadge"><i class="fas fa-coins"></i> Chargement...</div>
+        </div>
+
+        <div id="currentSubSection" style="display:none;">
+            <div class="current-sub" id="currentSubInfo"></div>
+        </div>
+
+        <div class="plans-grid">
+            <div class="plan-card" id="planStarter">
+                <div class="plan-name">🌱 Starter</div>
+                <div class="plan-price">500 <span>coins/mois</span></div>
+                <div class="plan-coins">+100 coins bonus/mois</div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check-circle"></i> 100 coins bonus chaque mois</li>
+                    <li><i class="fas fa-check-circle"></i> 1 serveur gratuit par mois</li>
+                    <li><i class="fas fa-check-circle"></i> Support prioritaire</li>
+                    <li><i class="fas fa-check-circle"></i> Badge Starter</li>
+                </ul>
+                <button class="subscribe-btn outline" onclick="subscribe('starter')" id="btnStarter">Souscrire</button>
+            </div>
+            <div class="plan-card popular" id="planPro">
+                <div class="popular-badge">⭐ Le plus populaire</div>
+                <div class="plan-name">🚀 Pro</div>
+                <div class="plan-price">1500 <span>coins/mois</span></div>
+                <div class="plan-coins">+350 coins bonus/mois</div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check-circle"></i> 350 coins bonus chaque mois</li>
+                    <li><i class="fas fa-check-circle"></i> 3 serveurs gratuits par mois</li>
+                    <li><i class="fas fa-check-circle"></i> Support VIP</li>
+                    <li><i class="fas fa-check-circle"></i> Auto-renew inclus</li>
+                    <li><i class="fas fa-check-circle"></i> Badge Pro exclusif</li>
+                </ul>
+                <button class="subscribe-btn primary" onclick="subscribe('pro')" id="btnPro">Souscrire</button>
+            </div>
+            <div class="plan-card" id="planBusiness">
+                <div class="plan-name">💼 Business</div>
+                <div class="plan-price">4000 <span>coins/mois</span></div>
+                <div class="plan-coins">+1000 coins bonus/mois</div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check-circle"></i> 1000 coins bonus chaque mois</li>
+                    <li><i class="fas fa-check-circle"></i> Serveurs illimités</li>
+                    <li><i class="fas fa-check-circle"></i> Support 24/7 dédié</li>
+                    <li><i class="fas fa-check-circle"></i> Tableau de bord business</li>
+                    <li><i class="fas fa-check-circle"></i> API illimitée</li>
+                    <li><i class="fas fa-check-circle"></i> Badge Business doré</li>
+                </ul>
+                <button class="subscribe-btn outline" onclick="subscribe('business')" id="btnBusiness">Souscrire</button>
+            </div>
+        </div>
+
+        <div class="perks-section">
+            <h2>✨ Pourquoi souscrire ?</h2>
+            <div class="perks-grid">
+                <div class="perk-card"><div class="perk-icon">🪙</div><h4>Coins chaque mois</h4><p>Recevez des coins automatiquement au début de chaque mois.</p></div>
+                <div class="perk-card"><div class="perk-icon">⚡</div><h4>Serveurs gratuits</h4><p>Des renouvellements offerts chaque mois selon votre plan.</p></div>
+                <div class="perk-card"><div class="perk-icon">🎖️</div><h4>Badge exclusif</h4><p>Affichez votre statut dans la communauté avec un badge unique.</p></div>
+                <div class="perk-card"><div class="perk-icon">🎧</div><h4>Support premium</h4><p>Tickets traités en priorité par notre équipe dédiée.</p></div>
+            </div>
+        </div>
+
+        <!-- Tableau comparatif -->
+        <div style="margin-top:48px">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:24px;text-align:center">📊 Comparaison des plans</h2>
+            <div style="background:var(--surface-strong);border:1px solid var(--border);border-radius:20px;overflow:hidden">
+                <table style="width:100%;border-collapse:collapse;font-size:14px">
+                    <thead>
+                        <tr style="background:var(--accent-dim)">
+                            <th style="padding:16px 20px;text-align:left;font-weight:700;color:var(--text)">Fonctionnalité</th>
+                            <th style="padding:16px;text-align:center;font-weight:700;color:var(--text)">🆓 Gratuit</th>
+                            <th style="padding:16px;text-align:center;font-weight:700;color:var(--text)">🌱 Starter</th>
+                            <th style="padding:16px;text-align:center;font-weight:700;color:var(--accent);background:rgba(99,102,241,0.12)">🚀 Pro</th>
+                            <th style="padding:16px;text-align:center;font-weight:700;color:var(--text)">💼 Business</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compareTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div style="margin-top:48px">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;text-align:center">❓ Questions fréquentes</h2>
+            <div style="display:flex;flex-direction:column;gap:12px">
+                <details style="background:var(--surface-strong);border:1px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer">
+                    <summary style="font-weight:700;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center">Est-ce que je peux annuler à tout moment ? <i class="fas fa-chevron-down"></i></summary>
+                    <p style="margin-top:12px;color:var(--text-muted);line-height:1.6">Oui, vous pouvez annuler votre abonnement à tout moment depuis la page Abonnement. Le plan restera actif jusqu'à la fin de la période payée.</p>
+                </details>
+                <details style="background:var(--surface-strong);border:1px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer">
+                    <summary style="font-weight:700;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center">Comment fonctionnent les coins bonus ? <i class="fas fa-chevron-down"></i></summary>
+                    <p style="margin-top:12px;color:var(--text-muted);line-height:1.6">Les coins bonus sont crédités automatiquement sur votre compte chaque mois au moment du renouvellement. Ils peuvent être utilisés pour créer ou renouveler des serveurs.</p>
+                </details>
+                <details style="background:var(--surface-strong);border:1px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer">
+                    <summary style="font-weight:700;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center">Puis-je changer de plan ? <i class="fas fa-chevron-down"></i></summary>
+                    <p style="margin-top:12px;color:var(--text-muted);line-height:1.6">Oui. Vous pouvez upgrader votre plan à tout moment. L'ancien plan sera résilié et le nouveau activé immédiatement. La différence de prix n'est pas remboursée.</p>
+                </details>
+                <details style="background:var(--surface-strong);border:1px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer">
+                    <summary style="font-weight:700;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center">Que se passe-t-il si je n'ai pas assez de coins ? <i class="fas fa-chevron-down"></i></summary>
+                    <p style="margin-top:12px;color:var(--text-muted);line-height:1.6">Si votre solde est insuffisant lors du renouvellement mensuel, l'abonnement sera automatiquement résilié. Vous recevrez une notification 3 jours avant.</p>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('flyhost_token');
+        let userCoins = 0;
+        let currentSub = null;
+
+        function toggleTheme(){const c=document.documentElement.getAttribute('data-theme')||'light';const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('fh_theme',n);document.getElementById('themeIcon').className=n==='dark'?'fas fa-sun':'fas fa-moon';}
+        const s=localStorage.getItem('fh_theme')||'light';document.documentElement.setAttribute('data-theme',s);document.getElementById('themeIcon').className=s==='dark'?'fas fa-sun':'fas fa-moon';
+
+        function toast(msg, type='info'){const c=document.getElementById('toastContainer');const el=document.createElement('div');el.className=`toast ${type}`;el.innerHTML=msg;c.appendChild(el);setTimeout(()=>el.remove(),3000);}
+
+        async function init() {
+            if (!token) { document.getElementById('coinsBadge').innerHTML = '🔒 Connectez-vous'; return; }
+            try {
+                const [profileRes, subRes] = await Promise.all([
+                    fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } }),
+                    fetch('/api/subscriptions/me', { headers: { Authorization: `Bearer ${token}` } })
+                ]);
+                const profileData = await profileRes.json();
+                const subData = await subRes.json();
+                userCoins = profileData.user?.coins || 0;
+                document.getElementById('coinsBadge').innerHTML = `<i class="fas fa-coins"></i> ${userCoins} coins disponibles`;
+                currentSub = subData.subscription;
+                if (currentSub) {
+                    const plans = { starter: '🌱 Starter', pro: '🚀 Pro', business: '💼 Business' };
+                    document.getElementById('currentSubSection').style.display = 'block';
+                    document.getElementById('currentSubInfo').innerHTML = `
+                        <div class="current-sub-icon">✅</div>
+                        <div class="current-sub-info">
+                            <h3>Abonnement actif : ${plans[currentSub.plan_name] || currentSub.plan_name}</h3>
+                            <p>Prochain débit : ${currentSub.next_billing_at ? new Date(currentSub.next_billing_at).toLocaleDateString('fr-FR') : 'N/A'} • ${currentSub.price_per_month} coins/mois</p>
+                        </div>
+                        <button class="cancel-btn" onclick="cancelSub()"><i class="fas fa-times"></i> Résilier</button>`;
+                    ['Starter','Pro','Business'].forEach(p => {
+                        const id = 'btn' + p;
+                        const btn = document.getElementById(id);
+                        if (currentSub.plan_name === p.toLowerCase()) {
+                            btn.className = 'active-plan'; btn.textContent = '✓ Plan actif'; btn.disabled = true;
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
+        async function subscribe(plan) {
+            if (!token) { alert('Connectez-vous pour souscrire.'); window.location.href = '/login'; return; }
+            const prices = { starter: 500, pro: 1500, business: 4000 };
+            if (userCoins < prices[plan]) { toast(`Coins insuffisants. Vous avez ${userCoins} coins, il vous faut ${prices[plan]}.`, 'error'); return; }
+            if (!confirm(`Souscrire au plan ${plan} pour ${prices[plan]} coins/mois ?`)) return;
+            const res = await fetch('/api/subscriptions/subscribe', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ plan })
+            });
+            const data = await res.json();
+            if (data.success) { toast('Abonnement activé ! 🎉', 'success'); setTimeout(() => location.reload(), 1500); }
+            else toast(data.error || 'Erreur', 'error');
+        }
+
+        async function cancelSub() {
+            if (!confirm('Résilier votre abonnement ? Vous ne recevrez plus de coins bonus.')) return;
+            const res = await fetch('/api/subscriptions/cancel', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+            const data = await res.json();
+            if (data.success) { toast('Abonnement résilié.', 'info'); setTimeout(() => location.reload(), 1500); }
+            else toast('Erreur', 'error');
+        }
+
+        function renderCompareTable() {
+            const ck = '<span style="color:#10b981;font-size:16px">✓</span>';
+            const xk = '<span style="color:#64748b;font-size:16px">—</span>';
+            const rows = [
+                ['Coins bonus mensuels', xk, '100 🪙', '350 🪙', '1000 🪙'],
+                ['Serveurs gratuits/mois', xk, '1', '3', 'Illimités'],
+                ['Priorité support tickets', xk, ck, 'VIP', '24/7 dédié'],
+                ['Auto-renouvellement', xk, xk, ck, ck],
+                ['Badge exclusif', xk, '🌱 Starter', '🚀 Pro', '💼 Business'],
+                ['API illimitée', xk, xk, xk, ck],
+                ['Tableau de bord business', xk, xk, xk, ck],
+                ['Déploiements GitHub', ck, ck, ck, ck],
+                ['Espace revendeur', xk, xk, ck, ck],
+                ['Backups automatiques', xk, xk, ck, ck],
+                ['Domaines personnalisés', xk, xk, xk, ck],
+                ['Export données CSV/PDF', xk, xk, ck, ck],
+            ];
+            const tbody = document.getElementById('compareTable');
+            tbody.innerHTML = rows.map((r, i) => `
+                <tr style="border-top:1px solid var(--border);${i%2===0?'background:rgba(99,102,241,0.02)':''}">
+                    <td style="padding:14px 20px;font-weight:600;color:var(--text-secondary)">${r[0]}</td>
+                    <td style="padding:14px;text-align:center">${r[1]}</td>
+                    <td style="padding:14px;text-align:center">${r[2]}</td>
+                    <td style="padding:14px;text-align:center;background:rgba(99,102,241,0.05)">${r[3]}</td>
+                    <td style="padding:14px;text-align:center">${r[4]}</td>
+                </tr>
+            `).join('');
+        }
+
+        init();
+        renderCompareTable();
+    </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

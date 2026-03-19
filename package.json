@@ -1,0 +1,58 @@
+{
+  "name": "flyhost",
+  "version": "8.0.0",
+  "description": "Plateforme d'hébergement complète - Panels Gaming & Déploiement Web avec système de revendeurs, API à 3 niveaux et paiements MoneyFusion",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "axios": "^1.6.2",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.1.5",
+    "form-data": "^4.0.1",
+    "helmet": "^7.1.0",
+    "http-proxy": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.7",
+    "pdfkit": "^0.18.0",
+    "sqlite3": "^5.1.6",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "hosting",
+    "pterodactyl",
+    "reseller",
+    "api",
+    "deployment",
+    "github",
+    "moneyfusion",
+    "payment",
+    "websocket",
+    "admin"
+  ],
+  "author": "FLYHOST Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flyhost/flyhost-platform"
+  },
+  "bugs": {
+    "url": "https://github.com/flyhost/flyhost-platform/issues"
+  },
+  "homepage": "https://flyhost.store"
+}

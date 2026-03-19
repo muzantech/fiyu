@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classement Revendeurs - FLYHOST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --accent:#6366f1;--accent-dim:rgba(99,102,241,0.1);
+            --bg:#eef0f7;--surface:rgba(255,255,255,0.75);--surface-strong:rgba(255,255,255,0.92);
+            --border:rgba(99,102,241,0.18);--border-strong:rgba(99,102,241,0.35);
+            --text:#0f172a;--text-secondary:#334155;--text-muted:#64748b;
+            --green:#10b981;--warning:#f59e0b;--error:#ef4444;--radius:18px;
+        }
+        [data-theme="dark"]{--bg:#0d1117;--surface:rgba(22,27,34,0.85);--surface-strong:rgba(30,37,48,0.95);--border:rgba(99,102,241,0.25);--border-strong:rgba(99,102,241,0.45);--text:#f0f6fc;--text-secondary:#c9d1d9;--text-muted:#8b949e;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px;padding:0 20px;height:60px;background:var(--surface-strong);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);}
+        .logo-mark{width:32px;height:32px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;}
+        .logo-text{font-weight:800;font-size:16px;}
+        .topbar-nav{margin-left:auto;display:flex;gap:8px;align-items:center;}
+        .nav-link{color:var(--text-muted);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:10px;}
+        .nav-link:hover{background:var(--accent-dim);color:var(--accent);}
+        .theme-toggle{background:none;border:1px solid var(--border);border-radius:50px;padding:6px 12px;cursor:pointer;color:var(--text);}
+        .container{max-width:860px;margin:0 auto;padding:32px 16px;}
+        .page-header{text-align:center;margin-bottom:40px;}
+        .page-header h1{font-size:32px;font-weight:800;margin-bottom:8px;}
+        .page-header p{color:var(--text-muted);}
+        .podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:40px;}
+        .podium-item{display:flex;flex-direction:column;align-items:center;gap:8px;}
+        .podium-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;}
+        .podium-item.rank-1 .podium-avatar{width:80px;height:80px;font-size:28px;background:linear-gradient(135deg,#f59e0b,#fbbf24);box-shadow:0 8px 24px rgba(245,158,11,0.4);}
+        .podium-item.rank-2 .podium-avatar{width:64px;height:64px;font-size:22px;background:linear-gradient(135deg,#94a3b8,#cbd5e1);box-shadow:0 8px 20px rgba(148,163,184,0.4);}
+        .podium-item.rank-3 .podium-avatar{width:58px;height:58px;font-size:19px;background:linear-gradient(135deg,#cd7f32,#d97706);box-shadow:0 8px 18px rgba(205,127,50,0.4);}
+        .podium-medal{font-size:24px;}
+        .podium-name{font-weight:700;font-size:14px;}
+        .podium-stat{font-size:12px;color:var(--text-muted);}
+        .podium-block{border-radius:12px 12px 0 0;width:100px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;}
+        .rank-1 .podium-block{height:80px;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.1));color:#f59e0b;}
+        .rank-2 .podium-block{height:60px;color:var(--text-muted);}
+        .rank-3 .podium-block{height:48px;color:#cd7f32;}
+        .leaderboard-table{background:var(--surface-strong);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+        .lb-row{display:grid;grid-template-columns:60px 1fr 120px 120px 100px;padding:16px 20px;border-bottom:1px solid var(--border);align-items:center;gap:8px;}
+        .lb-row:last-child{border-bottom:none;}
+        .lb-header{background:var(--bg);font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;}
+        .lb-rank{font-size:20px;font-weight:800;color:var(--text-muted);}
+        .lb-rank.gold{color:#f59e0b;}
+        .lb-rank.silver{color:#94a3b8;}
+        .lb-rank.bronze{color:#cd7f32;}
+        .lb-user{display:flex;align-items:center;gap:10px;}
+        .lb-avatar{width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;}
+        .lb-username{font-weight:700;font-size:14px;}
+        .lb-role{font-size:11px;color:var(--text-muted);}
+        .lb-val{font-weight:700;font-size:15px;color:var(--text);}
+        .lb-badge{background:var(--accent-dim);color:var(--accent);border-radius:50px;padding:3px 10px;font-size:11px;font-weight:700;}
+        .badge-gold{background:#f59e0b22;color:#f59e0b;}
+        .badge-silver{background:#94a3b822;color:#94a3b8;}
+        .badge-bronze{background:#cd7f3222;color:#cd7f32;}
+        .empty{text-align:center;padding:60px;color:var(--text-muted);}
+    </style>
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo-mark">FH</div>
+        <span class="logo-text">FLYHOST</span>
+        <div class="topbar-nav">
+            <a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+            <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="themeIcon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>🏆 Classement des Revendeurs</h1>
+            <p>Les meilleurs revendeurs FLYHOST du moment, classés par revenus totaux générés.</p>
+        </div>
+        <div class="podium" id="podium"></div>
+        <div class="leaderboard-table" id="leaderboardTable">
+            <div class="lb-row lb-header">
+                <div>Rang</div><div>Revendeur</div><div>Clients</div><div>Revenus</div><div>Badge</div>
+            </div>
+            <div id="lbRows" style="text-align:center;padding:40px;color:var(--text-muted);">Chargement...</div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme(){const c=document.documentElement.getAttribute('data-theme')||'light';const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('fh_theme',n);document.getElementById('themeIcon').className=n==='dark'?'fas fa-sun':'fas fa-moon';}
+        const s=localStorage.getItem('fh_theme')||'light';document.documentElement.setAttribute('data-theme',s);document.getElementById('themeIcon').className=s==='dark'?'fas fa-sun':'fas fa-moon';
+
+        async function load() {
+            const res = await fetch('/api/leaderboard/resellers');
+            const data = await res.json();
+            if (!data.success || !data.leaderboard.length) {
+                document.getElementById('lbRows').innerHTML = '<div class="empty"><i class="fas fa-trophy" style="font-size:40px;opacity:0.3;margin-bottom:12px;display:block"></i><p>Aucun revendeur encore classé.</p></div>';
+                return;
+            }
+            const lb = data.leaderboard;
+            // Podium
+            const medals = ['🥇','🥈','🥉'];
+            const rankCls = ['rank-1','rank-2','rank-3'];
+            const heights = ['1', '2', '3'];
+            const podiumOrder = [lb[1], lb[0], lb[2]].filter(Boolean);
+            const podiumRanks = lb[1] ? [2, 1, 3] : [1];
+            document.getElementById('podium').innerHTML = podiumOrder.map((p, i) => {
+                const rank = podiumRanks[i];
+                return `<div class="podium-item ${rankCls[rank-1]}">
+                    <div class="podium-medal">${medals[rank-1]}</div>
+                    <div class="podium-avatar">${(p.username||'?')[0].toUpperCase()}</div>
+                    <div class="podium-name">${p.username}</div>
+                    <div class="podium-stat">${formatNum(p.total_revenue)} XOF</div>
+                    <div class="podium-block">${rank}</div>
+                </div>`;
+            }).join('');
+            // Table rows
+            document.getElementById('lbRows').innerHTML = lb.map((u, i) => {
+                const rank = i + 1;
+                const rankCls2 = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+                const badgeCls = rank === 1 ? 'badge-gold' : rank === 2 ? 'badge-silver' : rank === 3 ? 'badge-bronze' : '';
+                const badge = rank === 1 ? '🥇 Top 1' : rank === 2 ? '🥈 Top 2' : rank === 3 ? '🥉 Top 3' : rank <= 10 ? 'Top 10' : 'Revendeur';
+                return `<div class="lb-row">
+                    <div class="lb-rank ${rankCls2}">${rank}</div>
+                    <div class="lb-user">
+                        <div class="lb-avatar">${(u.username||'?')[0].toUpperCase()}</div>
+                        <div><div class="lb-username">${u.username}</div><div class="lb-role">${u.role}</div></div>
+                    </div>
+                    <div class="lb-val">${u.clients}</div>
+                    <div class="lb-val">${formatNum(u.total_revenue)} XOF</div>
+                    <div><span class="lb-badge ${badgeCls}">${badge}</span></div>
+                </div>`;
+            }).join('');
+        }
+        function formatNum(n){return new Intl.NumberFormat('fr-FR').format(n||0);}
+        load();
+    </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

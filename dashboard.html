@@ -1,0 +1,3392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord - FLYHOST</title>
+    <meta name="description" content="Gérez vos serveurs, coins, déploiements et statistiques FLYHOST">
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FLYHOST">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dim: rgba(99, 102, 241, 0.1);
+            --bg: #eef0f7;
+            --surface: rgba(255, 255, 255, 0.75);
+            --surface-strong: rgba(255, 255, 255, 0.92);
+            --border: rgba(99, 102, 241, 0.18);
+            --border-strong: rgba(99, 102, 241, 0.35);
+            --text: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --green: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 18px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 8px 20px -8px rgba(99, 102, 241, 0.2);
+            --shadow-hover: 0 20px 30px -12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* ========== MODE SOMBRE ========== */
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: rgba(22, 27, 34, 0.85);
+            --surface-strong: rgba(30, 37, 48, 0.95);
+            --border: rgba(99, 102, 241, 0.25);
+            --border-strong: rgba(99, 102, 241, 0.45);
+            --text: #f0f6fc;
+            --text-secondary: #c9d1d9;
+            --text-muted: #8b949e;
+        }
+
+        .theme-toggle {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px 12px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 16px;
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover { border-color: var(--accent); }
+
+        /* ========== ONBOARDING OVERLAY ========== */
+        .onboarding-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(6px); padding: 16px;
+        }
+        .onboarding-box {
+            background: var(--surface-strong); border: 1px solid var(--border-strong);
+            border-radius: 28px; padding: 36px 32px; max-width: 520px; width: 100%;
+            text-align: center; position: relative;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+            animation: obIn .35s cubic-bezier(.4,0,.2,1) both;
+        }
+        @keyframes obIn { from { opacity:0; transform: scale(.94) translateY(16px); } to { opacity:1; transform: none; } }
+        .ob-progress { display:flex; align-items:center; gap:6px; justify-content:center; margin-bottom:28px; }
+        .ob-step-circle { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); color:var(--text-muted); font-size:11px; font-weight:800; display:flex;align-items:center;justify-content:center; transition:all .3s; flex-shrink:0; }
+        .ob-step-circle.done { background:var(--accent); border-color:var(--accent); color:#fff; }
+        .ob-step-circle.active { border-color:var(--accent); color:var(--accent); }
+        .ob-step-line { flex:1; height:2px; background:var(--border); border-radius:1px; transition: background .3s; }
+        .ob-step-line.done { background:var(--accent); }
+        .ob-step-label { font-size:10px; font-weight:700; margin-top:3px; color:var(--text-muted); }
+        .onboarding-icon { font-size:48px; margin-bottom:12px; }
+        .onboarding-box h2 { font-size:22px; font-weight:800; margin-bottom:6px; color:var(--text); }
+        .onboarding-box .ob-sub { color:var(--text-muted); font-size:14px; margin-bottom:24px; line-height:1.5; }
+        /* Plan cards */
+        .ob-plan-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:24px; text-align:left; }
+        @media(max-width:420px){ .ob-plan-grid { grid-template-columns:1fr; } }
+        .ob-plan-card { border:2px solid var(--border); border-radius:16px; padding:14px 12px; cursor:pointer; transition:all .2s; }
+        .ob-plan-card:hover { border-color:var(--accent); background:var(--accent-dim); }
+        .ob-plan-card.selected { border-color:var(--accent); background:var(--accent-dim); box-shadow:0 0 0 3px rgba(99,102,241,.15); }
+        .ob-plan-name { font-size:14px; font-weight:800; margin-bottom:3px; }
+        .ob-plan-price { font-size:13px; color:var(--accent); font-weight:700; }
+        .ob-plan-desc { font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.4; }
+        /* Server type grid */
+        .ob-type-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:20px; }
+        @media(max-width:420px){ .ob-type-grid { grid-template-columns:repeat(2,1fr); } }
+        .ob-type-card { border:2px solid var(--border); border-radius:12px; padding:12px 8px; cursor:pointer; transition:all .2s; text-align:center; }
+        .ob-type-card:hover { border-color:var(--accent); }
+        .ob-type-card.selected { border-color:var(--accent); background:var(--accent-dim); }
+        .ob-type-card .ob-type-icon { font-size:22px; display:block; margin-bottom:5px; }
+        .ob-type-card .ob-type-label { font-size:11px; font-weight:700; color:var(--text-secondary); }
+        .ob-name-input { width:100%; border:1.5px solid var(--border); border-radius:12px; padding:11px 14px; font-size:15px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); margin-bottom:20px; transition:border .2s; }
+        .ob-name-input:focus { border-color:var(--accent); }
+        /* Launch step */
+        .ob-launch-summary { background:var(--accent-dim); border:1px solid var(--border-strong); border-radius:16px; padding:18px; margin-bottom:20px; text-align:left; }
+        .ob-launch-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
+        .ob-launch-row:last-child { margin-bottom:0; }
+        .ob-launch-key { color:var(--text-muted); font-weight:600; }
+        .ob-launch-val { font-weight:800; color:var(--text); }
+        /* Nav */
+        .ob-nav { display:flex; gap:12px; justify-content:space-between; margin-top:4px; }
+        .ob-btn { padding:11px 24px; border-radius:50px; border:none; cursor:pointer; font-weight:700; font-size:14px; font-family:inherit; transition:all .2s; }
+        .ob-btn-primary { background:var(--accent); color:#fff; flex:1; }
+        .ob-btn-primary:hover { background:#5254d4; }
+        .ob-btn-secondary { background:var(--surface); color:var(--text-muted); border:1px solid var(--border); }
+        .ob-btn-launch { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; flex:1; font-size:15px; box-shadow:0 4px 20px rgba(99,102,241,.4); }
+        .ob-btn-launch:hover { transform:scale(1.02); }
+
+        /* ========== WIDGET SUPPORT FLOTTANT ========== */
+        .support-widget {
+            position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+        }
+        .support-bubble {
+            width: 56px; height: 56px; border-radius: 50%; background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+            color: white; font-size: 22px; transition: transform 0.2s;
+        }
+        .support-bubble:hover { transform: scale(1.1); }
+        .support-panel {
+            position: absolute; bottom: 70px; right: 0; width: 300px;
+            background: var(--surface-strong); border: 1px solid var(--border);
+            border-radius: 20px; padding: 20px; display: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .support-panel.open { display: block; }
+        .support-panel h4 { margin-bottom: 12px; color: var(--text); font-size: 16px; }
+        .support-panel p { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
+        .support-panel .sp-btn {
+            display: block; width: 100%; padding: 10px; border-radius: 12px; border: none;
+            background: var(--accent); color: white; font-weight: 600; cursor: pointer;
+            margin-bottom: 8px; font-size: 14px;
+        }
+        .support-panel .sp-btn.secondary {
+            background: var(--surface); color: var(--text); border: 1px solid var(--border);
+        }
+
+        /* ========== CHALLENGES SECTION ========== */
+        .challenges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+        .challenge-card {
+            background: var(--surface-strong); border: 1px solid var(--border);
+            border-radius: 18px; padding: 20px; position: relative; overflow: hidden;
+        }
+        .challenge-card .ch-icon { font-size: 28px; margin-bottom: 10px; }
+        .challenge-card h4 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .challenge-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+        .ch-progress-bar { height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+        .ch-progress-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width 0.5s; }
+        .ch-reward { font-size: 12px; color: var(--accent); font-weight: 700; }
+        .ch-claim-btn {
+            background: var(--accent); color: white; border: none; border-radius: 50px;
+            padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        .ch-claim-btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ========== FOND ANIMÉ ========== */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+
+        .orb1 {
+            width: 600px;
+            height: 600px;
+            background: rgba(99, 102, 241, 0.6);
+            top: -200px;
+            left: -100px;
+            animation-duration: 20s;
+        }
+
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: rgba(139, 92, 246, 0.5);
+            bottom: -150px;
+            right: -100px;
+            animation-duration: 28s;
+            animation-delay: -5s;
+        }
+
+        .orb3 {
+            width: 400px;
+            height: 400px;
+            background: rgba(45, 212, 191, 0.5);
+            top: 40%;
+            left: 40%;
+            animation-duration: 22s;
+            animation-delay: -2s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(80px, -60px) scale(1.3); }
+        }
+
+        /* ========== TOPBAR ========== */
+        .topbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 64px;
+            background: #1e1e2e;
+            border-top: 3px solid var(--accent);
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .hamburger {
+            background: transparent;
+            border: none;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            margin-right: 16px;
+        }
+        .hamburger:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background-color: white;
+            border-radius: 2px;
+            transition: transform 0.3s ease, opacity 0.2s ease;
+        }
+        .hamburger.open span:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+        .hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.open span:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .logo-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        .logo-text {
+            font-weight: 800;
+            font-size: 18px;
+            color: white;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .notification-icon {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            position: relative;
+        }
+        .notification-icon:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .notif-badge {
+            position: absolute;
+            top: 4px; right: 4px;
+            min-width: 16px; height: 16px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            pointer-events: none;
+        }
+        .notif-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 360px;
+            max-height: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.4);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .notif-panel.open { display: flex; }
+        .notif-panel-header {
+            padding: 16px 18px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .notif-panel-body {
+            overflow-y: auto;
+            flex: 1;
+        }
+        .notif-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .notif-item:hover { background: var(--hover); }
+        .notif-item.unread { background: rgba(99,102,241,0.06); }
+        .notif-icon-dot {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+        .notif-item-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+        .notif-item-msg { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+        .notif-item-time { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+        .notif-empty { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 14px; }
+        .notif-wrapper { position: relative; }
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        /* ========== DRAWER (NAVIGATION COULISSANTE) ========== */
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(238, 240, 247, 0.97);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 40px rgba(99,102,241,0.15);
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .drawer-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .drawer-logo .logo-mark {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+        .drawer-logo span {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--text);
+        }
+        .close-drawer {
+            background: transparent;
+            border: none;
+            font-size: 28px;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .close-drawer:hover {
+            color: var(--error);
+            background: rgba(239,68,68,0.1);
+        }
+
+        .drawer-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .drawer-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 22px;
+            color: white;
+        }
+        .drawer-user-info {
+            flex: 1;
+        }
+        .drawer-username {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+        }
+        .drawer-coins {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: var(--warning);
+            font-weight: 600;
+            margin: 4px 0;
+        }
+        .drawer-role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+        .drawer-role-badge.admin { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .drawer-role-badge.superadmin { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        .drawer-nav {
+            flex: 1;
+            padding: 16px 12px;
+        }
+        .nav-section {
+            margin: 20px 0 8px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-bottom: 2px;
+        }
+        .nav-item i {
+            width: 20px;
+            font-size: 16px;
+            color: var(--accent);
+        }
+        .nav-item:hover {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+        }
+        .nav-item.active i {
+            color: white;
+        }
+
+        .drawer-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+        .drawer-stats {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            flex: 1;
+        }
+        .stat-item .value {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--accent);
+            display: block;
+            line-height: 1.3;
+        }
+        .stat-item .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 30px;
+            background: rgba(239,68,68,0.1);
+            border: none;
+            color: var(--error);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            background: rgba(239,68,68,0.2);
+        }
+
+        /* ========== OVERLAY ========== */
+        .drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 199;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .drawer-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            padding: 64px 24px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            transition: margin-left 0.3s ease;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* ========== SECTIONS ========== */
+        .section {
+            margin-bottom: 32px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+        .section:nth-child(5) { animation-delay: 0.5s; }
+        .section:nth-child(6) { animation-delay: 0.6s; }
+        .section:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+
+        .section-header h2 i {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        /* ========== CARDS ========== */
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* ── PROMO COUNTDOWN CARD ── */
+        .promo-dash-countdown {
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            border-radius: 14px; padding: 14px 20px;
+            display: flex; align-items: center; gap: 14px;
+            color: #fff; font-weight: 700; margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(249,115,22,.35);
+            animation: promoPulse 2.5s ease-in-out infinite;
+        }
+        .promo-dash-countdown .promo-icon { font-size: 22px; flex-shrink: 0; }
+        .promo-dash-countdown .promo-info { flex: 1; min-width: 0; }
+        .promo-dash-countdown .promo-title { font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .promo-dash-countdown .promo-sub { font-size: 12px; opacity: .85; margin-top: 2px; }
+        .promo-dash-countdown .promo-timer {
+            background: rgba(0,0,0,.2); border-radius: 8px; padding: 6px 12px;
+            font-family: monospace; font-size: 18px; font-weight: 900; flex-shrink: 0;
+        }
+        .promo-dash-countdown .promo-cta {
+            background: #fff; color: #f97316; font-size: 13px; font-weight: 800;
+            padding: 7px 14px; border-radius: 8px; text-decoration: none; flex-shrink: 0;
+            transition: transform .15s;
+        }
+        .promo-dash-countdown .promo-cta:hover { transform: scale(1.04); }
+        @keyframes promoPulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(249,115,22,.35); }
+            50% { box-shadow: 0 4px 35px rgba(249,115,22,.65); }
+        }
+
+        /* ========== STATS GRID ========== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-strong);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-label i {
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        /* ========== QUICK ACTIONS ========== */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .action-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: block;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-strong);
+            color: var(--accent);
+        }
+
+        .action-card i {
+            font-size: 24px;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .action-card span {
+            font-size: 13px;
+            font-weight: 600;
+            display: block;
+        }
+
+        .action-card.reward-available {
+            border-color: var(--warning);
+            animation: pulse 2s infinite;
+        }
+
+        .action-card.reward-available i {
+            color: var(--warning);
+        }
+
+        @keyframes pulse {
+            0%, 100% { border-color: var(--warning); }
+            50% { border-color: rgba(245, 158, 11, 0.3); }
+        }
+
+        /* ========== SERVER CARDS ========== */
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .server-card {
+            background: var(--surface-strong);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .server-card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-4px);
+        }
+
+        .server-card.expiring {
+            border-left: 4px solid var(--warning);
+        }
+
+        .server-card.expired {
+            border-left: 4px solid var(--error);
+            opacity: 0.8;
+        }
+
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .server-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .server-name i {
+            color: var(--accent);
+        }
+
+        .server-badges {
+            display: flex;
+            gap: 6px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-type {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .badge-ephemeral {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-dot.running {
+            background: var(--green);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+            animation: pulse-dot 2s infinite;
+        }
+
+        .status-dot.stopped {
+            background: var(--text-muted);
+        }
+
+        .status-dot.unknown {
+            background: var(--warning);
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .server-details {
+            margin: 16px 0;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+        }
+
+        .detail-icon {
+            width: 24px;
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        .detail-content {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .server-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .server-action {
+            padding: 10px 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+        }
+
+        .server-action i {
+            font-size: 14px;
+        }
+
+        .server-action:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* ========== DEPLOYMENTS LIST ========== */
+        .deployments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .deployment-item {
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            transition: all 0.2s;
+        }
+
+        .deployment-item:hover {
+            border-color: var(--border-strong);
+            transform: translateX(4px);
+        }
+
+        .deployment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .deployment-type {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .deployment-type i {
+            color: var(--accent);
+        }
+
+        .deployment-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .deployment-status.running {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--green);
+        }
+
+        .deployment-status.failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .deployment-status.building {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .deployment-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-item i {
+            color: var(--accent);
+            font-size: 12px;
+        }
+
+        .deployment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        /* ========== MODALS ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface-strong);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-header i {
+            color: var(--accent);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--error);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* ========== INFO MODAL ========== */
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-icon {
+            width: 32px;
+            color: var(--accent);
+            font-size: 18px;
+        }
+        .info-content {
+            flex: 1;
+        }
+        .info-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .info-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .info-value.operational { color: var(--green); }
+        .info-value.degraded { color: var(--warning); }
+
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5254d4;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-strong);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        /* ========== ALERTS ========== */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--green);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .alert-info {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--border-strong);
+            color: var(--accent);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== LOADING SPINNER ========== */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== EMPTY STATES ========== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        /* ========== HERO BANNER ========== */
+        .hero-banner {
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d1b69 50%, #1e1e2e 100%);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: var(--radius-lg);
+            padding: 28px 32px;
+            margin: 16px 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            background: rgba(99,102,241,0.15);
+            filter: blur(40px);
+        }
+        .hero-left { display: flex; align-items: center; gap: 18px; flex: 1; min-width: 0; }
+        .hero-avatar-big {
+            width: 64px; height: 64px; border-radius: 18px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 26px; color: white;
+            border: 2px solid rgba(255,255,255,0.15);
+            flex-shrink: 0;
+            box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+        }
+        .hero-text .greeting { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 2px; }
+        .hero-text .username { font-size: 22px; font-weight: 800; color: white; line-height: 1.2; }
+        .hero-badge {
+            display: inline-block; margin-top: 6px;
+            padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+            background: rgba(99,102,241,0.3); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.4);
+        }
+        .hero-badge.admin { background: rgba(245,158,11,0.2); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+        .hero-badge.superadmin { background: rgba(239,68,68,0.2); color: #f87171; border-color: rgba(239,68,68,0.3); }
+
+        .hero-right { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
+        .hero-stat { text-align: center; }
+        .hero-stat-val { font-size: 28px; font-weight: 800; color: white; line-height: 1; }
+        .hero-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; text-transform: uppercase; }
+        .hero-stat-lbl i { color: var(--warning); }
+        .hero-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.12); }
+
+        /* ========== STAT CARDS COLORISÉES ========== */
+        .stat-card { border-top: 3px solid transparent; transition: all 0.3s ease; }
+        .stat-card:nth-child(1) { border-top-color: var(--accent); }
+        .stat-card:nth-child(2) { border-top-color: var(--warning); }
+        .stat-card:nth-child(3) { border-top-color: var(--green); }
+        .stat-card:nth-child(4) { border-top-color: #f97316; }
+        .stat-card:nth-child(1) .stat-value { color: var(--accent); }
+        .stat-card:nth-child(2) .stat-value { color: var(--warning); }
+        .stat-card:nth-child(3) .stat-value { color: var(--green); }
+        .stat-card:nth-child(4) .stat-value { color: #f97316; }
+
+        .stat-card .stat-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; margin-bottom: 12px;
+        }
+        .stat-card:nth-child(1) .stat-icon { background: rgba(99,102,241,0.1); color: var(--accent); }
+        .stat-card:nth-child(2) .stat-icon { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .stat-card:nth-child(3) .stat-icon { background: rgba(16,185,129,0.1); color: var(--green); }
+        .stat-card:nth-child(4) .stat-icon { background: rgba(249,115,22,0.1); color: #f97316; }
+
+        /* ========== DAILY REWARD BANNER ========== */
+        .reward-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(249,115,22,0.08));
+            border: 1px solid rgba(245,158,11,0.25);
+            border-radius: var(--radius);
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            display: flex; align-items: center; gap: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        .reward-banner:hover { border-color: var(--warning); background: rgba(245,158,11,0.15); }
+        .reward-banner i { font-size: 22px; color: var(--warning); }
+        .reward-banner span { flex: 1; font-weight: 600; font-size: 14px; }
+        .reward-banner .claim-btn {
+            padding: 7px 16px; border-radius: 30px;
+            background: var(--warning); color: white;
+            font-size: 13px; font-weight: 700; border: none; cursor: pointer;
+        }
+
+        /* ========== TOASTS ========== */
+        .toast-container {
+            position: fixed; bottom: 24px; right: 24px;
+            z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 18px; border-radius: 14px;
+            background: #1e1e2e; color: white;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            font-size: 14px; font-weight: 500;
+            border-left: 4px solid var(--accent);
+            animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            pointer-events: all;
+            max-width: 340px;
+            min-width: 220px;
+        }
+        .toast.success { border-left-color: var(--green); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.info { border-left-color: var(--accent); }
+        .toast i { font-size: 16px; flex-shrink: 0; }
+        .toast.success i { color: var(--green); }
+        .toast.error i { color: var(--error); }
+        .toast.info i { color: var(--accent); }
+        .toast.out { animation: toastOut 0.25s ease forwards; }
+        @keyframes toastIn { from{ opacity:0; transform:translateY(20px) scale(0.95); } to{ opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes toastOut { from{ opacity:1; transform:translateY(0); } to{ opacity:0; transform:translateY(10px); } }
+
+        @media (max-width:768px) {
+            .hero-banner { flex-direction: column; align-items: flex-start; padding: 20px; gap: 16px; }
+            .hero-right { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 14px; }
+            .hero-stat-val { font-size: 22px; }
+            .toast-container { bottom: 12px; right: 12px; left: 12px; }
+            .toast { max-width: 100%; }
+        }
+        @media (max-width:480px) {
+            .hero-banner { padding: 16px; gap: 12px; }
+            .hero-avatar-big { width: 48px; height: 48px; font-size: 20px; border-radius: 14px; }
+            .hero-text .username { font-size: 18px; }
+            .hero-text .greeting { font-size: 12px; }
+            .hero-stat-val { font-size: 19px; }
+            .hero-stat-lbl { font-size: 10px; }
+            .hero-right { gap: 10px; }
+            .hero-divider { height: 28px; }
+            .hero-right .btn { font-size: 12px; padding: 8px 12px; }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 64px 16px 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .servers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .server-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+
+        /* ===== RESPONSIVE COMPLET ===== */
+        @media (max-width: 900px) {
+            .sidebar { width: 200px; }
+            .main-content { margin-left: 200px; }
+        }
+        @media (max-width: 768px) {
+            /* sidebar cachée par défaut, slide-in via JS */
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                z-index: 200;
+                transition: left 0.25s ease;
+                width: 240px !important;
+            }
+            .sidebar.mob-open { left: 0; }
+            .mob-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 199;
+            }
+            .mob-overlay.vis { display: block; }
+            .main-content { margin-left: 0 !important; padding: 64px 12px 12px; }
+            .header-actions { gap: 6px; }
+            .quick-actions { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .quick-actions { grid-template-columns: 1fr; }
+            .servers-grid { grid-template-columns: 1fr; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .header-actions { width: 100%; }
+            .search-bar { width: 100%; }
+        }
+        /* ANNOUNCEMENT BANNER */
+        .announce-banner { display:flex; align-items:flex-start; gap:14px; border-radius:14px; padding:16px 20px; margin:0 0 18px; position:relative; animation:fadeIn .4s ease; border:1px solid; }
+        .announce-banner.info { background:rgba(59,130,246,.08); border-color:rgba(59,130,246,.25); }
+        .announce-banner.warning { background:rgba(245,158,11,.08); border-color:rgba(245,158,11,.25); }
+        .announce-banner.success { background:rgba(16,185,129,.08); border-color:rgba(16,185,129,.25); }
+        .announce-banner.incident { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.3); }
+        .announce-banner.maintenance { background:rgba(99,102,241,.08); border-color:rgba(99,102,241,.3); }
+        .announce-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+        .announce-banner.info .announce-icon { background:rgba(59,130,246,.15); color:#3b82f6; }
+        .announce-banner.warning .announce-icon { background:rgba(245,158,11,.15); color:#f59e0b; }
+        .announce-banner.success .announce-icon { background:rgba(16,185,129,.15); color:#10b981; }
+        .announce-banner.incident .announce-icon { background:rgba(239,68,68,.15); color:#ef4444; }
+        .announce-banner.maintenance .announce-icon { background:rgba(99,102,241,.15); color:#6366f1; }
+        .announce-body { flex:1; }
+        .announce-title { font-weight:700; font-size:14px; }
+        .announce-msg { color:var(--text-secondary); font-size:13px; margin-top:3px; line-height:1.5; }
+        .announce-dismiss { position:absolute; top:12px; right:12px; background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:14px; padding:4px; border-radius:6px; transition:.2s; }
+        .announce-dismiss:hover { color:var(--text-primary); background:rgba(255,255,255,.06); }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);} }
+
+        /* ===== COINS CHIP TOPBAR ===== */
+        .topbar-coins-chip {
+            display: flex; align-items: center; gap: 7px;
+            padding: 7px 14px; border-radius: 50px;
+            background: linear-gradient(135deg, rgba(99,102,241,.25), rgba(139,92,246,.25));
+            border: 1px solid rgba(99,102,241,.4); color: #fff;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+            transition: all .2s; text-decoration: none; flex-shrink: 0;
+        }
+        .topbar-coins-chip:hover { border-color: var(--accent); background: rgba(99,102,241,.35); }
+        .topbar-coins-chip i { color: #fbbf24; }
+        .topbar-coins-chip.low-coins {
+            border-color: rgba(239,68,68,.6); background: rgba(239,68,68,.15);
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3);} 50%{box-shadow:0 0 0 6px rgba(239,68,68,0);} }
+        @keyframes coin-bump { 0%{transform:scale(1);} 40%{transform:scale(1.18);} 100%{transform:scale(1);} }
+        .coin-bump { animation: coin-bump .4s ease; }
+
+        /* ===== TOPBAR SEARCH ===== */
+        .topbar-search { position: relative; flex: 1; max-width: 320px; margin: 0 16px; }
+        .topbar-search input {
+            width: 100%; padding: 8px 14px 8px 36px;
+            border-radius: 10px; border: 1px solid rgba(255,255,255,.15);
+            background: rgba(255,255,255,.08); color: #fff;
+            font-family: inherit; font-size: 14px; outline: none; transition: .2s;
+        }
+        .topbar-search input::placeholder { color: rgba(255,255,255,.35); }
+        .topbar-search input:focus { border-color: var(--accent); background: rgba(255,255,255,.12); }
+        .topbar-search .ts-icon {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: rgba(255,255,255,.35); font-size: 13px; pointer-events: none;
+        }
+        .ts-results {
+            position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+            background: #1e1e2e; border: 1px solid rgba(255,255,255,.12);
+            border-radius: 12px; overflow: hidden; display: none; z-index: 999;
+            box-shadow: 0 8px 32px rgba(0,0,0,.5);
+        }
+        .ts-results.open { display: block; }
+        .ts-result-item {
+            padding: 11px 16px; display: flex; align-items: center; gap: 10px;
+            cursor: pointer; color: rgba(255,255,255,.8); font-size: 14px; transition: .15s;
+        }
+        .ts-result-item:hover { background: rgba(99,102,241,.2); color: #fff; }
+        .ts-result-item i { color: var(--accent); width: 16px; text-align: center; }
+
+        /* ===== LOW COINS BANNER ===== */
+        .low-coins-banner {
+            background: linear-gradient(90deg, #dc2626, #b91c1c);
+            color: #fff; padding: 10px 24px;
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            font-size: 13px; font-weight: 600;
+            position: fixed; top: 67px; left: 0; right: 0; z-index: 80;
+            transform: translateY(-100%); transition: transform .4s ease;
+            box-shadow: 0 4px 16px rgba(239,68,68,.4);
+        }
+        .low-coins-banner.show { transform: translateY(0); }
+        .low-coins-banner a { color: #fde68a; text-decoration: none; font-weight: 700; }
+        .low-coins-banner button { background: none; border: none; color: rgba(255,255,255,.6); cursor: pointer; font-size: 20px; line-height: 1; }
+
+        /* ===== AMÉLIORATION CARTES SERVEUR ===== */
+        .server-card { position: relative; }
+        .server-fav-btn {
+            position: absolute; top: 12px; right: 12px;
+            background: none; border: none; cursor: pointer;
+            color: rgba(255,255,255,.3); font-size: 16px; transition: .2s; z-index: 2;
+            padding: 4px;
+        }
+        .server-fav-btn:hover { color: #fbbf24; transform: scale(1.15); }
+        .server-fav-btn.starred { color: #fbbf24; }
+        .server-expiry-bar {
+            width: 100%; height: 4px; border-radius: 2px;
+            background: rgba(255,255,255,.1); margin: 10px 0; overflow: hidden;
+        }
+        .server-expiry-fill {
+            height: 100%; border-radius: 2px; transition: width .4s ease;
+        }
+        .server-live-url {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; color: var(--accent-light); margin: 8px 0 0;
+            word-break: break-all;
+        }
+        .server-live-url a {
+            color: var(--accent-light); text-decoration: none; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+        }
+        .server-live-url a:hover { text-decoration: underline; }
+        .server-renew-btn {
+            width: 100%; padding: 10px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border: none; border-radius: 10px; color: #fff;
+            font-weight: 700; font-size: 13px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            transition: all .2s; font-family: inherit; margin-top: 10px;
+        }
+        .server-renew-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(99,102,241,.35); }
+        .server-renew-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+        /* ===== STREAK CALENDRIER ===== */
+        .streak-calendar {
+            display: flex; flex-direction: column; gap: 10px;
+            background: var(--surface-strong); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px; margin-bottom: 20px;
+        }
+        .streak-cal-header {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .streak-cal-title { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .streak-cal-title i { color: var(--warning); }
+        .streak-cal-days {
+            display: flex; gap: 6px; flex-wrap: wrap;
+        }
+        .streak-cal-day {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 600; flex-shrink: 0;
+            transition: .2s;
+        }
+        .streak-cal-day.done { background: linear-gradient(135deg,var(--accent),#8b5cf6); color:#fff; }
+        .streak-cal-day.today-done { background: linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; box-shadow:0 0 0 2px rgba(245,158,11,.4); }
+        .streak-cal-day.empty { background: rgba(255,255,255,.05); color:var(--text-muted); border:1px solid var(--border); }
+        .streak-cal-day.future { background: rgba(255,255,255,.02); color:rgba(0,0,0,.1); border:1px dashed var(--border); }
+        [data-theme="dark"] .streak-cal-day.empty { background:rgba(255,255,255,.04); }
+        [data-theme="dark"] .streak-cal-day.future { background:rgba(255,255,255,.01); color:rgba(255,255,255,.05); }
+
+        /* ===== RESPONSIVE TOPBAR SEARCH ===== */
+        @media(max-width:720px){ .topbar-search { display: none; } }
+        @media(max-width:480px){ .topbar-coins-chip span { display: none; } }
+    </style>
+    <script src="/promo-bar.js" defer></script>
+</head>
+<body>
+    <!-- FOND ANIMÉ -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb1"></div>
+        <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- LOW COINS BANNER -->
+    <div class="low-coins-banner" id="lowCoinsBanner">
+        <span><i class="fas fa-exclamation-triangle"></i> Votre solde est faible — pensez à <a href="/payment">ajouter des coins</a> pour conserver vos serveurs.</span>
+        <button onclick="document.getElementById('lowCoinsBanner').classList.remove('show');localStorage.setItem('fh_low_dismissed',Date.now())">&times;</button>
+    </div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="logo-area">
+            <div class="logo-mark">FH</div>
+            <span class="logo-text">FLYHOST</span>
+        </div>
+        <!-- SEARCH -->
+        <div class="topbar-search">
+            <i class="fas fa-search ts-icon"></i>
+            <input type="text" id="topbarSearch" placeholder="Rechercher…" autocomplete="off"
+                oninput="filterServersSearch(this.value)" onfocus="openTsResults()" />
+            <div class="ts-results" id="tsResults"></div>
+        </div>
+        <div class="topbar-right">
+            <!-- COINS CHIP -->
+            <a class="topbar-coins-chip" id="topbarCoinsChip" href="/payment" title="Solde de coins">
+                <i class="fas fa-coins"></i>
+                <span id="topbarCoinsVal">…</span>
+            </a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn" title="Mode sombre/clair">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="notif-wrapper">
+                <button class="notification-icon" onclick="toggleNotifPanel()" id="notifBellBtn" title="Notifications">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notif-badge" id="notifBadge"></span>
+                </button>
+                <div class="notif-panel" id="notifPanel">
+                    <div class="notif-panel-header">
+                        <span><i class="fas fa-bell" style="color:var(--accent);margin-right:8px;"></i>Notifications</span>
+                        <button onclick="markAllNotifsRead()" style="background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;font-weight:600;">Tout marquer lu</button>
+                    </div>
+                    <div class="notif-panel-body" id="notifPanelBody">
+                        <div class="notif-empty"><i class="fa-regular fa-bell-slash" style="font-size:28px;margin-bottom:10px;display:block;opacity:.4;"></i>Aucune notification</div>
+                    </div>
+                </div>
+            </div>
+            <div class="avatar-circle" id="topbarAvatar" onclick="openSidebar()">?</div>
+        </div>
+    </header>
+
+    <!-- ONBOARDING OVERLAY -->
+    <div class="onboarding-overlay" id="onboardingOverlay" style="display:none;">
+        <div class="onboarding-box" id="obBox">
+
+            <!-- Progress bar -->
+            <div class="ob-progress" id="obProgress">
+                <div class="ob-step-circle active" id="obc1">1</div>
+                <div class="ob-step-line" id="obl1"></div>
+                <div class="ob-step-circle" id="obc2">2</div>
+                <div class="ob-step-line" id="obl2"></div>
+                <div class="ob-step-circle" id="obc3">3</div>
+            </div>
+
+            <!-- STEP 1: Choisir un plan -->
+            <div id="ob-step-1">
+                <div class="onboarding-icon">🎯</div>
+                <h2>Quel plan vous convient ?</h2>
+                <p class="ob-sub">Choisissez votre formule de départ. Vous pourrez changer à tout moment.</p>
+                <div class="ob-plan-grid">
+                    <div class="ob-plan-card selected" id="obPlan-free" onclick="selectObPlan('free')">
+                        <div class="ob-plan-name">Gratuit</div>
+                        <div class="ob-plan-price">0 coin/mois</div>
+                        <div class="ob-plan-desc">1 serveur · 512 Mo RAM · Idéal pour débuter</div>
+                    </div>
+                    <div class="ob-plan-card" id="obPlan-starter" onclick="selectObPlan('starter')">
+                        <div class="ob-plan-name">Starter</div>
+                        <div class="ob-plan-price">500 coins/mois</div>
+                        <div class="ob-plan-desc">3 serveurs · 2 Go RAM · +100 coins bonus/mois</div>
+                    </div>
+                    <div class="ob-plan-card" id="obPlan-pro" onclick="selectObPlan('pro')">
+                        <div class="ob-plan-name">Pro ⭐</div>
+                        <div class="ob-plan-price">1500 coins/mois</div>
+                        <div class="ob-plan-desc">10 serveurs · 8 Go RAM · +350 coins/mois</div>
+                    </div>
+                </div>
+                <div class="ob-nav">
+                    <button class="ob-btn ob-btn-secondary" onclick="skipOnboarding()">Passer</button>
+                    <button class="ob-btn ob-btn-primary" onclick="obGoStep(2)">Suivant →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Configurer -->
+            <div id="ob-step-2" style="display:none;">
+                <div class="onboarding-icon">⚙️</div>
+                <h2>Configurez votre serveur</h2>
+                <p class="ob-sub">Donnez un nom à votre premier serveur et choisissez son type.</p>
+                <input class="ob-name-input" id="obServerName" type="text" placeholder="Ex : Mon serveur Minecraft" maxlength="40">
+                <div class="ob-type-grid">
+                    <div class="ob-type-card selected" id="obType-minecraft" onclick="selectObType('minecraft','⛏️','Minecraft')">
+                        <span class="ob-type-icon">⛏️</span>
+                        <span class="ob-type-label">Minecraft</span>
+                    </div>
+                    <div class="ob-type-card" id="obType-discord" onclick="selectObType('discord','🤖','Discord Bot')">
+                        <span class="ob-type-icon">🤖</span>
+                        <span class="ob-type-label">Discord Bot</span>
+                    </div>
+                    <div class="ob-type-card" id="obType-nodejs" onclick="selectObType('nodejs','🟢','Node.js')">
+                        <span class="ob-type-icon">🟢</span>
+                        <span class="ob-type-label">Node.js</span>
+                    </div>
+                    <div class="ob-type-card" id="obType-python" onclick="selectObType('python','🐍','Python')">
+                        <span class="ob-type-icon">🐍</span>
+                        <span class="ob-type-label">Python</span>
+                    </div>
+                    <div class="ob-type-card" id="obType-web" onclick="selectObType('web','🌐','Web / PHP')">
+                        <span class="ob-type-icon">🌐</span>
+                        <span class="ob-type-label">Web / PHP</span>
+                    </div>
+                    <div class="ob-type-card" id="obType-other" onclick="selectObType('other','📦','Autre')">
+                        <span class="ob-type-icon">📦</span>
+                        <span class="ob-type-label">Autre</span>
+                    </div>
+                </div>
+                <div class="ob-nav">
+                    <button class="ob-btn ob-btn-secondary" onclick="obGoStep(1)">← Retour</button>
+                    <button class="ob-btn ob-btn-primary" onclick="obGoStep(3)">Suivant →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Lancer -->
+            <div id="ob-step-3" style="display:none;">
+                <div class="onboarding-icon">🚀</div>
+                <h2>Tout est prêt !</h2>
+                <p class="ob-sub">Voici votre configuration. Cliquez sur "Créer mon serveur" pour démarrer.</p>
+                <div class="ob-launch-summary">
+                    <div class="ob-launch-row">
+                        <span class="ob-launch-key">Plan choisi</span>
+                        <span class="ob-launch-val" id="obSumPlan">Gratuit</span>
+                    </div>
+                    <div class="ob-launch-row">
+                        <span class="ob-launch-key">Nom du serveur</span>
+                        <span class="ob-launch-val" id="obSumName">—</span>
+                    </div>
+                    <div class="ob-launch-row">
+                        <span class="ob-launch-key">Type</span>
+                        <span class="ob-launch-val" id="obSumType">Minecraft</span>
+                    </div>
+                    <div class="ob-launch-row">
+                        <span class="ob-launch-key">Coins de départ</span>
+                        <span class="ob-launch-val" id="obSumCoins">10 coins 🎁</span>
+                    </div>
+                </div>
+                <div class="ob-nav">
+                    <button class="ob-btn ob-btn-secondary" onclick="obGoStep(2)">← Retour</button>
+                    <button class="ob-btn ob-btn-launch" onclick="launchOnboarding()">🚀 Créer mon serveur</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- WIDGET SUPPORT FLOTTANT -->
+    <div class="support-widget" id="supportWidget">
+        <div class="support-panel" id="supportPanel">
+            <h4>💬 Besoin d'aide ?</h4>
+            <p>Notre équipe est disponible pour vous accompagner.</p>
+            <button class="sp-btn" onclick="window.location.href='/chat'"><i class="fas fa-comments"></i> Communauté</button>
+            <button class="sp-btn" onclick="openSupportTicket()"><i class="fas fa-ticket-alt"></i> Créer un ticket</button>
+        </div>
+        <div class="support-bubble" onclick="toggleSupportPanel()" title="Support">
+            <i class="fas fa-headset"></i>
+        </div>
+    </div>
+
+    <!-- OVERLAY -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeSidebar()"></div>
+
+    <!-- DRAWER (NAVIGATION COULISSANTE) -->
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">
+                <div class="logo-mark">FH</div>
+                <span>FLYHOST</span>
+            </div>
+            <button class="close-drawer" onclick="closeSidebar()">&times;</button>
+        </div>
+
+        <div class="drawer-user" id="drawerUser">
+            <div class="drawer-avatar" id="drawerAvatar">?</div>
+            <div class="drawer-user-info">
+                <div class="drawer-username" id="drawerUsername">Chargement...</div>
+                <div class="drawer-coins">
+                    <i class="fas fa-coins"></i>
+                    <span id="drawerCoins">0</span>
+                </div>
+                <span class="drawer-role-badge" id="drawerRole">Utilisateur</span>
+            </div>
+        </div>
+
+        <nav class="drawer-nav" id="drawerNav">
+            <div class="nav-section">PRINCIPAL</div>
+            <a href="/dashboard" class="nav-item active" data-page="dashboard">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/payment" class="nav-item" data-page="payment">
+                <i class="fas fa-credit-card"></i>
+                <span>Paiement</span>
+            </a>
+            <a href="/deploy" class="nav-item" data-page="deploy">
+                <i class="fas fa-rocket"></i>
+                <span>Déploiement</span>
+            </a>
+            <a href="/profile" class="nav-item" data-page="profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="/api-keys" class="nav-item" data-page="api">
+                <i class="fas fa-key"></i>
+                <span>API</span>
+            </a>
+            <a href="/dev" class="nav-item" data-page="info">
+                <i class="fas fa-info-circle"></i>
+                <span>Informations</span>
+            </a>
+            <a href="/chat" class="nav-item" data-page="chat">
+                <i class="fas fa-comments"></i>
+                <span>Communauté</span>
+            </a>
+            <a href="/history" class="nav-item" data-page="history">
+                <i class="fas fa-history"></i>
+                <span>Historique</span>
+            </a>
+            <a href="/status" class="nav-item" data-page="status">
+                <i class="fas fa-signal"></i>
+                <span>Statut services</span>
+            </a>
+            <a href="/marketplace" class="nav-item" data-page="marketplace">
+                <i class="fas fa-store"></i>
+                <span>Marketplace</span>
+            </a>
+            <a href="/leaderboard" class="nav-item" data-page="leaderboard">
+                <i class="fas fa-trophy"></i>
+                <span>Classement</span>
+            </a>
+            <a href="/subscription" class="nav-item" data-page="subscription">
+                <i class="fas fa-gem"></i>
+                <span>Abonnement</span>
+            </a>
+            <a href="/tickets" class="nav-item" data-page="tickets">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Support</span>
+            </a>
+            <a href="/invoices" class="nav-item" data-page="invoices">
+                <i class="fas fa-file-invoice"></i>
+                <span>Factures</span>
+            </a>
+
+            <div class="nav-section" id="resellerSectionTitle">REVENDEUR</div>
+            <a href="/panel-admin" class="nav-item" id="resellerDashboardLink" data-page="reseller">
+                <i class="fas fa-store"></i>
+                <span>Espace Revendeur</span>
+            </a>
+
+            <div class="nav-section" id="adminSectionTitle">ADMINISTRATION</div>
+            <a href="/root" class="nav-item" id="adminDashboardLink" data-page="admin">
+                <i class="fas fa-crown"></i>
+                <span>Administration</span>
+            </a>
+        </nav>
+
+        <div class="drawer-footer">
+            <div class="drawer-stats" id="drawerStats">
+                <div class="stat-item">
+                    <span class="value" id="statServersDrawer">0</span>
+                    <span class="label">Serveurs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statReferralsDrawer">0</span>
+                    <span class="label">Filleuls</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statStreakDrawer">0</span>
+                    <span class="label">Série</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="mainContent">
+
+        <!-- ANNOUNCEMENTS BANNER -->
+        <div id="announcementsContainer"></div>
+
+        <!-- HERO BANNER -->
+        <div class="hero-banner" id="heroBanner">
+            <div class="hero-left">
+                <div class="hero-avatar-big" id="heroAvatarBig">?</div>
+                <div class="hero-text">
+                    <div class="greeting" id="heroGreeting">Bonjour !</div>
+                    <div class="username" id="heroUsername">Chargement...</div>
+                    <span class="hero-badge" id="heroBadge">Utilisateur</span>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="hero-stat">
+                    <div class="hero-stat-val" id="heroCoins">0</div>
+                    <div class="hero-stat-lbl"><i class="fas fa-coins"></i> Coins</div>
+                </div>
+                <div class="hero-divider"></div>
+                <div class="hero-stat">
+                    <div class="hero-stat-val" id="heroStreak">0</div>
+                    <div class="hero-stat-lbl"><i class="fas fa-fire"></i> Jours</div>
+                </div>
+                <div class="hero-divider"></div>
+                <a href="/payment" class="btn btn-primary" style="flex-shrink:0;"><i class="fas fa-plus"></i> Nouveau serveur</a>
+            </div>
+        </div>
+
+        <!-- DAILY REWARD BANNER (shown if claimable) -->
+        <div class="reward-banner" id="rewardBanner" style="display:none;" onclick="claimDailyReward()">
+            <i class="fas fa-gift"></i>
+            <span>🎉 Votre récompense quotidienne est disponible !</span>
+            <button class="claim-btn"><i class="fas fa-hand-sparkles"></i> Réclamer</button>
+        </div>
+
+        <!-- STATS SECTION -->
+        <section class="section">
+            <!-- Zone d'injection des promotions -->
+            <div id="promo-inject-zone"></div>
+
+            <div class="section-header">
+                <h2><i class="fas fa-chart-line"></i> Aperçu</h2>
+                <button class="btn btn-outline btn-sm" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Rafraîchir
+                </button>
+            </div>
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-server"></i></div>
+                    <div class="stat-value" id="statServers">0</div>
+                    <div class="stat-label">Serveurs actifs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-value" id="statCoins">0</div>
+                    <div class="stat-label">Coins</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-value" id="statReferrals">0</div>
+                    <div class="stat-label">Filleuls</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    <div class="stat-value" id="statStreak">0</div>
+                    <div class="stat-label">Série jours</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CALENDRIER STREAK -->
+        <div class="streak-calendar" id="streakCalendar">
+            <div class="streak-cal-header">
+                <div class="streak-cal-title"><i class="fas fa-fire"></i> Série de connexions</div>
+                <span id="streakCalLabel" style="font-size:13px;font-weight:600;color:var(--text-muted);">0 jours</span>
+            </div>
+            <div class="streak-cal-days" id="streakCalDays"></div>
+        </div>
+
+        <!-- QUICK ACTIONS (6 CARTES) -->
+        <section class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-bolt"></i> Actions rapides</h2>
+            </div>
+            <div class="quick-actions">
+                <a href="/payment" class="action-card">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nouveau serveur</span>
+                </a>
+                <a href="/deploy" class="action-card">
+                    <i class="fas fa-code-branch"></i>
+                    <span>Déployer</span>
+                </a>
+                <div class="action-card" onclick="claimDailyReward()" id="dailyRewardBtn">
+                    <i class="fas fa-gift"></i>
+                    <span>Récompense</span>
+                </div>
+                <a href="/profile" class="action-card">
+                    <i class="fas fa-user"></i>
+                    <span>Mon profil</span>
+                </a>
+                <a href="/referral" class="action-card">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Inviter</span>
+                </a>
+                <div class="action-card" onclick="openInfoModal()">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Informations</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- MES SERVEURS -->
+        <section class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-server"></i> Mes serveurs</h2>
+                <a href="/payment" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Créer
+                </a>
+            </div>
+            <div id="serversContainer" class="servers-grid">
+                <div class="empty-state">
+                    <i class="fas fa-server"></i>
+                    <h3>Aucun serveur</h3>
+                    <p>Créez votre premier serveur pour commencer</p>
+                    <a href="/payment" class="btn btn-primary">Créer un serveur</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- DÉPLOIEMENTS RÉCENTS -->
+        <section class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> Déploiements récents</h2>
+                <button class="btn btn-outline btn-sm" onclick="refreshDeployments()">
+                    <i class="fas fa-sync-alt"></i> Rafraîchir
+                </button>
+            </div>
+            <div id="deploymentsContainer" class="deployments-list">
+                <div class="empty-state">
+                    <i class="fas fa-code-branch"></i>
+                    <h3>Aucun déploiement</h3>
+                    <p>Lancez votre premier déploiement depuis la page dédiée</p>
+                    <a href="/deploy" class="btn btn-primary">Déployer maintenant</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- INFORMATIONS DU COMPTE (RÉDUIT) -->
+        <section class="section">
+            <div class="card">
+                <div class="section-header">
+                    <h2><i class="fas fa-id-card"></i> Mon compte</h2>
+                </div>
+                <div class="profile-grid">
+                    <div>
+                        <div class="info-row">
+                            <div class="info-icon"><i class="fas fa-user"></i></div>
+                            <div>
+                                <div class="info-label">Nom d'utilisateur</div>
+                                <div class="info-value" id="profileUsername">-</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <div class="info-label">Email</div>
+                                <div class="info-value" id="profileEmail">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL DE GESTION DE SERVEUR -->
+    <div class="modal" id="serverModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-server"></i> <span id="modalServerName">Gestion</span></h3>
+                <button class="close-modal" onclick="closeModal('serverModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-microchip"></i></div>
+                        <div>
+                            <div class="info-label">Type</div>
+                            <div class="info-value" id="modalServerType">-</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-circle"></i></div>
+                        <div>
+                            <div class="info-label">Statut</div>
+                            <div class="info-value" id="modalServerStatus">-</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon"><i class="fas fa-hourglass-end"></i></div>
+                        <div>
+                            <div class="info-label">Expire le</div>
+                            <div class="info-value" id="modalServerExpires">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('serverModal')">Fermer</button>
+                <a href="#" class="btn btn-primary" id="modalServerLink">Voir le serveur</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE LOGS -->
+    <div class="modal" id="logsModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-terminal"></i> Logs de déploiement</h3>
+                <button class="close-modal" onclick="closeModal('logsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="logs-container" id="logsContainer">
+                    <div class="log-line">⏳ Chargement des logs...</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('logsModal')">Fermer</button>
+                <button class="btn btn-primary" onclick="copyLogs()">
+                    <i class="fas fa-copy"></i> Copier
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMATION -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-question-circle"></i> Confirmation</h3>
+                <button class="close-modal" onclick="closeModal('confirmModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Êtes-vous sûr ?</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('confirmModal')">Annuler</button>
+                <button class="btn btn-primary" id="confirmAction">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INFORMATIONS -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Informations plateforme</h3>
+                <button class="close-modal" onclick="closeModal('infoModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Uptime</div>
+                            <div class="info-value" id="infoUptime">99.9%</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-tag"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Version</div>
+                            <div class="info-value" id="infoVersion">8.0.0</div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i class="fas fa-heartbeat"></i></div>
+                        <div class="info-content">
+                            <div class="info-label">Statut serveurs</div>
+                            <div class="info-value operational" id="infoStatus">Opérationnel</div>
+                        </div>
+                    </div>
+                    <a href="/info" class="btn btn-primary" style="margin-top: 16px; width: 100%;">Voir page Info</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.origin;
+        let authToken = localStorage.getItem('flyhost_token');
+        let currentUser = null;
+        let statsInterval = null;
+
+        // Vérification authentification
+        if (!authToken) {
+            window.location.href = '/login';
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+            setupEventListeners();
+            checkMobileView();
+            updateActivePage();
+            loadAnnouncements();
+            loadPromoCountdown();
+        });
+
+        // ── PROMO COUNTDOWN WIDGET ──
+        let _promoCountdownInterval = null;
+        async function loadPromoCountdown() {
+            try {
+                const r = await fetch('/api/promotions');
+                const d = await r.json();
+                if (!d.success || !d.promotions?.length) return;
+                const active = d.promotions.filter(p => p.active && p.discount_percent > 0);
+                if (!active.length) return;
+                const promo = active.find(p => p.pinned) || active.sort((a,b) => b.discount_percent - a.discount_percent)[0];
+                if (!promo) return;
+
+                const COLORS = { orange:'#f97316',red:'#ef4444',green:'#10b981',blue:'#3b82f6',purple:'#6366f1',gold:'#f59e0b' };
+                const color = COLORS[promo.color_scheme] || '#f97316';
+                const planLabel = promo.server_type ? {
+                    free:'Starter','1gb':'1 GB','2gb':'2 GB','4gb':'4 GB',
+                    '8gb':'8 GB',unlimited:'Unlimited',admin:'Admin'
+                }[promo.server_type] || promo.server_type : 'tous les plans';
+
+                const card = document.createElement('div');
+                card.className = 'promo-dash-countdown';
+                card.id = 'promoDashCard';
+                card.style.background = `linear-gradient(135deg,${color},#c2410c)`;
+                card.innerHTML = `
+                    <div class="promo-icon">🔥</div>
+                    <div class="promo-info">
+                        <div class="promo-title">${promo.badge_text || 'PROMO'} — ${promo.title.replace(/^[🔥🎉💥🏷️🎁\s]+/,'')}</div>
+                        <div class="promo-sub">−${promo.discount_percent}% sur ${planLabel}${promo.ends_at ? ' · Se termine bientôt' : ''}</div>
+                    </div>
+                    ${promo.ends_at ? `<div class="promo-timer" id="promoDashTimer">--:--:--</div>` : ''}
+                    <a href="${promo.cta_url || '/pricing'}" class="promo-cta" style="color:${color};">En profiter →</a>
+                `;
+
+                const zone = document.getElementById('promo-inject-zone');
+                if (zone) zone.insertAdjacentElement('afterend', card);
+
+                if (promo.ends_at) {
+                    const timerEl = document.getElementById('promoDashTimer');
+                    const updateTimer = () => {
+                        const diff = Math.max(0, new Date(promo.ends_at) - Date.now());
+                        if (!timerEl) return;
+                        if (diff === 0) { timerEl.textContent = 'Expiré'; card.style.opacity = '.5'; return; }
+                        const h = Math.floor(diff/3600000);
+                        const m = Math.floor((diff%3600000)/60000);
+                        const s = Math.floor((diff%60000)/1000);
+                        timerEl.textContent = `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+                    };
+                    updateTimer();
+                    _promoCountdownInterval = setInterval(updateTimer, 1000);
+                }
+            } catch(e) {}
+        }
+
+        // ---- NOTIFICATIONS SYSTEM ----
+        const NOTIF_ICONS = { info:'ℹ️', warning:'⚠️', success:'✅', incident:'🔴', maintenance:'🔧' };
+        const NOTIF_COLORS = { info:'rgba(99,102,241,.2)', warning:'rgba(245,158,11,.2)', success:'rgba(16,185,129,.2)', incident:'rgba(239,68,68,.2)', maintenance:'rgba(100,116,139,.2)' };
+        let notifPanelOpen = false;
+
+        function toggleNotifPanel() {
+            notifPanelOpen = !notifPanelOpen;
+            const panel = document.getElementById('notifPanel');
+            if (panel) panel.classList.toggle('open', notifPanelOpen);
+            if (notifPanelOpen) loadNotifications();
+        }
+
+        document.addEventListener('click', (e) => {
+            if (notifPanelOpen && !e.target.closest('.notif-wrapper')) {
+                notifPanelOpen = false;
+                const panel = document.getElementById('notifPanel');
+                if (panel) panel.classList.remove('open');
+            }
+        });
+
+        async function loadNotifications() {
+            const body = document.getElementById('notifPanelBody');
+            if (!body) return;
+            try {
+                const t = localStorage.getItem('flyhost_token');
+                if (!t) return;
+                const r = await fetch('/api/user/notifications', { headers: { Authorization: 'Bearer ' + t } });
+                const d = await r.json();
+                if (!d.success || !d.notifications.length) {
+                    body.innerHTML = '<div class="notif-empty"><i class="fa-regular fa-bell-slash" style="font-size:28px;margin-bottom:10px;display:block;opacity:.4;"></i>Aucune notification</div>';
+                    return;
+                }
+                body.innerHTML = d.notifications.map(n => `
+                    <div class="notif-item${n.is_read ? '' : ' unread'}" onclick="clickNotif(${n.id},'${n.link||''}')">
+                        <div class="notif-icon-dot" style="background:${NOTIF_COLORS[n.type]||NOTIF_COLORS.info};">${NOTIF_ICONS[n.type]||'ℹ️'}</div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="notif-item-title">${n.title}${n.is_read ? '' : ' <span style="display:inline-block;width:7px;height:7px;background:var(--accent);border-radius:50%;margin-left:4px;vertical-align:middle;"></span>'}</div>
+                            <div class="notif-item-msg">${n.message}</div>
+                            <div class="notif-item-time">${timeAgo(n.created_at)}</div>
+                        </div>
+                    </div>`).join('');
+                updateNotifBadge(d.notifications.filter(n => !n.is_read).length);
+            } catch(e) {}
+        }
+
+        async function clickNotif(id, link) {
+            try {
+                const t = localStorage.getItem('flyhost_token');
+                await fetch(`/api/user/notifications/${id}/read`, { method:'PUT', headers: { Authorization: 'Bearer ' + t } });
+            } catch(e) {}
+            if (link && link !== 'null') { window.location.href = link; }
+            else {
+                await loadNotifications();
+                await refreshNotifCount();
+            }
+        }
+
+        async function markAllNotifsRead() {
+            try {
+                const t = localStorage.getItem('flyhost_token');
+                await fetch('/api/user/notifications/read-all', { method:'PUT', headers: { Authorization: 'Bearer ' + t } });
+                await loadNotifications();
+                updateNotifBadge(0);
+            } catch(e) {}
+        }
+
+        function updateNotifBadge(count) {
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = count > 9 ? '9+' : count;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        async function refreshNotifCount() {
+            try {
+                const t = localStorage.getItem('flyhost_token');
+                if (!t) return;
+                const r = await fetch('/api/user/notifications/unread-count', { headers: { Authorization: 'Bearer ' + t } });
+                const d = await r.json();
+                if (d.success) updateNotifBadge(d.count);
+            } catch(e) {}
+        }
+
+        function timeAgo(dateStr) {
+            if (!dateStr) return '';
+            const diff = Math.floor((Date.now() - new Date(dateStr + (dateStr.includes('Z') ? '' : 'Z')).getTime()) / 1000);
+            if (diff < 60) return 'À l\'instant';
+            if (diff < 3600) return Math.floor(diff/60) + ' min';
+            if (diff < 86400) return Math.floor(diff/3600) + 'h';
+            return Math.floor(diff/86400) + 'j';
+        }
+
+        // Polling toutes les 60s pour le badge
+        setTimeout(refreshNotifCount, 2000);
+        setInterval(refreshNotifCount, 60000);
+
+        const ANNOUNCE_ICONS = { info:'fa-info-circle', warning:'fa-exclamation-triangle', success:'fa-check-circle', incident:'fa-fire', maintenance:'fa-tools' };
+        async function loadAnnouncements() {
+            try {
+                const r = await fetch('/api/announcements');
+                const d = await r.json();
+                if (!d.success || !d.announcements.length) return;
+                const dismissed = JSON.parse(localStorage.getItem('fh_dismissed_ann') || '[]');
+                const container = document.getElementById('announcementsContainer');
+                container.innerHTML = d.announcements.filter(a => !dismissed.includes(a.id)).map(a => `
+                    <div class="announce-banner ${a.type || 'info'}" id="ann-${a.id}">
+                        <div class="announce-icon"><i class="fas ${ANNOUNCE_ICONS[a.type] || 'fa-info-circle'}"></i></div>
+                        <div class="announce-body">
+                            <div class="announce-title">${a.title}</div>
+                            <div class="announce-msg">${a.message}</div>
+                        </div>
+                        <button class="announce-dismiss" onclick="dismissAnnouncement(${a.id})" title="Fermer"><i class="fas fa-times"></i></button>
+                    </div>`).join('');
+            } catch(e) {}
+        }
+        function dismissAnnouncement(id) {
+            const el = document.getElementById('ann-' + id);
+            if (el) { el.style.opacity = '0'; el.style.transform = 'translateY(-8px)'; el.style.transition = '.3s'; setTimeout(() => el.remove(), 300); }
+            const dismissed = JSON.parse(localStorage.getItem('fh_dismissed_ann') || '[]');
+            dismissed.push(id);
+            localStorage.setItem('fh_dismissed_ann', JSON.stringify(dismissed));
+        }
+
+        // Mettre à jour la page active dans le menu
+        function updateActivePage() {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === currentPath) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Configuration des écouteurs
+        function setupEventListeners() {
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    closeModal(e.target.id);
+                }
+            });
+
+            window.addEventListener('resize', checkMobileView);
+
+            // ESC pour fermer le drawer
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeSidebar();
+                }
+            });
+
+            statsInterval = setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    refreshStats();
+                }
+            }, 30000);
+        }
+
+        // Vérification vue mobile
+        function checkMobileView() {
+            if (window.innerWidth <= 768) {
+                // rien de spécial
+            }
+        }
+
+        // ========== DRAWER FUNCTIONS ==========
+        function toggleSidebar() {
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('drawerOverlay');
+            const hamburger = document.getElementById('hamburgerBtn');
+
+            if (drawer.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+
+        function openSidebar() {
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('hamburgerBtn').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('hamburgerBtn').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // ========== INFO MODAL ==========
+        function openInfoModal() {
+            document.getElementById('infoModal').style.display = 'flex';
+            // Données statiques (pourraient être dynamiques)
+            document.getElementById('infoUptime').textContent = '99.9%';
+            document.getElementById('infoVersion').textContent = '8.0.0';
+            document.getElementById('infoStatus').textContent = 'Opérationnel';
+        }
+
+        // Mise à jour du menu selon le rôle
+        function updateMenuByRole(role) {
+            if (!role) return;
+            
+            const isSuperAdmin = role === 'superadmin';
+            const isReseller = role === 'reseller' || role === 'admin';
+
+            const resellerSectionTitle = document.getElementById('resellerSectionTitle');
+            const resellerLink = document.getElementById('resellerDashboardLink');
+            const adminSectionTitle = document.getElementById('adminSectionTitle');
+            const adminLink = document.getElementById('adminDashboardLink');
+
+            if (!resellerSectionTitle || !resellerLink || !adminSectionTitle || !adminLink) return;
+
+            if (isSuperAdmin) {
+                resellerSectionTitle.style.display = 'none';
+                resellerLink.style.display = 'none';
+                adminSectionTitle.style.display = 'block';
+                adminLink.style.display = 'flex';
+            } else if (isReseller) {
+                resellerSectionTitle.style.display = 'block';
+                resellerLink.style.display = 'flex';
+                adminSectionTitle.style.display = 'none';
+                adminLink.style.display = 'none';
+            } else {
+                resellerSectionTitle.style.display = 'none';
+                resellerLink.style.display = 'none';
+                adminSectionTitle.style.display = 'none';
+                adminLink.style.display = 'none';
+            }
+        }
+
+        // Chargement du dashboard
+        async function loadDashboard() {
+            try {
+                console.log('Chargement du dashboard...');
+                showInfo('Chargement des données...');
+
+                const response = await fetch('/api/user/me', {
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Réponse API:', response.status);
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        console.log('Token invalide, redirection vers login');
+                        logout();
+                        return;
+                    }
+                    
+                    try {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Erreur HTTP ${response.status}`);
+                    } catch (e) {
+                        throw new Error(`Erreur HTTP ${response.status}`);
+                    }
+                }
+
+                const data = await response.json();
+                console.log('Données reçues:', data);
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    updateMenuByRole(data.user.role);
+                    updateUI(data);
+                    
+                    // Charger les serveurs séparément
+                    loadServers();
+                    loadDeployments();
+                    loadReferralStats();
+                    checkDailyReward();
+                    
+                    document.getElementById('infoMessage')?.style && (document.getElementById('infoMessage').style.display = 'none');
+                } else {
+                    throw new Error(data.error || 'Erreur de chargement des données');
+                }
+            } catch (error) {
+                console.error('❌ Erreur détaillée:', error);
+                
+                let errorMessage = 'Impossible de charger les données';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Le serveur est inaccessible. Vérifiez votre connexion.';
+                } else if (error.message.includes('401')) {
+                    errorMessage = 'Session expirée. Veuillez vous reconnecter.';
+                    setTimeout(() => logout(), 2000);
+                } else {
+                    errorMessage = error.message || 'Impossible de charger les données';
+                }
+                
+                showError(errorMessage);
+            }
+        }
+
+        // Mise à jour de l'interface
+        function updateUI(data) {
+            const user = data.user;
+            const init = user.username ? user.username.charAt(0).toUpperCase() : '?';
+
+            // Hero banner
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+            document.getElementById('heroGreeting').textContent = greeting + ' 👋';
+            document.getElementById('heroUsername').textContent = user.username || 'Utilisateur';
+            document.getElementById('heroAvatarBig').textContent = init;
+            document.getElementById('heroCoins').textContent = (user.coins || 0).toLocaleString();
+            document.getElementById('heroStreak').textContent = user.daily_login_streak || 0;
+            const heroBadge = document.getElementById('heroBadge');
+            heroBadge.className = 'hero-badge';
+            if (user.role === 'superadmin') { heroBadge.textContent = '⭐ Super Admin'; heroBadge.classList.add('superadmin'); }
+            else if (user.role === 'admin') { heroBadge.textContent = '🏪 Revendeur'; heroBadge.classList.add('admin'); }
+            else { heroBadge.textContent = '👤 Utilisateur'; }
+
+            // Topbar & Drawer
+            document.getElementById('topbarAvatar').textContent = init;
+            document.getElementById('drawerAvatar').textContent = init;
+            document.getElementById('drawerUsername').textContent = user.username || 'Utilisateur';
+            document.getElementById('drawerCoins').textContent = user.coins || 0;
+            
+            const roleElement = document.getElementById('drawerRole');
+            roleElement.classList.remove('admin', 'superadmin');
+            if (user.role === 'superadmin') { roleElement.textContent = 'Super Admin'; roleElement.classList.add('superadmin'); }
+            else if (user.role === 'admin') { roleElement.textContent = 'Admin Revendeur'; roleElement.classList.add('admin'); }
+            else { roleElement.textContent = 'Utilisateur'; }
+
+            // Stats drawer
+            const serverCount = data.servers ? data.servers.length : 0;
+            document.getElementById('statServersDrawer').textContent = serverCount;
+            document.getElementById('statReferralsDrawer').textContent = user.referral_count || 0;
+            document.getElementById('statStreakDrawer').textContent = user.daily_login_streak || 0;
+
+            // Stats principales
+            document.getElementById('statServers').textContent = serverCount;
+            document.getElementById('statCoins').textContent = (user.coins || 0).toLocaleString();
+            document.getElementById('statStreak').textContent = user.daily_login_streak || 0;
+
+            // Profil
+            document.getElementById('profileUsername').textContent = user.username || '-';
+            document.getElementById('profileEmail').textContent = user.email || '-';
+
+            // Nouvelles fonctions UX
+            updateTopbarCoins(user.coins || 0);
+            checkLowCoins(user.coins || 0);
+            renderStreakCalendar(user.daily_login_streak || 0);
+        }
+
+        // Chargement des serveurs
+        async function loadServers() {
+            try {
+                console.log('Chargement des serveurs...');
+                const response = await fetch('/api/servers', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Serveurs reçus:', data);
+                
+                if (data.success) {
+                    displayServers(data.servers || []);
+                } else {
+                    displayServers([]);
+                }
+            } catch (error) {
+                console.error('Erreur chargement serveurs:', error);
+                displayServers([]);
+            }
+        }
+
+        // ===== FAVORIS =====
+        function getFavs(){ try{ return JSON.parse(localStorage.getItem('fh_favs')||'[]'); }catch(e){ return []; } }
+        function toggleFav(id, btn, e){
+            e.stopPropagation();
+            const favs = getFavs();
+            const idx = favs.indexOf(id);
+            if(idx>=0) favs.splice(idx,1); else favs.push(id);
+            localStorage.setItem('fh_favs', JSON.stringify(favs));
+            btn.classList.toggle('starred', favs.includes(id));
+        }
+        function isFav(id){ return getFavs().includes(id); }
+
+        // ===== RENOUVELLEMENT RAPIDE =====
+        async function renewServer(id, name, btn, e){
+            e.stopPropagation();
+            if(!confirm(`Renouveler le serveur "${name}" ?`)) return;
+            btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Renouvellement…';
+            try{
+                const res = await fetch(`/api/servers/${id}/renew`, {
+                    method:'POST', headers:{'Authorization':`Bearer ${authToken}`,'Content-Type':'application/json'}
+                });
+                const d = await res.json();
+                if(d.success){ showSuccess(`Serveur "${name}" renouvelé !`); setTimeout(()=>loadServers(),1000); }
+                else { showError(d.error||'Erreur de renouvellement'); btn.disabled=false; btn.innerHTML='<i class="fas fa-redo"></i> Renouveler'; }
+            }catch(err){ showError('Erreur réseau'); btn.disabled=false; btn.innerHTML='<i class="fas fa-redo"></i> Renouveler'; }
+        }
+
+        // ===== RECHERCHE SERVEURS =====
+        const SEARCH_PAGES=[
+            {label:'Dashboard',href:'/dashboard',icon:'fa-chart-pie'},
+            {label:'Paiement / Nouveau serveur',href:'/payment',icon:'fa-credit-card'},
+            {label:'Déploiement',href:'/deploy',icon:'fa-code-branch'},
+            {label:'Profil',href:'/profile',icon:'fa-user'},
+            {label:'Historique',href:'/history',icon:'fa-clock-rotate-left'},
+            {label:'Parrainage',href:'/referral',icon:'fa-user-plus'},
+            {label:'Communauté',href:'/chat',icon:'fa-comments'},
+            {label:'Classement',href:'/leaderboard',icon:'fa-trophy'},
+            {label:'Marketplace',href:'/marketplace',icon:'fa-store'},
+            {label:'Abonnement',href:'/subscription',icon:'fa-gem'},
+            {label:'Support',href:'/tickets',icon:'fa-ticket-alt'},
+        ];
+        let allServers = [];
+        function openTsResults(){ const r=document.getElementById('tsResults'); if(r&&r.innerHTML) r.classList.add('open'); }
+        function filterServersSearch(q){
+            const r=document.getElementById('tsResults');
+            if(!r) return;
+            if(!q||q.length<1){ r.classList.remove('open'); return; }
+            const q2=q.toLowerCase();
+            const serverMatches=(allServers||[]).filter(s=>(s.server_name||'').toLowerCase().includes(q2)).slice(0,4);
+            const pageMatches=SEARCH_PAGES.filter(p=>p.label.toLowerCase().includes(q2)).slice(0,3);
+            let html='';
+            serverMatches.forEach(s=>{ html+=`<div class="ts-result-item" onclick="window.location.href='/server?id=${s.id}'"><i class="fas fa-server"></i>${s.server_name||'Sans nom'}</div>`; });
+            pageMatches.forEach(p=>{ html+=`<div class="ts-result-item" onclick="window.location.href='${p.href}'"><i class="fas ${p.icon}"></i>${p.label}</div>`; });
+            if(!html){ r.classList.remove('open'); return; }
+            r.innerHTML=html; r.classList.add('open');
+        }
+        document.addEventListener('click',(e)=>{ if(!e.target.closest('.topbar-search')){ const r=document.getElementById('tsResults'); if(r) r.classList.remove('open'); } });
+
+        // ===== ALERTE SOLDE BAS =====
+        function checkLowCoins(coins){
+            const threshold=parseInt(localStorage.getItem('fh_coins_threshold')||'10');
+            const banner=document.getElementById('lowCoinsBanner');
+            const chip=document.getElementById('topbarCoinsChip');
+            const dismissed=parseInt(localStorage.getItem('fh_low_dismissed')||'0');
+            const cooldown=6*3600*1000;
+            if(coins<threshold&&banner&&(Date.now()-dismissed>cooldown)){
+                banner.classList.add('show');
+                if(chip) chip.classList.add('low-coins');
+            }
+        }
+
+        // ===== COINS CHIP TOPBAR =====
+        function updateTopbarCoins(val){
+            const chip=document.getElementById('topbarCoinsVal');
+            if(!chip) return;
+            const old=parseInt(chip.textContent)||0;
+            chip.textContent=(val||0).toLocaleString();
+            if(val!==old){
+                const c=document.getElementById('topbarCoinsChip');
+                if(c){ c.classList.add('coin-bump'); setTimeout(()=>c.classList.remove('coin-bump'),400); }
+            }
+        }
+
+        // ===== CALENDRIER STREAK =====
+        function renderStreakCalendar(streak){
+            const days=14;
+            const container=document.getElementById('streakCalDays');
+            const label=document.getElementById('streakCalLabel');
+            if(!container) return;
+            if(label) label.textContent=`${streak} jour${streak!==1?'s':''} consécutif${streak!==1?'s':''}`;
+            let html='';
+            const todayN=new Date(); todayN.setHours(0,0,0,0);
+            for(let i=days-1;i>=0;i--){
+                const d=new Date(todayN); d.setDate(d.getDate()-i);
+                const dayNum=d.getDate();
+                const isToday=i===0;
+                const daysDone=isToday ? streak>0 : (i<streak);
+                let cls='empty';
+                if(daysDone && isToday) cls='today-done';
+                else if(daysDone) cls='done';
+                html+=`<div class="streak-cal-day ${cls}" title="${d.toLocaleDateString('fr-FR')}">${dayNum}</div>`;
+            }
+            container.innerHTML=html;
+        }
+
+        // ===== AFFICHAGE DES SERVEURS (AMÉLIORÉ) =====
+        function displayServers(servers) {
+            allServers = servers || [];
+            const container = document.getElementById('serversContainer');
+            const favs = getFavs();
+
+            if (!allServers.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-server"></i>
+                        <h3>Aucun serveur</h3>
+                        <p>Créez votre premier serveur pour commencer</p>
+                        <a href="/payment" class="btn btn-primary">Créer un serveur</a>
+                    </div>`;
+                return;
+            }
+
+            // Favoris d'abord
+            const sorted = [...allServers].sort((a,b)=>{
+                const af=favs.includes(a.id)?1:0, bf=favs.includes(b.id)?1:0;
+                return bf-af;
+            });
+
+            const ENV_MAP = {
+                nodejs:  { icon: 'fab fa-node-js',  color: '#68a063', label: 'Node.js' },
+                python:  { icon: 'fab fa-python',   color: '#3b82f6', label: 'Python' },
+                php:     { icon: 'fab fa-php',      color: '#8b5cf6', label: 'PHP' },
+                java:    { icon: 'fab fa-java',     color: '#f59e0b', label: 'Java' },
+                static:  { icon: 'fas fa-code',     color: '#10b981', label: 'Static' }
+            };
+
+            container.innerHTML = sorted.map(server => {
+                const now = new Date();
+                const expires = server.expires_at ? new Date(server.expires_at) : null;
+                const daysLeft = expires ? Math.ceil((expires - now) / (1000*60*60*24)) : null;
+                const totalDays = 30;
+                const expiryPct = expires ? Math.max(0, Math.min(100, (daysLeft/totalDays)*100)) : 100;
+                const expiryColor = daysLeft<=1 ? '#ef4444' : daysLeft<=3 ? '#f59e0b' : '#10b981';
+                const expiringClass = daysLeft!==null && daysLeft<=1 ? 'expiring' : '';
+                const starred = favs.includes(server.id);
+                const statusClass = server.server_status === 'running' ? 'running' : server.server_status === 'stopped' ? 'stopped' : 'unknown';
+                const statusText = server.server_status === 'running' ? 'En ligne' : server.server_status === 'stopped' ? 'Arrêté' : 'Inconnu';
+                const env = ENV_MAP[server.env_type] || ENV_MAP.nodejs;
+                const liveUrl = server.custom_domain
+                    ? `https://${server.custom_domain}`
+                    : server.custom_subdomain
+                        ? `https://${server.custom_subdomain}.flihost.site`
+                        : server.server_identifier
+                            ? `https://${server.server_identifier}.flihost.site`
+                            : null;
+
+                return `
+                    <div class="server-card ${expiringClass}" style="position:relative;">
+                        <button class="server-fav-btn ${starred?'starred':''}" onclick="toggleFav(${server.id},this,event)" title="${starred?'Retirer des favoris':'Ajouter aux favoris'}">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        <div class="server-header">
+                            <div class="server-name">
+                                <i class="fas fa-server"></i>
+                                ${server.server_name || 'Sans nom'}
+                            </div>
+                            <div class="server-badges">
+                                <span class="badge" style="background:${env.color}22;color:${env.color};border:1px solid ${env.color}44;"><i class="${env.icon}" style="margin-right:3px;"></i>${env.label}</span>
+                                ${server.is_ephemeral ? '<span class="badge badge-ephemeral">Promo</span>' : ''}
+                            </div>
+                        </div>
+
+                        <div class="status-indicator">
+                            <span class="status-dot ${statusClass}"></span>
+                            <span>${statusText}</span>
+                            ${starred ? '<i class="fas fa-star" style="color:#fbbf24;font-size:12px;margin-left:auto;"></i>' : ''}
+                        </div>
+
+                        ${expires ? `
+                        <div style="margin:8px 0 4px;">
+                            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;">
+                                <span><i class="fas fa-hourglass-end"></i> Expire dans ${daysLeft>0?`${daysLeft}j`:'aujourd\'hui'}</span>
+                                <span>${expires.toLocaleDateString('fr-FR')}</span>
+                            </div>
+                            <div class="server-expiry-bar"><div class="server-expiry-fill" style="width:${expiryPct}%;background:${expiryColor};"></div></div>
+                        </div>` : ''}
+
+                        ${liveUrl ? `
+                        <div class="server-live-url">
+                            <i class="fas fa-globe" style="flex-shrink:0;"></i>
+                            <a href="${liveUrl}" target="_blank" onclick="event.stopPropagation()">${liveUrl.replace('https://','')}</a>
+                            <button onclick="event.stopPropagation();navigator.clipboard.writeText('${liveUrl}');showSuccess('URL copiée !')" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;padding:2px 4px;" title="Copier l'URL"><i class="fas fa-copy"></i></button>
+                        </div>` : ''}
+
+                        <div class="server-actions" style="margin-top:12px;">
+                            <a href="/server?id=${server.id}" class="server-action" onclick="event.stopPropagation()">
+                                <i class="fas fa-cog"></i><span>Gérer</span>
+                            </a>
+                            ${liveUrl ? `<a href="${liveUrl}" target="_blank" class="server-action" onclick="event.stopPropagation()" style="color:var(--green);">
+                                <i class="fas fa-external-link-alt"></i><span>Voir</span>
+                            </a>` : ''}
+                            <button class="server-action" onclick="event.stopPropagation();quickDuplicateServer(${server.id},'${(server.server_name||'').replace(/'/g,"\\'")}')">
+                                <i class="fas fa-copy"></i><span>Copier</span>
+                            </button>
+                        </div>
+
+                        ${expires ? `<button class="server-renew-btn" onclick="event.stopPropagation();renewServer(${server.id},'${(server.server_name||'').replace(/'/g,"\\'")}',this,event)">
+                            <i class="fas fa-redo"></i> Renouveler
+                        </button>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Chargement des déploiements
+        async function quickDuplicateServer(serverId, serverName) {
+            if (!confirm(`Dupliquer le serveur "${serverName}" ? Une copie sera créée dans votre espace.`)) return;
+            try {
+                const res = await fetch(`/api/servers/${serverId}/duplicate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showSuccessNotification(`Serveur "${data.name}" créé avec succès !`);
+                    setTimeout(() => loadDashboard(), 1500);
+                } else {
+                    showErrorNotification(data.error || 'Erreur lors de la duplication');
+                }
+            } catch(e) {
+                showErrorNotification('Erreur réseau');
+            }
+        }
+
+        function showSuccessNotification(msg) {
+            const n = document.createElement('div');
+            n.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#10b981;color:white;padding:14px 20px;border-radius:12px;font-weight:600;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+            n.textContent = msg;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 3500);
+        }
+        function showErrorNotification(msg) {
+            const n = document.createElement('div');
+            n.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#ef4444;color:white;padding:14px 20px;border-radius:12px;font-weight:600;font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+            n.textContent = msg;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 3500);
+        }
+
+        async function loadDeployments() {
+            try {
+                console.log('Chargement des déploiements...');
+                
+                const serversResponse = await fetch('/api/servers', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (!serversResponse.ok) {
+                    throw new Error(`Erreur HTTP ${serversResponse.status}`);
+                }
+
+                const serversData = await serversResponse.json();
+                
+                if (!serversData.success || !serversData.servers || serversData.servers.length === 0) {
+                    displayDeployments([]);
+                    return;
+                }
+
+                const allDeployments = [];
+                for (const server of serversData.servers) {
+                    try {
+                        const deplResponse = await fetch(`/api/servers/${server.id}/deployments`, {
+                            headers: { 'Authorization': `Bearer ${authToken}` }
+                        });
+                        
+                        if (deplResponse.ok) {
+                            const deplData = await deplResponse.json();
+                            if (deplData.success && deplData.deployments) {
+                                allDeployments.push(...deplData.deployments.map(d => ({
+                                    ...d,
+                                    server_name: server.server_name
+                                })));
+                            }
+                        }
+                    } catch (e) {
+                        console.error(`Erreur chargement déploiements pour serveur ${server.id}:`, e);
+                    }
+                }
+
+                displayDeployments(allDeployments.slice(0, 5));
+            } catch (error) {
+                console.error('Erreur chargement déploiements:', error);
+                displayDeployments([]);
+            }
+        }
+
+        // Affichage des déploiements
+        function displayDeployments(deployments) {
+            const container = document.getElementById('deploymentsContainer');
+            
+            if (!deployments || deployments.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-code-branch"></i>
+                        <h3>Aucun déploiement</h3>
+                        <p>Lancez votre premier déploiement depuis la page dédiée</p>
+                        <a href="/deploy" class="btn btn-primary">Déployer maintenant</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = deployments.map(dep => `
+                <div class="deployment-item">
+                    <div class="deployment-header">
+                        <div class="deployment-type">
+                            <i class="fas fa-${dep.deploy_type === 'github' ? 'code-branch' : 'file-archive'}"></i>
+                            ${dep.deploy_type ? dep.deploy_type.charAt(0).toUpperCase() + dep.deploy_type.slice(1) : 'Inconnu'} · ${dep.server_name || 'Serveur'}
+                        </div>
+                        <span class="deployment-status ${dep.status || 'unknown'}">${dep.status || 'inconnu'}</span>
+                    </div>
+
+                    <div class="deployment-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i> ${dep.created_at ? new Date(dep.created_at).toLocaleString('fr-FR') : 'Date inconnue'}
+                        </span>
+                        ${dep.git_branch ? `
+                        <span class="meta-item">
+                            <i class="fas fa-code-branch"></i> ${dep.git_branch}
+                        </span>
+                        ` : ''}
+                        ${dep.git_commit ? `
+                        <span class="meta-item">
+                            <i class="fas fa-hashtag"></i> ${dep.git_commit.substring(0, 7)}
+                        </span>
+                        ` : ''}
+                    </div>
+
+                    <div class="deployment-actions">
+                        <button class="btn btn-outline btn-sm" onclick="viewDeploymentLogs(${dep.id})">
+                            <i class="fas fa-terminal"></i> Logs
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Chargement des stats de parrainage
+        async function loadReferralStats() {
+            try {
+                const response = await fetch('/api/referral/info', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('statReferrals').textContent = data.referral_count || 0;
+                        document.getElementById('statReferralsDrawer').textContent = data.referral_count || 0;
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur chargement parrainage:', error);
+            }
+        }
+
+        // Vérification de la récompense quotidienne
+        async function checkDailyReward() {
+            try {
+                const response = await fetch('/api/daily-reward/status', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const canClaim = data.success && data.can_claim;
+                    document.getElementById('dailyRewardBtn').classList.toggle('reward-available', canClaim);
+                    const banner = document.getElementById('rewardBanner');
+                    if (banner) banner.style.display = canClaim ? 'flex' : 'none';
+                }
+            } catch (error) {
+                console.error('Erreur vérification récompense:', error);
+            }
+        }
+
+        // Réclamation de la récompense quotidienne
+        async function claimDailyReward() {
+            try {
+                const response = await fetch('/api/daily-reward/claim', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showSuccess(`+${data.coins} coins ! Série : ${data.streak} jour${data.streak > 1 ? 's' : ''} 🔥`);
+                    document.getElementById('dailyRewardBtn').classList.remove('reward-available');
+                    const banner = document.getElementById('rewardBanner');
+                    if (banner) banner.style.display = 'none';
+                    loadDashboard();
+                } else {
+                    showError(data.error || 'Impossible de réclamer');
+                }
+            } catch (error) {
+                showError('Erreur lors de la réclamation');
+            }
+        }
+
+        // Visualisation des logs d'un déploiement
+        async function viewDeploymentLogs(deploymentId) {
+            try {
+                const response = await fetch(`/api/deploy/${deploymentId}/status`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    const logs = data.deployment.build_log || 'Aucun log disponible';
+                    document.getElementById('logsContainer').innerHTML = logs.split('\n').map(line => 
+                        `<div class="log-line">${line}</div>`
+                    ).join('');
+                    document.getElementById('logsModal').style.display = 'flex';
+                }
+            } catch (error) {
+                showError('Erreur lors du chargement des logs');
+            }
+        }
+
+        // Rafraîchissement
+        function refreshDashboard() {
+            loadDashboard();
+            showInfo('Tableau de bord rafraîchi');
+        }
+
+        function refreshDeployments() {
+            loadDeployments();
+            showInfo('Liste des déploiements rafraîchie');
+        }
+
+        function refreshStats() {
+            loadServers();
+            loadReferralStats();
+        }
+
+        // Copie des logs
+        function copyLogs() {
+            const logs = [...document.querySelectorAll('#logsContainer .log-line')]
+                .map(line => line.textContent).join('\n');
+            navigator.clipboard.writeText(logs);
+            showSuccess('Logs copiés dans le presse-papiers');
+        }
+
+        // Fermeture d'un modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Confirmation
+        function showConfirm(message, onConfirm) {
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmAction').onclick = () => {
+                closeModal('confirmModal');
+                onConfirm();
+            };
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        // ========== SYSTÈME DE TOASTS ==========
+        function toast(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${message}</span>`;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.classList.add('out');
+                setTimeout(() => el.remove(), 300);
+            }, duration);
+        }
+
+        function showSuccess(message) { toast(message, 'success'); }
+        function showError(message) { console.error('Erreur:', message); toast(message, 'error', 5000); }
+        function showInfo(message) { toast(message, 'info', 3000); }
+
+        // Déconnexion
+        function logout() {
+            if (statsInterval) clearInterval(statsInterval);
+            localStorage.removeItem('flyhost_token');
+            localStorage.removeItem('flyhost_user');
+            window.location.href = '/';
+        }
+
+        // ========== PWA SERVICE WORKER ==========
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+
+        // ========== MODE SOMBRE/CLAIR ==========
+        function initTheme() {
+            const saved = localStorage.getItem('fh_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            document.querySelector('#themeToggleBtn i').className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('fh_theme', next);
+            document.querySelector('#themeToggleBtn i').className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        initTheme();
+
+        // ========== ONBOARDING WIZARD ==========
+        let obSelectedPlan = 'free';
+        let obSelectedType = 'minecraft';
+        let obSelectedTypeLabel = 'Minecraft';
+        let obCurrentWizardStep = 1;
+
+        function showOnboarding() {
+            if (localStorage.getItem('fh_onboarding_done')) return;
+            document.getElementById('onboardingOverlay').style.display = 'flex';
+        }
+
+        function obGoStep(n) {
+            if (n === 2) {
+                const name = document.getElementById('obServerName')?.value?.trim();
+                if (n > obCurrentWizardStep && obCurrentWizardStep === 2 && !name) {
+                    document.getElementById('obServerName').focus();
+                    document.getElementById('obServerName').style.borderColor = 'var(--error)';
+                    return;
+                }
+            }
+            if (n === 3) {
+                const name = (document.getElementById('obServerName')?.value || '').trim() || 'Mon serveur';
+                const planLabels = { free:'Gratuit', starter:'Starter', pro:'Pro ⭐' };
+                const planCoins = { free:'10 coins (bonus inscription) 🎁', starter:'600 coins (10 + 100 bonus)', pro:'1360 coins (10 + 350 bonus)' };
+                document.getElementById('obSumPlan').textContent = planLabels[obSelectedPlan] || obSelectedPlan;
+                document.getElementById('obSumName').textContent = name;
+                document.getElementById('obSumType').textContent = obSelectedTypeLabel;
+                document.getElementById('obSumCoins').textContent = planCoins[obSelectedPlan] || '10 coins 🎁';
+            }
+            document.getElementById(`ob-step-${obCurrentWizardStep}`).style.display = 'none';
+            document.getElementById(`ob-step-${n}`).style.display = '';
+            obCurrentWizardStep = n;
+            // Update progress circles
+            for (let i = 1; i <= 3; i++) {
+                const c = document.getElementById(`obc${i}`);
+                c.className = 'ob-step-circle' + (i < n ? ' done' : i === n ? ' active' : '');
+                if (i < n) c.innerHTML = '<i class="fas fa-check" style="font-size:11px"></i>';
+                else c.textContent = i;
+            }
+            for (let i = 1; i <= 2; i++) {
+                document.getElementById(`obl${i}`).className = 'ob-step-line' + (i < n ? ' done' : '');
+            }
+        }
+
+        function selectObPlan(plan) {
+            obSelectedPlan = plan;
+            document.querySelectorAll('.ob-plan-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('obPlan-' + plan)?.classList.add('selected');
+        }
+
+        function selectObType(key, icon, label) {
+            obSelectedType = key;
+            obSelectedTypeLabel = label;
+            document.querySelectorAll('.ob-type-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('obType-' + key)?.classList.add('selected');
+        }
+
+        function launchOnboarding() {
+            skipOnboarding();
+            const name = encodeURIComponent((document.getElementById('obServerName')?.value || '').trim() || 'Mon serveur');
+            const plan = obSelectedPlan === 'free' ? '' : `?plan=${obSelectedPlan}`;
+            window.location.href = `/payment${plan}`;
+        }
+
+        function skipOnboarding() {
+            localStorage.setItem('fh_onboarding_done', '1');
+            document.getElementById('onboardingOverlay').style.display = 'none';
+        }
+
+        // ========== WIDGET SUPPORT ==========
+        function toggleSupportPanel() {
+            document.getElementById('supportPanel').classList.toggle('open');
+        }
+        function openSupportTicket() {
+            document.getElementById('supportPanel').classList.remove('open');
+            window.location.href = '/tickets';
+        }
+        document.addEventListener('click', function(e) {
+            const widget = document.getElementById('supportWidget');
+            if (!widget.contains(e.target)) {
+                document.getElementById('supportPanel').classList.remove('open');
+            }
+        });
+
+        // ========== CHALLENGES ==========
+        async function loadChallenges() {
+            const container = document.getElementById('challengesContainer');
+            if (!container) return;
+            try {
+                const token = localStorage.getItem('flyhost_token');
+                const res = await fetch('/api/challenges', { headers: { Authorization: `Bearer ${token}` } });
+                const data = await res.json();
+                if (!data.success || !data.challenges.length) {
+                    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Aucun challenge actif ce mois-ci.</p>';
+                    return;
+                }
+                container.innerHTML = `<div class="challenges-grid">${data.challenges.map(ch => {
+                    const pct = Math.min(100, Math.round(((ch.progress||0) / (ch.target_value||1)) * 100));
+                    return `<div class="challenge-card">
+                        <div class="ch-icon">🏆</div>
+                        <h4>${ch.name}</h4>
+                        <p>${ch.description || ''}</p>
+                        <div class="ch-progress-bar"><div class="ch-progress-fill" style="width:${pct}%"></div></div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span class="ch-reward">+${ch.reward_coins} coins</span>
+                            ${ch.completed && !ch.reward_claimed ? `<button class="ch-claim-btn" onclick="claimChallenge(${ch.id}, this)">Réclamer</button>` :
+                              ch.reward_claimed ? `<span style="font-size:12px;color:var(--green)">✓ Réclamé</span>` :
+                              `<span style="font-size:12px;color:var(--text-muted)">${pct}%</span>`}
+                        </div>
+                    </div>`;
+                }).join('')}</div>`;
+            } catch(e) {}
+        }
+
+        async function claimChallenge(id, btn) {
+            const token = localStorage.getItem('flyhost_token');
+            btn.disabled = true; btn.textContent = '...';
+            const res = await fetch(`/api/challenges/${id}/claim`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+            const data = await res.json();
+            if (data.success) { toast(`+${data.coins_earned} coins réclamés !`, 'success'); loadChallenges(); }
+            else { btn.disabled = false; btn.textContent = 'Réclamer'; toast(data.error, 'error'); }
+        }
+
+        // Ajouter showOnboarding à l'initialisation après login
+        const _origLoadDash = typeof loadDashboardData === 'function' ? loadDashboardData : null;
+        window.addEventListener('load', () => {
+            setTimeout(() => { showOnboarding(); loadChallenges(); }, 1200);
+        });
+    </script>
+</body>
+</html>

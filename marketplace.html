@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - FLYHOST</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root{--accent:#6366f1;--accent-dim:rgba(99,102,241,0.1);--bg:#eef0f7;--surface:rgba(255,255,255,0.75);--surface-strong:rgba(255,255,255,0.92);--border:rgba(99,102,241,0.18);--border-strong:rgba(99,102,241,0.35);--text:#0f172a;--text-secondary:#334155;--text-muted:#64748b;--green:#10b981;--warning:#f59e0b;--error:#ef4444;--radius:18px;}
+        [data-theme="dark"]{--bg:#0d1117;--surface:rgba(22,27,34,0.85);--surface-strong:rgba(30,37,48,0.95);--border:rgba(99,102,241,0.25);--border-strong:rgba(99,102,241,0.45);--text:#f0f6fc;--text-secondary:#c9d1d9;--text-muted:#8b949e;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px;padding:0 20px;height:60px;background:var(--surface-strong);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);}
+        .logo-mark{width:32px;height:32px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;}
+        .logo-text{font-weight:800;font-size:16px;}
+        .topbar-nav{margin-left:auto;display:flex;gap:8px;align-items:center;}
+        .nav-link{color:var(--text-muted);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:10px;}
+        .nav-link:hover{background:var(--accent-dim);color:var(--accent);}
+        .theme-toggle{background:none;border:1px solid var(--border);border-radius:50px;padding:6px 12px;cursor:pointer;color:var(--text);}
+        .container{max-width:1100px;margin:0 auto;padding:24px 16px;}
+        .page-header{margin-bottom:24px;}
+        .page-header h1{font-size:28px;font-weight:800;margin-bottom:6px;}
+        .page-header p{color:var(--text-muted);}
+        .toolbar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+        .search-input{flex:1;min-width:200px;padding:10px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;}
+        .cat-select{padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:14px;}
+        .sell-btn{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:10px 20px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+        .balance-badge{background:var(--accent-dim);color:var(--accent);border-radius:50px;padding:6px 14px;font-size:13px;font-weight:700;}
+        .listings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+        .listing-card{background:var(--surface-strong);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all 0.2s;}
+        .listing-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+        .listing-icon{width:52px;height:52px;border-radius:14px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;}
+        .listing-cat{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+        .listing-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+        .listing-desc{font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+        .listing-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+        .listing-price{font-size:18px;font-weight:800;color:var(--accent);}
+        .listing-price span{font-size:12px;font-weight:500;color:var(--text-muted);}
+        .listing-stats{margin-left:auto;font-size:12px;color:var(--text-muted);display:flex;gap:10px;}
+        .buy-btn{width:100%;margin-top:12px;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:10px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;}
+        .buy-btn:hover{opacity:0.9;}
+        .buy-btn:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed;}
+        .seller-tag{font-size:12px;color:var(--text-muted);margin-top:8px;}
+        .modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;display:none;align-items:center;justify-content:center;}
+        .modal.open{display:flex;}
+        .modal-box{background:var(--surface-strong);border:1px solid var(--border);border-radius:24px;padding:32px;max-width:520px;width:90%;max-height:90vh;overflow-y:auto;}
+        .modal-box h2{margin-bottom:20px;font-size:20px;}
+        .form-group{margin-bottom:16px;}
+        .form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-secondary);}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;}
+        .form-group textarea{resize:vertical;min-height:120px;}
+        .modal-actions{display:flex;gap:12px;margin-top:20px;}
+        .btn-primary{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-weight:700;cursor:pointer;font-family:inherit;flex:1;}
+        .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px 24px;font-weight:600;cursor:pointer;font-family:inherit;}
+        .content-modal{background:var(--bg);border-radius:12px;padding:16px;font-family:monospace;font-size:13px;white-space:pre-wrap;max-height:300px;overflow-y:auto;margin-top:16px;}
+        .empty{text-align:center;padding:60px;color:var(--text-muted);}
+        .empty i{font-size:48px;margin-bottom:16px;opacity:0.4;display:block;}
+        .how-it-works{background:var(--surface-strong);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;display:flex;gap:0;align-items:stretch;}
+        .how-step{flex:1;display:flex;align-items:flex-start;gap:14px;padding:0 20px;}
+        .how-step:not(:last-child){border-right:1px solid var(--border);}
+        .how-icon{width:42px;height:42px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--accent);}
+        .how-text h4{font-size:14px;font-weight:700;margin-bottom:4px;}
+        .how-text p{font-size:12px;color:var(--text-muted);line-height:1.5;}
+        @media(max-width:640px){.how-it-works{flex-direction:column;}.how-step{border-right:none!important;border-bottom:1px solid var(--border);padding:12px 0;}.how-step:last-child{border-bottom:none;}}
+        .toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+        .toast{background:var(--surface-strong);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-size:14px;min-width:200px;}
+    </style>
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <header class="topbar">
+        <div class="logo-mark">FH</div>
+        <span class="logo-text">FLYHOST</span>
+        <div class="topbar-nav">
+            <span class="balance-badge" id="balanceBadge"><i class="fas fa-coins"></i> - coins</span>
+            <a href="/dashboard" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+            <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="themeIcon"></i></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-store" style="color:var(--accent)"></i> Marketplace</h1>
+            <p>Achetez et vendez des templates, configs et ressources avec vos coins FLYHOST.</p>
+        </div>
+        <!-- COMMENT FONCTIONNE LE MARKETPLACE -->
+        <div class="how-it-works">
+            <div class="how-step">
+                <div class="how-icon"><i class="fas fa-tag"></i></div>
+                <div class="how-text">
+                    <h4>1. Publiez une ressource</h4>
+                    <p>Cliquez sur "+ Vendre", entrez votre template, config ou script, fixez un prix en coins et publiez. C'est immédiat.</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="how-icon"><i class="fas fa-shopping-cart"></i></div>
+                <div class="how-text">
+                    <h4>2. Achetez ce dont vous avez besoin</h4>
+                    <p>Parcourez les articles, filtrez par catégorie. Cliquez "Acheter" et les coins sont débités. Le contenu s'affiche immédiatement.</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="how-icon"><i class="fas fa-coins"></i></div>
+                <div class="how-text">
+                    <h4>3. Recevez vos coins</h4>
+                    <p>À chaque achat de votre article, les coins arrivent directement sur votre compte. Utilisez-les pour renouveler vos serveurs.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0">
+            <button class="tab-btn active" id="tabOneClick" onclick="switchTab('oneclick')" style="padding:10px 20px;background:none;border:none;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;margin-bottom:-1px;font-family:inherit"><i class="fas fa-bolt"></i> Déploiement One-Click</button>
+            <button class="tab-btn" id="tabCommunity" onclick="switchTab('community')" style="padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-weight:700;font-size:14px;cursor:pointer;margin-bottom:-1px;font-family:inherit"><i class="fas fa-store"></i> Marketplace</button>
+        </div>
+
+        <!-- ONE-CLICK DEPLOY SECTION -->
+        <div id="sectionOneClick">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px" id="oneClickGrid">
+                <!-- filled by JS -->
+            </div>
+        </div>
+
+        <!-- COMMUNITY MARKETPLACE SECTION -->
+        <div id="sectionCommunity" style="display:none">
+            <div class="toolbar">
+                <input type="text" class="search-input" id="searchInput" placeholder="Rechercher...">
+                <select class="cat-select" id="catSelect" onchange="load()">
+                    <option value="">Toutes les catégories</option>
+                    <option value="template">Templates</option>
+                    <option value="config">Configs</option>
+                    <option value="script">Scripts</option>
+                    <option value="api">APIs Bot</option>
+                    <option value="command">Commandes</option>
+                    <option value="function">Fonctions</option>
+                    <option value="file">Fichiers</option>
+                    <option value="plugin">Plugins</option>
+                    <option value="autre">Autres</option>
+                </select>
+                <button class="sell-btn" id="sellBtn" onclick="openSell()"><i class="fas fa-plus"></i> Publier un article</button>
+                <a href="/payment#reseller" class="sell-btn" id="resellerCta" style="display:none;background:linear-gradient(135deg,#f59e0b,#ef4444);text-decoration:none;color:#fff;"><i class="fas fa-crown"></i> Devenir revendeur</a>
+            </div>
+            <div class="listings-grid" id="listingsGrid">
+                <div class="empty"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ONE-CLICK DEPLOY MODAL -->
+    <div id="ocModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center">
+        <div style="background:var(--surface-strong);border:1px solid var(--border);border-radius:24px;padding:32px;max-width:440px;width:90%">
+            <h2 style="font-size:20px;font-weight:800;margin-bottom:8px"><i class="fas fa-bolt" style="color:var(--accent)"></i> Déployer <span id="ocAppName"></span></h2>
+            <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">Votre serveur sera créé et prêt en quelques secondes.</p>
+            <div style="margin-bottom:16px">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Nom du serveur</label>
+                <input id="ocServerName" style="width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-family:inherit" placeholder="Ex: Mon serveur Node.js">
+            </div>
+            <div style="display:flex;gap:12px;margin-top:20px">
+                <button onclick="closeOcModal()" style="flex:1;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-weight:600;color:var(--text);font-family:inherit">Annuler</button>
+                <button id="ocConfirmBtn" onclick="confirmOneClickDeploy()" style="flex:2;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><i class="fas fa-bolt"></i> Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SELL MODAL -->
+    <div class="modal" id="sellModal">
+        <div class="modal-box">
+            <h2><i class="fas fa-tag"></i> Mettre en vente</h2>
+            <div class="form-group"><label>Titre *</label><input id="sTitle" placeholder="Ex: Template Minecraft SkyWars"></div>
+            <div class="form-group"><label>Description</label><textarea id="sDesc" placeholder="Décrivez votre ressource..."></textarea></div>
+            <div class="form-group"><label>Catégorie</label>
+                <select id="sCat">
+                    <option value="template">Template</option>
+                    <option value="config">Config</option>
+                    <option value="script">Script (base bot)</option>
+                    <option value="api">API Bot</option>
+                    <option value="command">Commande spécifique</option>
+                    <option value="function">Fonction / Handler</option>
+                    <option value="file">Fichier</option>
+                    <option value="plugin">Plugin</option>
+                    <option value="autre">Autre</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Jeu / Technologie</label><input id="sGame" placeholder="Ex: Minecraft, Node.js, Python..."></div>
+            <div class="form-group"><label>Prix (coins) *</label><input id="sPrice" type="number" min="1" placeholder="Ex: 50"></div>
+            <div class="form-group">
+                <label>Contenu * <small style="color:var(--text-muted)">(sera révélé après achat)</small></label>
+                <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                    <label for="fileUpload" style="display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px dashed var(--accent);color:var(--accent);padding:7px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;">
+                        <i class="fas fa-upload"></i> Importer un fichier
+                    </label>
+                    <input type="file" id="fileUpload" style="display:none" onchange="handleFileUpload(event)">
+                    <span id="fileNameLabel" style="font-size:12px;color:var(--text-muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Aucun fichier choisi</span>
+                    <button type="button" onclick="clearFileUpload()" id="clearFileBtn" style="display:none;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;" title="Retirer le fichier">&times;</button>
+                </div>
+                <textarea id="sContent" placeholder="Ou collez directement votre config, code, script..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeSell()">Annuler</button>
+                <button class="btn-primary" onclick="submitListing()"><i class="fas fa-upload"></i> Publier</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BUY CONFIRM MODAL -->
+    <div class="modal" id="buyConfirmModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeBuyConfirm()">&times;</button>
+            <h2><i class="fas fa-shopping-cart" style="color:var(--accent)"></i> Confirmer l'achat</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">Vous allez acheter :</p>
+            <p style="font-weight:700;font-size:16px;margin-bottom:4px;" id="buyConfirmTitle"></p>
+            <div style="font-size:24px;font-weight:800;color:var(--accent);text-align:center;margin:16px 0;" id="buyConfirmCost"></div>
+            <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;padding:12px;background:var(--accent-dim);border-radius:12px;border:1px solid var(--border);margin-bottom:20px;">
+                <input type="checkbox" id="buyEmailOpt" style="width:18px;height:18px;accent-color:var(--accent);">
+                <span><i class="fas fa-envelope" style="color:var(--accent)"></i> Recevoir le contenu par e-mail</span>
+            </label>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeBuyConfirm()">Annuler</button>
+                <button class="btn btn-primary" onclick="confirmBuyNow()"><i class="fas fa-check"></i> Acheter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="contentModal">
+        <div class="modal-box">
+            <h2><i class="fas fa-file-download"></i> Contenu acheté</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">Copiez et sauvegardez ce contenu.</p>
+            <div class="content-modal" id="contentDisplay"></div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeContent()">Fermer</button>
+                <button class="btn-primary" onclick="copyContent()"><i class="fas fa-copy"></i> Copier</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('flyhost_token');
+        let userCoins = 0, currentUserId = null, currentUserRole = null;
+        let currentContent = '';
+
+        function toggleTheme(){const c=document.documentElement.getAttribute('data-theme')||'light';const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('fh_theme',n);document.getElementById('themeIcon').className=n==='dark'?'fas fa-sun':'fas fa-moon';}
+        const s=localStorage.getItem('fh_theme')||'light';document.documentElement.setAttribute('data-theme',s);document.getElementById('themeIcon').className=s==='dark'?'fas fa-sun':'fas fa-moon';
+
+        async function fetchCoins() {
+            if (!token) {
+                document.getElementById('resellerCta').style.display = '';
+                document.getElementById('balanceBadge').innerHTML = `<a href="/login?redirect=/marketplace" style="color:inherit;text-decoration:none;"><i class="fas fa-sign-in-alt"></i> Connexion</a>`;
+                return;
+            }
+            try {
+                const res = await fetch('/api/user/profile', { headers: { Authorization: `Bearer ${token}` } });
+                const data = await res.json();
+                userCoins = data.user?.coins || 0;
+                currentUserId = data.user?.id;
+                currentUserRole = data.user?.role;
+                document.getElementById('balanceBadge').innerHTML = `<i class="fas fa-coins"></i> ${userCoins} coins`;
+                const role = data.user?.role;
+                if (role === 'superadmin') {
+                    // superadmin toujours autorisé — bouton déjà visible
+                } else if (role === 'admin') {
+                    try {
+                        const rpRes = await fetch('/api/reseller/dashboard', { headers: { Authorization: `Bearer ${token}` } });
+                        const rpData = await rpRes.json();
+                        if (!rpData.profile?.contract_accepted) {
+                            document.getElementById('sellBtn').style.display = 'none';
+                            document.getElementById('resellerCta').style.display = '';
+                        }
+                    } catch(e) { document.getElementById('sellBtn').style.display = 'none'; }
+                } else {
+                    document.getElementById('sellBtn').style.display = 'none';
+                    document.getElementById('resellerCta').style.display = '';
+                }
+            } catch(e) {}
+        }
+
+        async function load() {
+            const search = document.getElementById('searchInput').value;
+            const cat = document.getElementById('catSelect').value;
+            let url = '/api/marketplace?limit=30';
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (cat) url += `&category=${cat}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            const grid = document.getElementById('listingsGrid');
+            if (!data.success || !data.listings.length) {
+                grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><i class="fas fa-store"></i><p>Aucun article trouvé. Soyez le premier à vendre !</p></div>`;
+                return;
+            }
+            const icons = { template:'📄', config:'⚙️', script:'💻', api:'🔌', command:'⌨️', function:'🧩', file:'📁', plugin:'🔌', autre:'📦' };
+            const canDelete = (l) => currentUserId && (l.seller_id === currentUserId || currentUserRole === 'superadmin');
+            grid.innerHTML = data.listings.map(l => `
+                <div class="listing-card" id="card-${l.id}">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+                        <div class="listing-icon" style="margin-bottom:0">${icons[l.category] || '📦'}</div>
+                        ${canDelete(l) ? `<button onclick="deleteListing(${l.id})" title="Supprimer cet article" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13px;"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+                    <div class="listing-cat">${l.category}</div>
+                    <div class="listing-title">${escH(l.title)}</div>
+                    <div class="listing-desc">${escH(l.description || 'Aucune description.')}</div>
+                    <div class="listing-meta">
+                        <div>
+                            <div class="listing-price">${l.price_coins} <span>coins</span></div>
+                        </div>
+                        <div class="listing-stats">
+                            <span><i class="fas fa-download"></i> ${l.downloads}</span>
+                        </div>
+                    </div>
+                    <div class="seller-tag">Par <strong>${escH(l.seller_name || '?')}</strong>${l.game ? ` • ${escH(l.game)}` : ''}</div>
+                    <button class="buy-btn" onclick="buy(${l.id}, '${escH(l.title)}', ${l.price_coins})" ${!token ? 'disabled title="Connectez-vous"' : ''}>
+                        <i class="fas fa-shopping-cart"></i> Acheter pour ${l.price_coins} coins
+                    </button>
+                </div>`).join('');
+        }
+
+        let pendingBuyId = null, pendingBuyPrice = 0;
+        function buy(id, title, price) {
+            if (!token) { alert('Connectez-vous pour acheter.'); return; }
+            if (userCoins < price) { toast(`Coins insuffisants (vous avez ${userCoins}, besoin de ${price})`, 'error'); return; }
+            pendingBuyId = id; pendingBuyPrice = price;
+            document.getElementById('buyConfirmTitle').textContent = `"${title}"`;
+            document.getElementById('buyConfirmCost').textContent = `${price} coins`;
+            document.getElementById('buyEmailOpt').checked = false;
+            document.getElementById('buyConfirmModal').classList.add('open');
+        }
+        function closeBuyConfirm() { document.getElementById('buyConfirmModal').classList.remove('open'); }
+        async function confirmBuyNow() {
+            const send_email = document.getElementById('buyEmailOpt').checked;
+            closeBuyConfirm();
+            const res = await fetch(`/api/marketplace/${pendingBuyId}/buy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ send_email })
+            });
+            const data = await res.json();
+            if (data.success) {
+                userCoins -= pendingBuyPrice;
+                document.getElementById('balanceBadge').innerHTML = `<i class="fas fa-coins"></i> ${userCoins} coins`;
+                currentContent = data.content;
+                document.getElementById('contentDisplay').textContent = data.content;
+                document.getElementById('contentModal').classList.add('open');
+                toast('Achat réussi !' + (send_email ? ' Contenu envoyé par email.' : ''), 'success');
+            } else { toast(data.error || 'Erreur', 'error'); }
+        }
+
+        function openSell() {
+            if (!token) { window.location.href = '/login?redirect=/marketplace'; return; }
+            clearFileUpload();
+            document.getElementById('sellModal').classList.add('open');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const MAX = 500 * 1024; // 500 Ko
+            if (file.size > MAX) { toast('Fichier trop lourd (max 500 Ko)', 'error'); clearFileUpload(); return; }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('sContent').value = e.target.result;
+                document.getElementById('fileNameLabel').textContent = `✓ ${file.name} (${(file.size/1024).toFixed(1)} Ko)`;
+                document.getElementById('fileNameLabel').style.color = 'var(--green)';
+                document.getElementById('clearFileBtn').style.display = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function clearFileUpload() {
+            document.getElementById('fileUpload').value = '';
+            document.getElementById('fileNameLabel').textContent = 'Aucun fichier choisi';
+            document.getElementById('fileNameLabel').style.color = '';
+            document.getElementById('clearFileBtn').style.display = 'none';
+        }
+        async function deleteListing(id) {
+            if (!confirm('Supprimer cet article définitivement ?')) return;
+            const res = await fetch(`/api/marketplace/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById(`card-${id}`)?.remove();
+                toast('Article supprimé.', 'success');
+            } else { toast(data.error || 'Erreur', 'error'); }
+        }
+
+        function closeSell() { document.getElementById('sellModal').classList.remove('open'); }
+        function closeContent() { document.getElementById('contentModal').classList.remove('open'); }
+        function copyContent() { navigator.clipboard.writeText(currentContent); toast('Copié !', 'success'); }
+
+        async function submitListing() {
+            const title = document.getElementById('sTitle').value.trim();
+            const description = document.getElementById('sDesc').value.trim();
+            const category = document.getElementById('sCat').value;
+            const game = document.getElementById('sGame').value.trim();
+            const price_coins = parseInt(document.getElementById('sPrice').value);
+            const content = document.getElementById('sContent').value.trim();
+            if (!title || !content || !price_coins) return alert('Titre, contenu et prix requis.');
+            const res = await fetch('/api/marketplace', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ title, description, category, game, price_coins, content })
+            });
+            const data = await res.json();
+            if (data.success) { closeSell(); toast('Article publié !', 'success'); load(); }
+            else toast(data.error || 'Erreur', 'error');
+        }
+
+        let searchTimer;
+        document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(load, 400); });
+
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            const el = document.createElement('div'); el.className = `toast ${type}`;
+            el.innerHTML = msg; c.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+        function escH(s) { if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+        function switchTab(tab) {
+            const oc = document.getElementById('sectionOneClick');
+            const cm = document.getElementById('sectionCommunity');
+            const t1 = document.getElementById('tabOneClick');
+            const t2 = document.getElementById('tabCommunity');
+            if (tab === 'oneclick') {
+                oc.style.display = ''; cm.style.display = 'none';
+                t1.style.borderBottomColor = 'var(--accent)'; t1.style.color = 'var(--accent)';
+                t2.style.borderBottomColor = 'transparent'; t2.style.color = 'var(--text-muted)';
+            } else {
+                oc.style.display = 'none'; cm.style.display = '';
+                t2.style.borderBottomColor = 'var(--accent)'; t2.style.color = 'var(--accent)';
+                t1.style.borderBottomColor = 'transparent'; t1.style.color = 'var(--text-muted)';
+                load();
+            }
+        }
+
+        const ONE_CLICK_APPS = [
+            { id:'nodejs-bot', name:'Bot Discord.js', icon:'🤖', desc:'Bot Discord complet avec slash commands, events et structure modulaire.', category:'Node.js', egg:15, ram:512, disk:1024, env:{ STARTUP:'node index.js', NODE_VERSION:'18' }, color:'#5865F2' },
+            { id:'python-api', name:'API Python FastAPI', icon:'🐍', desc:'API REST moderne avec FastAPI, async, validation Pydantic et docs auto.', category:'Python', egg:18, ram:512, disk:1024, env:{ STARTUP:'uvicorn main:app --host 0.0.0.0 --port {{SERVER_PORT}}' }, color:'#3776AB' },
+            { id:'nodejs-express', name:'Serveur Express.js', icon:'🚀', desc:'Serveur web Node.js avec Express, routes, middleware et hot-reload.', category:'Node.js', egg:15, ram:256, disk:512, env:{ STARTUP:'node server.js', NODE_VERSION:'18' }, color:'#68A063' },
+            { id:'minecraft-java', name:'Minecraft Java', icon:'⛏️', desc:'Serveur Minecraft Java Edition (PaperMC) prêt à jouer en 1 minute.', category:'Gaming', egg:16, ram:2048, disk:5120, env:{}, color:'#8B4513' },
+            { id:'python-scraper', name:'Web Scraper Python', icon:'🕷️', desc:'Scraper asynchrone avec Playwright, BeautifulSoup et export CSV/JSON.', category:'Python', egg:18, ram:512, disk:1024, env:{ STARTUP:'python main.py' }, color:'#FFD43B' },
+            { id:'nodejs-dashboard', name:'Dashboard Next.js', icon:'📊', desc:'App web React/Next.js avec SSR, Tailwind CSS et authentification JWT.', category:'Node.js', egg:15, ram:1024, disk:2048, env:{ STARTUP:'npm run start', NODE_VERSION:'18' }, color:'#000000' },
+            { id:'php-laravel', name:'App PHP Laravel', icon:'🐘', desc:'Application web Laravel avec base de données, authentification et routes.', category:'PHP', egg:19, ram:512, disk:2048, env:{}, color:'#FF2D20' },
+            { id:'python-telegram', name:'Bot Telegram', icon:'✈️', desc:'Bot Telegram avec python-telegram-bot, commandes et gestion multi-utilisateurs.', category:'Python', egg:18, ram:256, disk:512, env:{ STARTUP:'python bot.py' }, color:'#26A5E4' },
+        ];
+
+        function renderOneClickGrid() {
+            const grid = document.getElementById('oneClickGrid');
+            if (!grid) return;
+            const catColors = { 'Node.js':'rgba(104,160,99,0.1)', 'Python':'rgba(55,118,171,0.1)', 'Gaming':'rgba(139,69,19,0.1)', 'PHP':'rgba(255,45,32,0.1)' };
+            grid.innerHTML = ONE_CLICK_APPS.map(app => `
+                <div style="background:var(--surface-strong);border:1px solid var(--border);border-radius:18px;padding:20px;transition:all 0.2s;cursor:default" onmouseenter="this.style.borderColor='${app.color}';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='';this.style.transform=''">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                        <div style="width:52px;height:52px;border-radius:14px;background:${catColors[app.category]||'var(--accent-dim)'};display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">${app.icon}</div>
+                        <div>
+                            <div style="font-size:15px;font-weight:700;color:var(--text)">${app.name}</div>
+                            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:${catColors[app.category]||'var(--accent-dim)'};color:${app.color}">${app.category}</span>
+                        </div>
+                    </div>
+                    <div style="font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:16px">${app.desc}</div>
+                    <div style="display:flex;gap:8px;font-size:12px;color:var(--text-muted);margin-bottom:14px">
+                        <span><i class="fas fa-memory"></i> ${app.ram >= 1024 ? app.ram/1024+'G' : app.ram+'M'} RAM</span>
+                        <span><i class="fas fa-hdd"></i> ${app.disk >= 1024 ? app.disk/1024+'G' : app.disk+'M'} Disk</span>
+                    </div>
+                    <button onclick="oneClickDeploy('${app.id}')" style="width:100%;padding:11px;background:${app.color};color:#fff;border:none;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px" id="ocbtn-${app.id}">
+                        <i class="fas fa-bolt"></i> Déployer maintenant
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        let ocDeployTarget = null;
+        function oneClickDeploy(appId) {
+            if (!token) { window.location.href = '/login?redirect=/marketplace'; return; }
+            ocDeployTarget = ONE_CLICK_APPS.find(a => a.id === appId);
+            if (!ocDeployTarget) return;
+            document.getElementById('ocAppName').textContent = ocDeployTarget.name;
+            document.getElementById('ocServerName').value = ocDeployTarget.name + ' ' + Date.now().toString(36).toUpperCase();
+            document.getElementById('ocModal').style.display = 'flex';
+        }
+        function closeOcModal() { document.getElementById('ocModal').style.display = 'none'; ocDeployTarget = null; }
+
+        async function confirmOneClickDeploy() {
+            if (!ocDeployTarget) return;
+            const name = document.getElementById('ocServerName').value.trim() || ocDeployTarget.name;
+            const btn = document.getElementById('ocConfirmBtn');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Déploiement...';
+            try {
+                const res = await fetch('/api/servers/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({
+                        name, egg_id: ocDeployTarget.egg,
+                        ram: ocDeployTarget.ram, disk: ocDeployTarget.disk,
+                        auto_configure: true
+                    })
+                });
+                const data = await res.json();
+                if (data.success || data.server) {
+                    closeOcModal();
+                    toast(`✅ "${name}" déployé ! Redirection...`, 'success');
+                    setTimeout(() => window.location.href = '/dashboard', 2000);
+                } else {
+                    btn.disabled = false; btn.innerHTML = '<i class="fas fa-bolt"></i> Confirmer';
+                    toast(data.error || 'Erreur lors du déploiement', 'error');
+                }
+            } catch(e) {
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-bolt"></i> Confirmer';
+                toast(e.message, 'error');
+            }
+        }
+
+        fetchCoins(); renderOneClickGrid();
+    </script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});</script>
+</body>
+</html>

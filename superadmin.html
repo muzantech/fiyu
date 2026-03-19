@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLYHOST — Panel Super Admin</title>
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{
+            --accent:#6366f1;--accent-light:#818cf8;--accent-dim:rgba(99,102,241,0.1);
+            --bg:#eef0f7;--surface:rgba(255,255,255,0.85);--surface-strong:rgba(255,255,255,0.95);
+            --border:rgba(99,102,241,0.18);--text:#0f172a;--text-secondary:#334155;--text-muted:#64748b;
+            --green:#10b981;--warning:#f59e0b;--error:#ef4444;--radius:16px;
+            --shadow:0 4px 20px rgba(99,102,241,0.12);
+        }
+        [data-theme="light"]{--bg:#eef0f7;--surface:rgba(255,255,255,0.85);--surface-strong:rgba(255,255,255,0.95);--border:rgba(99,102,241,0.18);--text:#0f172a;--text-secondary:#334155;--text-muted:#64748b;}
+        [data-theme="dark"]{--bg:#0d1117;--surface:rgba(22,27,34,0.9);--surface-strong:rgba(30,37,48,0.95);--border:rgba(99,102,241,0.25);--text:#f0f6fc;--text-secondary:#c9d1d9;--text-muted:#8b949e;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s;}
+        ::-webkit-scrollbar{width:6px;height:6px;}
+        ::-webkit-scrollbar-track{background:var(--accent-dim);}
+        ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px;}
+
+        /* TOPBAR */
+        .topbar{position:fixed;top:0;width:100%;height:60px;background:#1e1e2e;border-bottom:2px solid var(--accent);z-index:100;display:flex;align-items:center;padding:0 20px;gap:14px;}
+        .logo-mark{width:36px;height:36px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:white;flex-shrink:0;}
+        .logo-text{font-weight:800;font-size:16px;color:white;}
+        .topbar-badge{background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#ef4444;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:4px;}
+        .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+        .topbar-user{color:rgba(255,255,255,0.7);font-size:13px;}
+        .topbar-logout{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;}
+        .topbar-logout:hover{background:rgba(239,68,68,0.25);}
+
+        /* LAYOUT */
+        .layout{display:flex;padding-top:60px;min-height:100vh;}
+
+        /* SIDEBAR */
+        .sidebar{width:220px;background:var(--surface-strong);border-right:1px solid var(--border);padding:20px 12px;position:fixed;top:60px;left:0;height:calc(100vh - 60px);overflow-y:auto;z-index:50;flex-shrink:0;}
+        .sidebar-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);margin:16px 0 6px 8px;}
+        .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:2px;transition:all 0.2s;border:none;background:none;width:100%;text-align:left;font-family:inherit;}
+        .sidebar-item i{width:16px;text-align:center;color:var(--accent);font-size:14px;}
+        .sidebar-item:hover,.sidebar-item.active{background:var(--accent);color:white;}
+        .sidebar-item.active i,.sidebar-item:hover i{color:white;}
+
+        /* MAIN */
+        .main{margin-left:220px;padding:24px;flex:1;}
+        .page-title{font-size:22px;font-weight:800;margin-bottom:4px;}
+        .page-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:20px;}
+
+        /* TABS */
+        .tab-pane{display:none;}
+        .tab-pane.active{display:block;}
+
+        /* STATS GRID */
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
+        .stat-card{background:var(--surface-strong);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+        .stat-card .val{font-size:26px;font-weight:800;color:var(--accent);line-height:1.2;}
+        .stat-card .lbl{font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+        .stat-card .ico{font-size:18px;color:var(--accent-light);float:right;margin-top:-4px;}
+
+        /* CARD */
+        .card{background:var(--surface-strong);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:20px;}
+        .card-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .card-title i{color:var(--accent);}
+
+        /* TABLE */
+        .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+        table{width:100%;border-collapse:collapse;min-width:500px;}
+        th{background:var(--accent-dim);padding:10px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--accent);}
+        td{padding:10px 12px;border-top:1px solid var(--border);font-size:13px;color:var(--text-secondary);}
+        tr:hover td{background:var(--accent-dim);}
+        td strong{color:var(--text);font-weight:600;}
+
+        /* BADGE */
+        .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+        .badge-green{background:rgba(16,185,129,0.1);color:var(--green);}
+        .badge-red{background:rgba(239,68,68,0.1);color:var(--error);}
+        .badge-yellow{background:rgba(245,158,11,0.1);color:var(--warning);}
+        .badge-blue{background:var(--accent-dim);color:var(--accent);}
+
+        /* BUTTONS */
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all 0.2s;white-space:nowrap;}
+        .btn-primary{background:var(--accent);color:white;}
+        .btn-primary:hover{background:#5254d4;}
+        .btn-success{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.3);}
+        .btn-success:hover{background:rgba(16,185,129,0.2);}
+        .btn-danger{background:rgba(239,68,68,0.1);color:var(--error);border:1px solid rgba(239,68,68,0.3);}
+        .btn-danger:hover{background:rgba(239,68,68,0.2);}
+        .btn-warning{background:rgba(245,158,11,0.1);color:var(--warning);border:1px solid rgba(245,158,11,0.3);}
+        .btn-warning:hover{background:rgba(245,158,11,0.2);}
+        .btn-outline{background:transparent;color:var(--accent);border:1px solid var(--border);}
+        .btn-outline:hover{background:var(--accent-dim);}
+        .btn-sm{padding:5px 10px;font-size:11px;}
+
+        /* FORM ELEMENTS */
+        .input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:white;color:var(--text);outline:none;transition:border 0.2s;}
+        .input:focus{border-color:var(--accent);}
+        .search-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+        .search-row .input{max-width:280px;}
+        select.input{cursor:pointer;}
+
+        /* MODAL */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;}
+        .modal-overlay.active{display:flex;}
+        .modal{background:white;border-radius:var(--radius);padding:24px;width:90%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+        .modal h3{font-size:16px;font-weight:700;margin-bottom:16px;}
+        .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
+        .form-group{margin-bottom:12px;}
+        .form-group label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;}
+
+        /* ALERT */
+        .alert{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;margin-top:10px;}
+        .alert-success{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.3);}
+        .alert-error{background:rgba(239,68,68,0.1);color:var(--error);border:1px solid rgba(239,68,68,0.3);}
+
+        /* LOADING */
+        .loading{text-align:center;padding:30px;color:var(--text-muted);font-size:13px;}
+        .loading i{font-size:24px;animation:spin 1s linear infinite;display:block;margin-bottom:8px;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+
+        /* MOBILE SIDEBAR TOGGLE */
+        .mob-ham{display:none;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);width:34px;height:34px;border-radius:8px;font-size:15px;cursor:pointer;align-items:center;justify-content:center;}
+        .mob-side-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;}
+        .mob-side-overlay.vis{display:block;}
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:900px){
+            .sidebar{width:200px;}
+            .main{margin-left:200px;}
+        }
+        @media(max-width:768px){
+            .mob-ham{display:flex;}
+            .sidebar{
+                position:fixed;left:-240px;top:0;height:100vh;z-index:150;
+                width:220px;transition:left 0.25s ease;box-shadow:4px 0 20px rgba(0,0,0,0.3);
+            }
+            .mob-side-overlay{z-index:149;}
+            .sidebar.mob-open{left:0;}
+            .main{margin-left:0;padding:14px;}
+            .stats-grid{grid-template-columns:repeat(2,1fr);}
+            .topbar-badge{display:none;}
+        }
+        @media(max-width:480px){
+            .stats-grid{grid-template-columns:1fr 1fr;}
+            .card-title{font-size:13px;}
+            .search-row{flex-direction:column;}
+            .search-row .input{max-width:100%;}
+            .topbar-right{gap:6px;}
+            .topbar-user{display:none;}
+            .topbar-logout span{display:none;}
+            .topbar-logout{padding:6px 10px;}
+            table{min-width:400px;}
+        }
+        .toast-container{position:fixed;top:72px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+        .toast{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:white;border:1px solid #e5e7eb;border-left:4px solid;box-shadow:0 8px 30px rgba(0,0,0,0.12);min-width:280px;max-width:380px;pointer-events:all;animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);font-size:14px;font-weight:600;}
+        .toast.success{border-left-color:#10b981;}.toast.error{border-left-color:#ef4444;}.toast.warn{border-left-color:#f59e0b;}.toast.info{border-left-color:#6366f1;}
+        .toast i{font-size:16px;flex-shrink:0;}.toast.success i{color:#10b981;}.toast.error i{color:#ef4444;}.toast.warn i{color:#f59e0b;}.toast.info i{color:#6366f1;}
+        .toast.out{animation:toastOut .25s ease forwards;}
+        @keyframes toastIn{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
+        @keyframes toastOut{to{opacity:0;transform:translateX(100%);}}
+    </style>
+</head>
+<body>
+<div class="mob-side-overlay" id="mobSideOverlay" onclick="closeSidebarMob()"></div>
+
+<div class="topbar">
+    <button class="mob-ham" id="mobHam" onclick="toggleSidebarMob()"><i class="fas fa-bars"></i></button>
+    <div class="logo-mark">FH</div>
+    <span class="logo-text">FLYHOST</span>
+    <span class="topbar-badge">SUPER ADMIN</span>
+    <div class="topbar-right">
+        <span class="topbar-user" id="topbarUser"></span>
+        <button onclick="toggleThemeSA()" id="themeToggleBtn" style="background:transparent;border:none;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:15px;transition:background 0.2s;" title="Mode clair/sombre"><i id="themeIconSA" class="fas fa-sun"></i></button>
+        <button class="topbar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span></button>
+    </div>
+</div>
+
+<div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-section">Vue d'ensemble</div>
+        <button class="sidebar-item active" onclick="showTab('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</button>
+        <button class="sidebar-item" onclick="showTab('financial')"><i class="fas fa-coins"></i> Finances</button>
+
+        <div class="sidebar-section">Gestion</div>
+        <button class="sidebar-item" onclick="showTab('users')"><i class="fas fa-users"></i> Utilisateurs</button>
+        <button class="sidebar-item" onclick="showTab('servers')"><i class="fas fa-server"></i> Serveurs</button>
+
+        <div class="sidebar-section">Revendeurs</div>
+        <button class="sidebar-item" onclick="showTab('resellers')"><i class="fas fa-handshake"></i> Revendeurs</button>
+        <button class="sidebar-item" onclick="showTab('withdrawals')"><i class="fas fa-money-bill-transfer"></i> Retraits</button>
+
+        <div class="sidebar-section">Accès</div>
+        <button class="sidebar-item" onclick="showTab('admins')"><i class="fas fa-shield-alt"></i> Admins</button>
+
+        <div class="sidebar-section">Communication</div>
+        <button class="sidebar-item" onclick="showTab('announcements')"><i class="fas fa-bullhorn"></i> Annonces</button>
+        <button class="sidebar-item" onclick="showTab('promotions')"><i class="fas fa-tags"></i> Promotions</button>
+        <button class="sidebar-item" onclick="showTab('revenue')"><i class="fas fa-chart-area"></i> Graphiques revenus</button>
+
+        <div class="sidebar-section">Analytics</div>
+        <button class="sidebar-item" onclick="showTab('audit')"><i class="fas fa-shield-check"></i> Audit Log</button>
+        <button class="sidebar-item" onclick="showTab('geomap')"><i class="fas fa-globe"></i> Géolocalisation</button>
+        <button class="sidebar-item" onclick="showTab('challenges')"><i class="fas fa-trophy"></i> Challenges</button>
+
+        <div class="sidebar-section">Export</div>
+        <button class="sidebar-item" onclick="exportCSV('users')"><i class="fas fa-file-csv"></i> Export Utilisateurs</button>
+        <button class="sidebar-item" onclick="exportCSV('transactions')"><i class="fas fa-file-csv"></i> Export Transactions</button>
+
+        <div class="sidebar-section">Pterodactyl</div>
+        <button class="sidebar-item" onclick="showTab('eggs')"><i class="fas fa-egg"></i> Config. Eggs</button>
+
+        <div class="sidebar-section">Boutique</div>
+        <button class="sidebar-item" onclick="showTab('my-marketplace')"><i class="fas fa-store"></i> Ma boutique</button>
+        <div class="sidebar-section">Liens</div>
+        <button class="sidebar-item" onclick="window.location.href='/dashboard'"><i class="fas fa-tachometer-alt"></i> Dashboard user</button>
+        <button class="sidebar-item" onclick="window.location.href='/chat'"><i class="fas fa-comments"></i> Chat</button>
+        <button class="sidebar-item" onclick="window.location.href='/leaderboard'"><i class="fas fa-trophy"></i> Classement</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-pane active">
+            <div class="page-title"><i class="fas fa-chart-line" style="color:var(--accent)"></i> Vue d'ensemble</div>
+            <div class="page-subtitle">Statistiques du système FLYHOST en temps réel</div>
+
+            <div id="stats-grid" class="stats-grid">
+                <div class="loading"><i class="fas fa-spinner"></i> Chargement...</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;flex-wrap:wrap;">
+                <div class="card" style="min-width:0">
+                    <div class="card-title"><i class="fas fa-server"></i> Serveurs par type</div>
+                    <div id="servers-by-type"><div class="loading"><i class="fas fa-spinner"></i></div></div>
+                </div>
+                <div class="card" style="min-width:0">
+                    <div class="card-title"><i class="fas fa-rocket"></i> Déploiements</div>
+                    <div id="deploy-stats"><div class="loading"><i class="fas fa-spinner"></i></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USERS TAB -->
+        <div id="tab-users" class="tab-pane">
+            <div class="page-title"><i class="fas fa-users" style="color:var(--accent)"></i> Gestion des utilisateurs</div>
+            <div class="page-subtitle">Rechercher, bannir, gérer les coins des utilisateurs</div>
+            <div class="card">
+                <div class="search-row">
+                    <input type="text" class="input" id="user-search" placeholder="Rechercher par nom ou email..." oninput="searchUsers()">
+                    <select class="input" id="user-role-filter" onchange="searchUsers()" style="max-width:160px;">
+                        <option value="">Tous les rôles</option>
+                        <option value="superadmin">Super Admin</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">Utilisateur</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="searchUsers()"><i class="fas fa-search"></i> Chercher</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Nom</th><th>Email</th><th>Rôle</th><th>Coins</th><th>Serveurs</th><th>Statut</th><th>Actions</th></tr></thead>
+                        <tbody id="users-tbody"><tr><td colspan="8" class="loading">Chargement...</td></tr></tbody>
+                    </table>
+                </div>
+                <div id="users-pagination" style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+                    <button class="btn btn-outline btn-sm" id="users-prev" onclick="usersPage(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span id="users-page-info" style="font-size:13px;color:var(--text-muted)"></span>
+                    <button class="btn btn-outline btn-sm" id="users-next" onclick="usersPage(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SERVERS TAB -->
+        <div id="tab-servers" class="tab-pane">
+            <div class="page-title"><i class="fas fa-server" style="color:var(--accent)"></i> Tous les serveurs</div>
+            <div class="page-subtitle">Voir et supprimer tous les serveurs de la plateforme</div>
+            <div class="card">
+                <div class="search-row">
+                    <input type="text" class="input" id="server-search" placeholder="Rechercher par nom ou utilisateur..." style="max-width:320px;" oninput="loadAllServers()">
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Nom</th><th>Utilisateur</th><th>Type</th><th>Statut</th><th>Expiration</th><th>Actions</th></tr></thead>
+                        <tbody id="servers-tbody"><tr><td colspan="7" class="loading">Chargement...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESELLERS TAB -->
+        <div id="tab-resellers" class="tab-pane">
+            <div class="page-title"><i class="fas fa-handshake" style="color:var(--accent)"></i> Revendeurs</div>
+            <div class="page-subtitle">Gérer les revendeurs et leurs taux de commission</div>
+            <div class="card">
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Utilisateur</th><th>Clients</th><th>Solde Commission</th><th>Total Gagné</th><th>Commission %</th><th>Actif</th><th>Actions</th></tr></thead>
+                        <tbody id="resellers-tbody"><tr><td colspan="8" class="loading">Chargement...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- WITHDRAWALS TAB -->
+        <div id="tab-withdrawals" class="tab-pane">
+            <div class="page-title"><i class="fas fa-money-bill-transfer" style="color:var(--accent)"></i> Demandes de retrait</div>
+            <div class="page-subtitle">Valider ou refuser les demandes de retrait des revendeurs</div>
+
+            <!-- Résumé rapide -->
+            <div id="withdrawal-summary" class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px;"></div>
+
+            <div class="card">
+                <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+                    <select class="input" id="withdrawal-status-filter" onchange="loadWithdrawals()" style="max-width:180px;">
+                        <option value="pending">⏳ En attente</option>
+                        <option value="approved">✅ Approuvés</option>
+                        <option value="rejected">❌ Refusés</option>
+                    </select>
+                    <button class="btn btn-outline btn-sm" onclick="loadWithdrawals()"><i class="fas fa-sync-alt"></i> Rafraîchir</button>
+                    <span id="withdrawal-count" style="font-size:13px;color:var(--text-muted);margin-left:auto;"></span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Revendeur</th>
+                                <th>Montant</th>
+                                <th>Méthode</th>
+                                <th>Informations de paiement</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawals-tbody"><tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Chargement...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FINANCIAL TAB -->
+        <div id="tab-financial" class="tab-pane">
+            <div class="page-title"><i class="fas fa-coins" style="color:var(--accent)"></i> Rapport financier</div>
+            <div class="page-subtitle">Vue d'ensemble des revenus et commissions</div>
+            <div id="financial-content">
+                <div class="loading"><i class="fas fa-spinner"></i> Chargement du rapport financier...</div>
+            </div>
+        </div>
+
+        <!-- ADMINS TAB -->
+        <div id="tab-admins" class="tab-pane">
+            <div class="page-title"><i class="fas fa-shield-alt" style="color:var(--accent)"></i> Administrateurs</div>
+            <div class="page-subtitle">Gérer les accès admin de la plateforme</div>
+            <div class="card" style="margin-bottom:16px;">
+                <div class="card-title"><i class="fas fa-plus-circle"></i> Promouvoir un utilisateur admin</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                    <div class="form-group" style="flex:1;min-width:200px;margin-bottom:0;position:relative;">
+                        <label>Nom d'utilisateur</label>
+                        <input type="text" class="input" id="promote-username" placeholder="Rechercher un utilisateur..." autocomplete="off" oninput="searchPromoteUser(this.value)">
+                        <input type="hidden" id="promote-userid">
+                        <div id="promote-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface-strong);border:1px solid var(--border-strong);border-radius:10px;z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.12);margin-top:4px;"></div>
+                    </div>
+                    <div class="form-group" style="min-width:120px;margin-bottom:0;">
+                        <label>Durée (jours)</label>
+                        <input type="number" class="input" id="promote-days" value="30" min="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="promoteUser()"><i class="fas fa-shield-alt"></i> Promouvoir</button>
+                </div>
+                <div id="promote-result" style="display:none"></div>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list"></i> Admins actuels</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Expire le</th><th>Serveurs</th><th>Actions</th></tr></thead>
+                        <tbody id="admins-tbody"><tr><td colspan="6" class="loading">Chargement...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS TAB -->
+        <div id="tab-announcements" class="tab-pane">
+            <div class="page-title"><i class="fas fa-bullhorn" style="color:var(--accent)"></i> Communication & Notifications</div>
+            <div class="page-subtitle">Envoyez des messages, annonces ou emails groupés à tous vos utilisateurs</div>
+
+            <!-- Onglets internes -->
+            <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" onclick="showBroadcastTab('announce')" id="bt-announce">📢 Annonce in-app</button>
+                <button class="btn btn-outline btn-sm" onclick="showBroadcastTab('email')" id="bt-email">📧 Email groupé</button>
+                <button class="btn btn-outline btn-sm" onclick="showBroadcastTab('notif')" id="bt-notif">🔔 Notification push</button>
+                <button class="btn btn-outline btn-sm" onclick="showBroadcastTab('history')" id="bt-history">📋 Historique</button>
+            </div>
+
+            <!-- Annonce in-app -->
+            <div id="bc-announce">
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-title"><i class="fas fa-plus"></i> Nouvelle annonce (bandeau dans le dashboard)</div>
+                    <div style="display:grid;gap:12px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Titre</label>
+                                <input type="text" class="input" id="ann-title" placeholder="Titre de l'annonce">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Type</label>
+                                <select class="input" id="ann-type">
+                                    <option value="info">ℹ️ Information</option>
+                                    <option value="warning">⚠️ Avertissement</option>
+                                    <option value="success">✅ Succès</option>
+                                    <option value="incident">🔴 Incident</option>
+                                    <option value="maintenance">🔧 Maintenance</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Message</label>
+                            <textarea class="input" id="ann-message" rows="3" placeholder="Contenu de l'annonce..." style="resize:vertical;"></textarea>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Expire le (optionnel)</label>
+                            <input type="datetime-local" class="input" id="ann-expires">
+                        </div>
+                        <button class="btn btn-primary" onclick="createAnnouncement()"><i class="fas fa-paper-plane"></i> Publier l'annonce</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-list"></i> Annonces actives</div>
+                    <div id="ann-list"><div class="loading">Chargement...</div></div>
+                </div>
+            </div>
+
+            <!-- Email groupé -->
+            <div id="bc-email" style="display:none;">
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-title"><i class="fas fa-envelope-open-text"></i> Envoyer un email à tous les utilisateurs</div>
+                    <div style="display:grid;gap:14px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Sujet de l'email</label>
+                                <input type="text" class="input" id="em-subject" placeholder="Ex: Maintenance prévue ce soir">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Type (couleur/icône)</label>
+                                <select class="input" id="em-type">
+                                    <option value="info">ℹ️ Information</option>
+                                    <option value="warning">⚠️ Avertissement</option>
+                                    <option value="success">✅ Succès</option>
+                                    <option value="incident">🔴 Incident</option>
+                                    <option value="maintenance">🔧 Maintenance</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Message</label>
+                            <textarea class="input" id="em-message" rows="5" placeholder="Corps du message email..." style="resize:vertical;"></textarea>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Destinataires</label>
+                                <select class="input" id="em-target">
+                                    <option value="all">Tous les utilisateurs</option>
+                                    <option value="active">Utilisateurs avec serveurs actifs</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                                    <input type="checkbox" id="em-also-announce" style="width:16px;height:16px;">
+                                    Créer aussi une annonce in-app
+                                </label>
+                                <input type="text" class="input" id="em-announce-title" placeholder="Titre de l'annonce in-app" style="margin-top:8px;display:none;">
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <button class="btn btn-primary" onclick="sendBroadcastEmail()"><i class="fas fa-paper-plane"></i> Envoyer l'email groupé</button>
+                            <div id="em-status" style="font-size:13px;color:var(--text-secondary);"></div>
+                        </div>
+                        <div style="padding:12px 16px;background:rgba(99,102,241,0.1);border-radius:10px;font-size:13px;color:var(--text-secondary);">
+                            <i class="fas fa-info-circle" style="color:var(--accent);margin-right:6px;"></i>
+                            L'envoi se fait progressivement pour éviter le blocage par les serveurs mail. Un rapport final s'affiche à la fin.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification push in-app -->
+            <div id="bc-notif" style="display:none;">
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-title"><i class="fas fa-bell"></i> Envoyer une notification push (cloche dans le dashboard)</div>
+                    <div style="display:grid;gap:14px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Titre de la notification</label>
+                                <input type="text" class="input" id="notif-title" placeholder="Ex: Nouvelle fonctionnalité !">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Type</label>
+                                <select class="input" id="notif-type">
+                                    <option value="info">ℹ️ Information</option>
+                                    <option value="warning">⚠️ Avertissement</option>
+                                    <option value="success">✅ Succès / Récompense</option>
+                                    <option value="incident">🔴 Incident</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Message</label>
+                            <textarea class="input" id="notif-message" rows="3" placeholder="Message de la notification..." style="resize:vertical;"></textarea>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Lien (optionnel)</label>
+                                <input type="text" class="input" id="notif-link" placeholder="/dashboard, /payment, etc.">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Destinataires</label>
+                                <select class="input" id="notif-target">
+                                    <option value="all">Tous les utilisateurs</option>
+                                    <option value="active">Utilisateurs avec serveurs actifs</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <button class="btn btn-primary" onclick="sendBroadcastNotification()"><i class="fas fa-bell"></i> Envoyer la notification</button>
+                            <div id="notif-status" style="font-size:13px;color:var(--text-secondary);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historique des broadcasts -->
+            <div id="bc-history" style="display:none;">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-history"></i> Historique des messages envoyés</div>
+                    <div id="broadcast-history-list"><div class="loading">Chargement...</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROMOTIONS TAB -->
+        <div id="tab-promotions" class="tab-pane">
+            <div class="page-title"><i class="fas fa-tags" style="color:var(--accent)"></i> Promotions & Réductions</div>
+            <div class="page-subtitle">Créez des bannières visuelles de réduction affichées sur le dashboard et les pages des utilisateurs</div>
+
+            <!-- Prévisualisation live -->
+            <div id="promo-preview-wrap" style="margin-bottom:20px;display:none;">
+                <div class="card-title" style="margin-bottom:10px;font-size:13px;color:var(--text-muted);"><i class="fas fa-eye"></i> Aperçu en direct</div>
+                <div id="promo-preview-container" style="border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2);"></div>
+            </div>
+
+            <!-- Formulaire création -->
+            <div class="card" style="margin-bottom:20px;">
+                <div class="card-title"><i class="fas fa-plus"></i> Nouvelle promotion</div>
+                <div style="display:grid;gap:14px;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Titre *</label>
+                            <input type="text" class="input" id="promo-title" placeholder="Ex: -50% sur les serveurs Node.js" oninput="updatePromoPreview()">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Sous-titre</label>
+                            <input type="text" class="input" id="promo-subtitle" placeholder="Ex: Offre valable ce week-end seulement" oninput="updatePromoPreview()">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>% de réduction</label>
+                            <input type="number" class="input" id="promo-discount" placeholder="Ex: 50" min="0" max="100" oninput="updatePromoPreview()">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Prix original (coins)</label>
+                            <input type="number" class="input" id="promo-orig-price" placeholder="Ex: 200" min="0" oninput="updatePromoPreview()">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Prix promo (coins)</label>
+                            <input type="number" class="input" id="promo-price" placeholder="Ex: 100" min="0" oninput="updatePromoPreview()">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Plans ciblés</label>
+                            <select class="input" id="promo-server-type" onchange="updatePromoPreview()">
+                                <option value="">🌍 Tous les plans</option>
+                                <option value="free">🆓 Starter (Gratuit)</option>
+                                <option value="1gb">📦 1 GB Plan</option>
+                                <option value="2gb">💼 2 GB Plan</option>
+                                <option value="4gb">🚀 4 GB Plan</option>
+                                <option value="8gb">⚡ 8 GB Plan</option>
+                                <option value="unlimited">♾️ Unlimited</option>
+                                <option value="admin">👑 Admin Plan</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Texte du badge</label>
+                            <input type="text" class="input" id="promo-badge" placeholder="Ex: FLASH SALE" value="PROMO" oninput="updatePromoPreview()">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Couleur</label>
+                            <select class="input" id="promo-color" onchange="updatePromoPreview()">
+                                <option value="purple">🟣 Violet (défaut)</option>
+                                <option value="orange">🟠 Orange (chaud)</option>
+                                <option value="red">🔴 Rouge (urgent)</option>
+                                <option value="green">🟢 Vert (éco)</option>
+                                <option value="blue">🔵 Bleu (pro)</option>
+                                <option value="gold">🟡 Or (premium)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Texte du bouton CTA</label>
+                            <input type="text" class="input" id="promo-cta-text" placeholder="Ex: En profiter maintenant" value="En profiter">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>URL du bouton (CTA)</label>
+                            <input type="text" class="input" id="promo-cta-url" placeholder="Ex: /pricing" value="/pricing">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Affichage</label>
+                            <select class="input" id="promo-display-type">
+                                <option value="banner">🖼️ Bannière (carte dans le dashboard)</option>
+                                <option value="ticker">📢 Ticker (défilant en haut)</option>
+                                <option value="popup">💬 Popup (modal automatique)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Expire le (optionnel)</label>
+                            <input type="datetime-local" class="input" id="promo-ends-at">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Options</label>
+                            <div style="display:flex;flex-direction:column;gap:8px;padding-top:4px;">
+                                <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;">
+                                    <input type="checkbox" id="promo-countdown" checked style="accent-color:var(--accent);width:15px;height:15px;">
+                                    Compte à rebours
+                                </label>
+                                <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;">
+                                    <input type="checkbox" id="promo-pinned" style="accent-color:var(--accent);width:15px;height:15px;">
+                                    Épingler en haut
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="createPromotion()"><i class="fas fa-rocket"></i> Publier la promotion</button>
+                </div>
+            </div>
+
+            <!-- Liste des promotions actives -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list"></i> Promotions actives</div>
+                <div id="promo-list"><div class="loading">Chargement...</div></div>
+            </div>
+        </div>
+
+        <!-- REVENUE CHART TAB -->
+        <div id="tab-revenue" class="tab-pane">
+            <div class="page-title"><i class="fas fa-chart-area" style="color:var(--accent)"></i> Graphiques de revenus</div>
+            <div class="page-subtitle">Analyse des revenus de la plateforme</div>
+            <div class="card" style="margin-bottom:20px;">
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap;">
+                    <span style="font-weight:700;font-size:14px;">Période :</span>
+                    <button class="btn btn-outline btn-sm" onclick="loadRevenueChart(7)" id="rev-btn-7">7 jours</button>
+                    <button class="btn btn-primary btn-sm" onclick="loadRevenueChart(30)" id="rev-btn-30">30 jours</button>
+                    <button class="btn btn-outline btn-sm" onclick="loadRevenueChart(90)" id="rev-btn-90">90 jours</button>
+                    <span id="rev-total" style="margin-left:auto;font-size:18px;font-weight:800;color:var(--accent);">—</span>
+                </div>
+                <canvas id="revenueChart" height="80"></canvas>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;">
+                <div class="card" style="text-align:center;padding:16px;">
+                    <div style="font-size:28px;font-weight:800;color:var(--accent);" id="rev-stat-total">—</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Total XOF</div>
+                </div>
+                <div class="card" style="text-align:center;padding:16px;">
+                    <div style="font-size:28px;font-weight:800;color:var(--green);" id="rev-stat-count">—</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Transactions</div>
+                </div>
+                <div class="card" style="text-align:center;padding:16px;">
+                    <div style="font-size:28px;font-weight:800;color:var(--warning);" id="rev-stat-avg">—</div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Moyenne/jour</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AUDIT LOG TAB -->
+        <div id="tab-audit" class="tab-pane">
+            <div class="page-title"><i class="fas fa-shield-check" style="color:var(--accent)"></i> Audit Log</div>
+            <div class="page-subtitle">Toutes les actions des administrateurs</div>
+            <div class="card" style="margin-bottom:16px;">
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <input id="auditSearch" type="text" placeholder="Filtrer par action..." style="flex:1;padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:#1e293b;color:#e2e8f0;font-family:inherit;font-size:13px;min-width:160px;" oninput="loadAuditLogs()">
+                    <button class="btn btn-primary btn-sm" onclick="loadAuditLogs()"><i class="fas fa-sync"></i> Actualiser</button>
+                </div>
+            </div>
+            <div id="auditLogsContainer" class="card" style="padding:0;overflow:hidden;">
+                <p style="padding:20px;color:var(--text-secondary);">Chargement...</p>
+            </div>
+        </div>
+
+        <!-- GEOMAP TAB -->
+        <div id="tab-geomap" class="tab-pane">
+            <div class="page-title"><i class="fas fa-globe" style="color:var(--accent)"></i> Géolocalisation</div>
+            <div class="page-subtitle">Distribution géographique des utilisateurs</div>
+            <div class="card">
+                <div id="geoIpTable">
+                    <p style="color:var(--text-secondary);">Chargement de la carte...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHALLENGES TAB -->
+        <div id="tab-challenges" class="tab-pane">
+            <div class="page-title"><i class="fas fa-trophy" style="color:var(--accent)"></i> Challenges</div>
+            <div class="page-subtitle">Gérer les challenges mensuels de la plateforme</div>
+            <div class="card" style="margin-bottom:20px;">
+                <h3 style="margin-bottom:16px;font-size:15px;">Créer un challenge</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">Nom *</label><input id="chName" type="text" placeholder="Ex: Déployer 3 serveurs" style="width:100%;padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:#1e293b;color:#e2e8f0;font-family:inherit;font-size:13px;"></div>
+                    <div><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">Coins de récompense</label><input id="chCoins" type="number" value="50" min="1" style="width:100%;padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:#1e293b;color:#e2e8f0;font-family:inherit;font-size:13px;"></div>
+                </div>
+                <div style="margin-bottom:12px;"><label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;">Description</label><input id="chDesc" type="text" placeholder="Description du challenge..." style="width:100%;padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:#1e293b;color:#e2e8f0;font-family:inherit;font-size:13px;"></div>
+                <button class="btn btn-primary btn-sm" onclick="createChallenge()"><i class="fas fa-plus"></i> Créer</button>
+            </div>
+            <div id="challengesAdminList" class="card" style="padding:0;overflow:hidden;">
+                <p style="padding:20px;color:var(--text-secondary);">Chargement...</p>
+            </div>
+        </div>
+
+        <!-- BOUTIQUE TAB -->
+        <div id="tab-my-marketplace" class="tab-pane">
+            <div class="page-title"><i class="fas fa-store" style="color:var(--accent)"></i> Ma boutique Marketplace</div>
+            <div class="page-subtitle">Gérez vos articles en vente et partagez votre boutique.</div>
+
+            <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.08));border:1px solid rgba(99,102,241,0.3);">
+                <div class="card-title"><i class="fas fa-link"></i> Lien de votre boutique</div>
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Partagez ce lien avec vos clients. Ils peuvent parcourir et acheter vos articles directement.</p>
+                <div style="display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.25);border:1px solid rgba(99,102,241,0.3);border-radius:12px;padding:12px 16px;margin-bottom:14px;flex-wrap:wrap;">
+                    <i class="fas fa-store" style="color:var(--accent);flex-shrink:0;"></i>
+                    <span id="sa-shop-url" style="font-family:monospace;font-size:13px;color:#e0e7ff;flex:1;word-break:break-all;">Chargement...</span>
+                    <button onclick="copySAShopLink()" style="background:var(--accent);border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-copy"></i> Copier</button>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button onclick="window.open(document.getElementById('sa-shop-url').textContent,'_blank')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e0e7ff;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-external-link-alt"></i> Voir ma boutique</button>
+                    <button onclick="window.open('/marketplace','_blank')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e0e7ff;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-plus"></i> Publier un article</button>
+                </div>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);">
+                    <div class="card-title" style="margin:0;"><i class="fas fa-tag"></i> Mes articles publiés</div>
+                    <button onclick="loadSAListings()" style="background:rgba(99,102,241,0.12);border:1px solid var(--border);color:var(--accent);padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;"><i class="fas fa-sync"></i> Actualiser</button>
+                </div>
+                <div id="sa-listings-wrap" style="padding:20px;">
+                    <p style="color:var(--text-secondary);font-size:13px;">Cliquez sur "Ma boutique" pour charger vos articles.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- EGGS PTERODACTYL TAB -->
+        <div id="tab-eggs" class="tab-pane">
+            <div class="page-title"><i class="fas fa-egg" style="color:var(--accent)"></i> Configuration Eggs Pterodactyl</div>
+            <div class="page-subtitle">Associez chaque technologie à un egg installé sur votre panel Pterodactyl</div>
+
+            <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.05));border:1px solid rgba(99,102,241,0.25);">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:200px;">
+                        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;"><i class="fas fa-info-circle" style="color:var(--accent)"></i> Comment ça marche ?</div>
+                        <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">Cliquez sur <strong>Charger les eggs</strong> pour voir tous les eggs installés sur votre panel Pterodactyl, puis sélectionnez l'egg correspondant à chaque technologie.</div>
+                    </div>
+                    <button onclick="loadPterodactylEggs()" id="btn-load-eggs" style="background:var(--accent);border:none;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="fas fa-sync"></i> Charger les eggs</button>
+                </div>
+            </div>
+
+            <div id="eggs-status" style="display:none;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:600;"></div>
+
+            <div class="card" style="margin-bottom:20px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+                    <div style="font-size:15px;font-weight:800;color:var(--text);"><i class="fas fa-layer-group" style="color:var(--accent)"></i> Mapping Technologie → Egg</div>
+                    <button onclick="saveEggMapping()" style="background:#10b981;border:none;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-save"></i> Sauvegarder</button>
+                </div>
+                <div id="egg-mapping-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:16px;">
+                    <div style="color:var(--text-secondary);font-size:13px;padding:20px;text-align:center;grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i> Cliquez sur "Charger les eggs" pour commencer</div>
+                </div>
+            </div>
+
+            <!-- Maintenance sous-domaines -->
+            <div class="card" style="margin-bottom:20px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+                    <div style="font-size:15px;font-weight:800;color:var(--text);"><i class="fas fa-network-wired" style="color:#f59e0b"></i> Maintenance sous-domaines</div>
+                    <button onclick="backfillAllocPorts()" id="btn-backfill" style="background:#f59e0b;border:none;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+                        <i class="fas fa-sync"></i> Récupérer les ports manquants
+                    </button>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">Pour les serveurs créés avant la mise à jour sous-domaines, cliquez pour récupérer automatiquement les ports d'allocation Pterodactyl. Nécessaire pour que les sous-domaines <code style="color:var(--accent)">xxx.flihost.site</code> fonctionnent.</div>
+                <div id="backfill-result" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;"></div>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden;" id="eggs-raw-card" style="display:none;">
+                <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+                    <div style="font-size:14px;font-weight:800;color:var(--text);"><i class="fas fa-list" style="color:var(--accent)"></i> Tous les eggs installés</div>
+                    <span id="eggs-count-badge" style="background:var(--accent-dim);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;"></span>
+                </div>
+                <div id="eggs-raw-list" style="padding:16px;max-height:400px;overflow-y:auto;"></div>
+            </div>
+        </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL COINS -->
+<div class="modal-overlay" id="modal-coins">
+    <div class="modal">
+        <h3><i class="fas fa-coins" style="color:var(--accent)"></i> Modifier les coins</h3>
+        <input type="hidden" id="modal-coins-uid">
+        <div class="form-group">
+            <label>Action</label>
+            <select class="input" id="modal-coins-action">
+                <option value="add">Ajouter</option>
+                <option value="remove">Retirer</option>
+                <option value="set">Définir</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Montant</label>
+            <input type="number" class="input" id="modal-coins-amount" placeholder="Ex: 100">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('modal-coins')">Annuler</button>
+            <button class="btn btn-primary" onclick="submitCoins()"><i class="fas fa-check"></i> Valider</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL COMMISSION -->
+<div class="modal-overlay" id="modal-commission">
+    <div class="modal">
+        <h3><i class="fas fa-percent" style="color:var(--accent)"></i> Modifier le taux de commission</h3>
+        <input type="hidden" id="modal-commission-id">
+        <div class="form-group">
+            <label>Nouveau taux (%)</label>
+            <input type="number" class="input" id="modal-commission-rate" min="0" max="100" placeholder="Ex: 15">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal('modal-commission')">Annuler</button>
+            <button class="btn btn-primary" onclick="submitCommission()"><i class="fas fa-check"></i> Valider</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL TRAITEMENT RETRAIT -->
+<div class="modal-overlay" id="modal-withdrawal" onclick="e=>{if(e.target.id==='modal-withdrawal')closeModal('modal-withdrawal')}">
+    <div class="modal" style="max-width:520px;padding:0;border-radius:16px;overflow:hidden;">
+
+        <!-- Header -->
+        <div id="wd-modal-header" style="padding:20px 24px 18px;border-bottom:1px solid rgba(99,102,241,0.15);">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <h3 style="font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px;">
+                    <i class="fas fa-money-bill-transfer" style="color:var(--accent)"></i>
+                    Traiter la demande de retrait
+                </h3>
+                <button onclick="closeModal('modal-withdrawal')" style="background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;">&times;</button>
+            </div>
+        </div>
+
+        <!-- Infos retrait -->
+        <div style="padding:18px 24px;background:rgba(99,102,241,0.04);border-bottom:1px solid rgba(99,102,241,0.12);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:3px;">Revendeur</div>
+                    <div style="font-size:14px;font-weight:700;color:var(--text);" id="wd-reseller-name">—</div>
+                    <div style="font-size:12px;color:var(--text-muted);" id="wd-business-name">—</div>
+                </div>
+                <div>
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:3px;">Montant demandé</div>
+                    <div style="font-size:22px;font-weight:800;color:var(--warning);" id="wd-amount">—</div>
+                </div>
+            </div>
+            <div style="margin-top:12px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:6px;">Méthode &amp; Informations de paiement</div>
+                <div style="background:white;border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:12px;">
+                    <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px;" id="wd-method">—</div>
+                    <div style="font-size:13px;color:var(--text);white-space:pre-wrap;" id="wd-details">—</div>
+                </div>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">Demandé le <span id="wd-date">—</span></div>
+        </div>
+
+        <!-- Actions -->
+        <div style="padding:20px 24px;">
+            <input type="hidden" id="wd-id">
+
+            <!-- Section Approbation -->
+            <div id="wd-approve-section">
+                <div class="form-group">
+                    <label>Référence de paiement <span style="color:var(--text-muted);font-weight:400;">(optionnel)</span></label>
+                    <input type="text" class="input" id="wd-reference" placeholder="Ex: TXN-20240315-001, numéro de transaction...">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Note pour le revendeur <span style="color:var(--text-muted);font-weight:400;">(optionnel)</span></label>
+                    <textarea class="input" id="wd-approve-note" rows="2" placeholder="Message visible par le revendeur..." style="resize:vertical;"></textarea>
+                </div>
+            </div>
+
+            <!-- Section Refus -->
+            <div id="wd-reject-section" style="display:none;">
+                <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px;margin-bottom:14px;">
+                    <div style="font-size:13px;font-weight:700;color:var(--error);margin-bottom:2px;"><i class="fas fa-exclamation-triangle"></i> Refus du retrait</div>
+                    <div style="font-size:12px;color:var(--text-muted);">Le montant sera recrédité sur le solde du revendeur. Il recevra votre motif.</div>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Motif du refus <span style="color:var(--error);">*</span></label>
+                    <textarea class="input" id="wd-reject-reason" rows="3" placeholder="Expliquez la raison du refus (visible par le revendeur)..." style="resize:vertical;border-color:rgba(239,68,68,0.4);"></textarea>
+                </div>
+            </div>
+
+            <div id="wd-action-btns" style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+                <button class="btn btn-success" onclick="submitWithdrawalAction('approved')" style="flex:1;justify-content:center;padding:12px;">
+                    <i class="fas fa-check-circle"></i> Approuver le paiement
+                </button>
+                <button class="btn btn-danger" onclick="toggleRejectForm()" id="wd-reject-toggle-btn" style="flex:1;justify-content:center;padding:12px;">
+                    <i class="fas fa-times-circle"></i> Refuser
+                </button>
+            </div>
+            <div id="wd-confirm-reject-btns" style="display:none;margin-top:12px;">
+                <button class="btn btn-danger" onclick="submitWithdrawalAction('rejected')" style="width:100%;justify-content:center;padding:12px;">
+                    <i class="fas fa-times-circle"></i> Confirmer le refus
+                </button>
+                <button class="btn btn-outline" onclick="toggleRejectForm()" style="width:100%;justify-content:center;margin-top:8px;">Annuler</button>
+            </div>
+            <div id="wd-processed-info" style="display:none;padding:14px;border-radius:10px;margin-top:12px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const token = localStorage.getItem('flyhost_token');
+if (!token) window.location.href = '/login';
+
+const h = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+/* --- Mobile sidebar toggle --- */
+function toggleSidebarMob(){
+    const sb = document.querySelector('.sidebar');
+    const ov = document.getElementById('mobSideOverlay');
+    const open = sb.classList.contains('mob-open');
+    sb.classList.toggle('mob-open', !open);
+    ov.classList.toggle('vis', !open);
+    document.body.style.overflow = open ? '' : 'hidden';
+}
+function closeSidebarMob(){
+    document.querySelector('.sidebar').classList.remove('mob-open');
+    document.getElementById('mobSideOverlay').classList.remove('vis');
+    document.body.style.overflow = '';
+}
+window.addEventListener('keydown', e => { if(e.key==='Escape') closeSidebarMob(); });
+window.addEventListener('resize', () => { if(window.innerWidth > 768) closeSidebarMob(); });
+
+let usersOffset = 0, usersLimit = 20, usersTotalCount = 0;
+
+async function init() {
+    try {
+        const r = await fetch('/api/user/me', { headers: h });
+        const d = await r.json();
+        if (!d.success) { logout(); return; }
+        if (d.user.role !== 'superadmin') { window.location.href = '/dashboard'; return; }
+        currentAdminId = d.user.id;
+        document.getElementById('topbarUser').textContent = d.user.username;
+    } catch(e) { logout(); }
+    loadDashboard();
+    loadUsers();
+}
+
+function logout() {
+    localStorage.removeItem('flyhost_token');
+    localStorage.removeItem('flyhost_user');
+    window.location.href = '/login';
+}
+
+function showTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if(window.innerWidth <= 768) closeSidebarMob();
+
+    if (name === 'users') loadUsers();
+    else if (name === 'servers') loadAllServers();
+    else if (name === 'resellers') loadResellers();
+    else if (name === 'withdrawals') loadWithdrawals();
+    else if (name === 'financial') loadFinancial();
+    else if (name === 'admins') loadAdmins();
+    else if (name === 'dashboard') loadDashboard();
+    else if (name === 'announcements') loadAnnouncements();
+    else if (name === 'promotions') loadPromotions();
+    else if (name === 'revenue') loadRevenueChart(30);
+    else if (name === 'audit') loadAuditLogs();
+    else if (name === 'geomap') loadGeoMap();
+    else if (name === 'challenges') loadChallengesAdmin();
+    else if (name === 'my-marketplace') loadSAMarketplace();
+}
+
+let currentAdminId = null;
+let saUserId = null, saUsername = null;
+async function loadSAMarketplace() {
+    if (!saUserId) {
+        try {
+            const r = await fetch('/api/user/profile', { headers: h });
+            const d = await r.json();
+            saUserId = d.user?.id;
+            saUsername = d.user?.username;
+        } catch(e) {}
+    }
+    if (saUsername) {
+        const shopUrl = `${window.location.origin}/shop/${saUsername.toLowerCase()}`;
+        document.getElementById('sa-shop-url').textContent = shopUrl;
+    }
+    loadSAListings();
+}
+async function loadSAListings() {
+    const wrap = document.getElementById('sa-listings-wrap');
+    wrap.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Chargement...</p>';
+    try {
+        const url = saUserId ? `/api/marketplace?limit=50&seller_id=${saUserId}` : '/api/marketplace?limit=50';
+        const r = await fetch(url, { headers: h });
+        const d = await r.json();
+        if (!d.listings?.length) {
+            wrap.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;padding:10px 0;">Aucun article publié. <a href="/marketplace" target="_blank" style="color:var(--accent);">Publiez votre premier article</a>.</p>';
+            return;
+        }
+        const ICONS = { template:'📄', config:'⚙️', script:'💻', api:'🔌', command:'⌨️', function:'🧩', file:'📁', plugin:'🔌', autre:'📦' };
+        wrap.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead><tr style="border-bottom:1px solid var(--border);color:var(--text-secondary);">
+                <th style="text-align:left;padding:8px 12px;font-weight:600;">Article</th>
+                <th style="text-align:left;padding:8px 12px;font-weight:600;">Catégorie</th>
+                <th style="text-align:center;padding:8px 12px;font-weight:600;">Prix</th>
+                <th style="text-align:center;padding:8px 12px;font-weight:600;">Ventes</th>
+                <th style="text-align:center;padding:8px 12px;font-weight:600;">Action</th>
+            </tr></thead>
+            <tbody>${d.listings.map(l => `<tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:10px 12px;">
+                    <span style="margin-right:6px;">${ICONS[l.category]||'📦'}</span>
+                    <strong>${escH2(l.title)}</strong>
+                    ${l.game ? `<span style="font-size:11px;color:var(--text-muted);margin-left:6px;">${escH2(l.game)}</span>` : ''}
+                </td>
+                <td style="padding:10px 12px;color:var(--accent);font-size:11px;font-weight:700;text-transform:uppercase;">${l.category}</td>
+                <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--accent);">${l.price_coins} coins</td>
+                <td style="padding:10px 12px;text-align:center;color:var(--text-muted);">${l.downloads||0}</td>
+                <td style="padding:10px 12px;text-align:center;">
+                    <button onclick="deleteSAListing(${l.id})" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;"><i class="fas fa-trash"></i> Supprimer</button>
+                </td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+    } catch(e) {
+        wrap.innerHTML = '<p style="color:#ef4444;font-size:13px;">Erreur de chargement. Connectez-vous via /login d\'abord.</p>';
+    }
+}
+function copySAShopLink() {
+    const url = document.getElementById('sa-shop-url').textContent;
+    navigator.clipboard.writeText(url);
+    showToast('Lien copié !', 'success');
+}
+async function deleteSAListing(id) {
+    if (!confirm('Supprimer cet article définitivement ?')) return;
+    const r = await fetch(`/api/marketplace/${id}`, { method: 'DELETE', headers: h });
+    const d = await r.json();
+    if (d.success) { showToast('Article supprimé.', 'success'); loadSAListings(); }
+    else showToast(d.error || 'Erreur', 'error');
+}
+function escH2(s) { if(!s)return''; const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;background:var(--surface-strong);border:1px solid ${type==='success'?'#10b981':'#ef4444'};color:${type==='success'?'#10b981':'#ef4444'};border-radius:12px;padding:12px 18px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.2);`;
+    t.textContent = msg; document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+}
+
+async function loadDashboard() {
+    try {
+        const r = await fetch('/api/superadmin/stats', { headers: h });
+        const d = await r.json();
+        if (!d.success) return;
+        const s = d.stats;
+        document.getElementById('stats-grid').innerHTML = `
+            ${statCard('Utilisateurs', s.totalUsers, 'fa-users')}
+            ${statCard('Vérifiés', s.verifiedUsers, 'fa-check-circle', '--green')}
+            ${statCard('Bannis', s.bannedUsers, 'fa-ban', '--error')}
+            ${statCard('Serveurs', s.totalServers, 'fa-server')}
+            ${statCard('Serveurs actifs', s.activeServers, 'fa-play', '--green')}
+            ${statCard('Revenue total', (s.totalRevenue || 0).toLocaleString() + ' XOF', 'fa-coins', '--warning')}
+            ${statCard('Revendeurs actifs', s.activeResellers, 'fa-handshake')}
+            ${statCard('Retraits en attente', s.pendingWithdrawals, 'fa-clock', '--warning')}
+            ${statCard('Déploiements', s.totalDeployments, 'fa-rocket')}
+            ${statCard('Codes promo', s.activePromoCodes, 'fa-tags')}
+        `;
+        
+        const byType = s.serversByType || [];
+        document.getElementById('servers-by-type').innerHTML = byType.length ? byType.map(t =>
+            `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+                <span style="font-weight:600">${t.server_type || '—'}</span>
+                <span class="badge badge-blue">${t.count}</span>
+            </div>`
+        ).join('') : '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Aucun serveur</p>';
+        
+        document.getElementById('deploy-stats').innerHTML = `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                ${miniStat('GitHub', s.githubDeployments || 0, 'fa-github')}
+                ${miniStat('ZIP', s.zipDeployments || 0, 'fa-file-archive')}
+                ${miniStat('Template', s.templateDeployments || 0, 'fa-layer-group')}
+                ${miniStat('En cours', s.runningDeployments || 0, 'fa-circle-notch')}
+                ${miniStat('Échoués', s.failedDeployments || 0, 'fa-times-circle')}
+                ${miniStat('Connexions GitHub', s.githubConnections || 0, 'fa-plug')}
+            </div>
+        `;
+    } catch(e) { console.error(e); }
+}
+
+function statCard(label, val, icon, color = '--accent') {
+    return `<div class="stat-card">
+        <div><i class="fas ${icon} ico" style="color:var(${color})"></i><div class="val" style="color:var(${color})">${val}</div><div class="lbl">${label}</div></div>
+    </div>`;
+}
+function miniStat(label, val, icon) {
+    return `<div style="background:var(--accent-dim);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:18px;font-weight:800;color:var(--accent)">${val}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px"><i class="fas ${icon}"></i> ${label}</div>
+    </div>`;
+}
+
+// ======= TOAST =======
+function toast(message, type='info', duration=4000){
+    let c=document.getElementById('toastContainer');
+    if(!c){c=document.createElement('div');c.id='toastContainer';c.className='toast-container';document.body.appendChild(c);}
+    const icons={success:'fa-check-circle',error:'fa-times-circle',warn:'fa-exclamation-triangle',info:'fa-info-circle'};
+    const el=document.createElement('div');el.className=`toast ${type}`;
+    el.innerHTML=`<i class="fas ${icons[type]||icons.info}"></i><span>${message}</span>`;
+    c.appendChild(el);
+    setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},duration);
+}
+
+// ======= USERS =======
+let usersSearchTimer;
+function searchUsers() {
+    clearTimeout(usersSearchTimer);
+    usersSearchTimer = setTimeout(() => { usersOffset = 0; loadUsers(); }, 300);
+}
+function usersPage(dir) {
+    usersOffset = Math.max(0, usersOffset + dir * usersLimit);
+    if (usersOffset >= usersTotalCount) usersOffset = Math.max(0, usersTotalCount - usersLimit);
+    loadUsers();
+}
+
+async function loadUsers() {
+    const search = document.getElementById('user-search')?.value || '';
+    const role = document.getElementById('user-role-filter')?.value || '';
+    try {
+        const url = `/admin/users?search=${encodeURIComponent(search)}&role=${role}&limit=${usersLimit}&offset=${usersOffset}`;
+        const r = await fetch(url, { headers: h });
+        const d = await r.json();
+        usersTotalCount = d.total || 0;
+        const tbody = document.getElementById('users-tbody');
+        if (!d.success || !d.users?.length) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted)">Aucun utilisateur trouvé</td></tr>';
+        } else {
+            tbody.innerHTML = d.users.map(u => `<tr>
+                <td><strong>#${u.id}</strong></td>
+                <td><strong>${u.username}</strong></td>
+                <td style="color:var(--text-muted);font-size:12px">${u.email}</td>
+                <td><span class="badge ${u.role === 'superadmin' ? 'badge-red' : u.role === 'admin' ? 'badge-yellow' : 'badge-blue'}">${u.role}</span></td>
+                <td><span style="color:var(--warning);font-weight:700">🪙 ${u.coins || 0}</span></td>
+                <td>${u.server_count || 0}</td>
+                <td><span class="badge ${u.banned ? 'badge-red' : 'badge-green'}">${u.banned ? 'Banni' : 'Actif'}</span></td>
+                <td style="display:flex;gap:4px;flex-wrap:wrap;">
+                    ${u.banned
+                        ? `<button class="btn btn-success btn-sm" title="Débannir" onclick="banUser(${u.id},false)"><i class="fas fa-unlock"></i></button>`
+                        : `<button class="btn btn-danger btn-sm" title="Bannir" onclick="banUser(${u.id},true)"><i class="fas fa-ban"></i></button>`}
+                    <button class="btn btn-warning btn-sm" title="Modifier les coins" onclick="openCoinsModal(${u.id})"><i class="fas fa-coins"></i></button>
+                    ${u.role !== 'superadmin' ? `<button class="btn btn-danger btn-sm" title="Supprimer le compte" style="opacity:0.7" onclick="deleteUser(${u.id},'${u.username}')"><i class="fas fa-trash"></i></button>` : ''}
+                </td>
+            </tr>`).join('');
+        }
+        document.getElementById('users-page-info').textContent = `${usersOffset+1}-${Math.min(usersOffset+usersLimit, usersTotalCount)} / ${usersTotalCount}`;
+        document.getElementById('users-prev').disabled = usersOffset === 0;
+        document.getElementById('users-next').disabled = usersOffset + usersLimit >= usersTotalCount;
+    } catch(e) { console.error(e); }
+}
+
+async function deleteUser(id, username) {
+    if (!confirm(`⚠️ Supprimer définitivement "${username}" (#${id}) ?\n\nCette action est IRRÉVERSIBLE.\nTous ses serveurs, activités et données seront supprimés.`)) return;
+    try {
+        const r = await fetch(`/admin/users/${id}`, {
+            method: 'DELETE', headers: h,
+            body: JSON.stringify({ admin_id: currentAdminId })
+        });
+        const d = await r.json();
+        if (d.success) { toast(`Compte "${username}" supprimé définitivement`, 'success'); loadUsers(); }
+        else toast(d.error || 'Erreur suppression', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+async function banUser(id, ban) {
+    if (!confirm(ban ? `Bannir l'utilisateur #${id} ?` : `Débannir l'utilisateur #${id} ?`)) return;
+    try {
+        const r = await fetch(`/admin/users/${id}/${ban ? 'ban' : 'unban'}`, { method: 'POST', headers: h });
+        const d = await r.json();
+        if (d.success) loadUsers();
+        else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+function openCoinsModal(uid) {
+    document.getElementById('modal-coins-uid').value = uid;
+    document.getElementById('modal-coins-amount').value = '';
+    document.getElementById('modal-coins').classList.add('active');
+}
+async function submitCoins() {
+    const uid = document.getElementById('modal-coins-uid').value;
+    const action = document.getElementById('modal-coins-action').value;
+    const rawAmount = parseInt(document.getElementById('modal-coins-amount').value);
+    if (!rawAmount || rawAmount <= 0) { toast('Montant invalide', 'warn'); return; }
+    if (!currentAdminId) { toast('Session admin non chargée, rechargez la page', 'error'); return; }
+
+    let amount = rawAmount;
+    if (action === 'remove') amount = -rawAmount;
+
+    try {
+        const r = await fetch(`/admin/users/${uid}/coins`, {
+            method: 'POST', headers: h,
+            body: JSON.stringify({ action, amount, admin_id: currentAdminId, reason: `Action admin: ${action === 'add' ? '+' : action === 'remove' ? '-' : '='}${rawAmount} coins` })
+        });
+        const d = await r.json();
+        if (d.success) { toast(`Coins ${action === 'add' ? 'ajoutés' : action === 'remove' ? 'retirés' : 'définis'} avec succès`, 'success'); closeModal('modal-coins'); loadUsers(); }
+        else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+// ======= SERVERS =======
+let serverSearchTimer;
+async function loadAllServers() {
+    clearTimeout(serverSearchTimer);
+    serverSearchTimer = setTimeout(async () => {
+        const search = document.getElementById('server-search')?.value || '';
+        const tbody = document.getElementById('servers-tbody');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted)"><i class="fas fa-spinner" style="animation:spin 1s linear infinite"></i> Chargement...</td></tr>';
+        try {
+            const r = await fetch(`/admin/servers?limit=200&offset=0`, { headers: h });
+            const d = await r.json();
+            if (!d.success) throw new Error(d.error || 'Erreur');
+            renderServers(d.servers || [], search);
+        } catch(e) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted)">Erreur chargement serveurs</td></tr>';
+        }
+    }, 200);
+}
+
+function renderServers(servers, search = '') {
+    const tbody = document.getElementById('servers-tbody');
+    const filtered = search ? servers.filter(s => s.server_name?.includes(search) || s.username?.includes(search)) : servers;
+    if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted)">Aucun serveur</td></tr>';
+        return;
+    }
+    tbody.innerHTML = filtered.map(s => `<tr>
+        <td><strong>#${s.id}</strong></td>
+        <td><strong>${s.server_name || '—'}</strong></td>
+        <td style="color:var(--text-muted)">${s.username || '—'}</td>
+        <td><span class="badge badge-blue">${s.server_type || '—'}</span></td>
+        <td><span class="badge ${s.is_active ? 'badge-green' : 'badge-red'}">${s.server_status || (s.is_active ? 'Actif' : 'Inactif')}</span></td>
+        <td style="font-size:12px;color:var(--text-muted)">${s.expires_at ? new Date(s.expires_at).toLocaleDateString('fr-FR') : '—'}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="forceDeleteServer(${s.id})"><i class="fas fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+async function forceDeleteServer(id) {
+    if (!confirm(`Supprimer définitivement le serveur #${id} de Pterodactyl ?`)) return;
+    try {
+        const r = await fetch(`/api/admin/servers/${id}/force`, { method: 'DELETE', headers: h });
+        const d = await r.json();
+        toast(d.success ? 'Serveur supprimé' : d.error || 'Erreur', d.success ? 'success' : 'error');
+        loadAllServers();
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+// ======= RESELLERS =======
+async function loadResellers() {
+    try {
+        const r = await fetch('/api/superadmin/resellers', { headers: h });
+        const d = await r.json();
+        const tbody = document.getElementById('resellers-tbody');
+        if (!d.success || !d.resellers?.length) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted)">Aucun revendeur</td></tr>';
+            return;
+        }
+        tbody.innerHTML = d.resellers.map(rs => `<tr>
+            <td><strong>#${rs.id}</strong></td>
+            <td><strong>${rs.username || '—'}</strong></td>
+            <td>${rs.clients_count || 0}</td>
+            <td style="color:var(--warning);font-weight:700">${(rs.commission_balance || 0).toFixed(2)} XOF</td>
+            <td>${(rs.total_earned || 0).toFixed(2)} XOF</td>
+            <td><span class="badge badge-blue">${rs.commission_rate || 10}%</span></td>
+            <td><span class="badge ${rs.active ? 'badge-green' : 'badge-red'}">${rs.active ? 'Actif' : 'Inactif'}</span></td>
+            <td style="display:flex;gap:4px;">
+                <button class="btn btn-warning btn-sm" onclick="openCommissionModal(${rs.id})"><i class="fas fa-percent"></i></button>
+                ${!rs.active ? `<button class="btn btn-success btn-sm" onclick="toggleReseller(${rs.id},true)"><i class="fas fa-toggle-on"></i></button>` :
+                              `<button class="btn btn-danger btn-sm" onclick="toggleReseller(${rs.id},false)"><i class="fas fa-toggle-off"></i></button>`}
+            </td>
+        </tr>`).join('');
+    } catch(e) { console.error(e); }
+}
+
+function openCommissionModal(id) {
+    document.getElementById('modal-commission-id').value = id;
+    document.getElementById('modal-commission-rate').value = '';
+    document.getElementById('modal-commission').classList.add('active');
+}
+async function submitCommission() {
+    const id = document.getElementById('modal-commission-id').value;
+    const rate = parseFloat(document.getElementById('modal-commission-rate').value);
+    if (isNaN(rate) || rate < 0 || rate > 100) { toast('Taux invalide (0-100)', 'warn'); return; }
+    try {
+        const r = await fetch(`/api/superadmin/resellers/${id}/commission-rate`, {
+            method: 'POST', headers: h, body: JSON.stringify({ commission_rate: rate })
+        });
+        const d = await r.json();
+        if (d.success) { closeModal('modal-commission'); loadResellers(); }
+        else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+async function toggleReseller(id, activate) {
+    try {
+        const r = await fetch(`/api/superadmin/resellers/${id}/deactivate`, { method: 'POST', headers: h });
+        const d = await r.json();
+        loadResellers();
+    } catch(e) {}
+}
+
+// ======= WITHDRAWALS =======
+let _wdData = [];
+
+async function loadWithdrawals() {
+    const status = document.getElementById('withdrawal-status-filter')?.value || 'pending';
+    const tbody = document.getElementById('withdrawals-tbody');
+    tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fas fa-spinner"></i> Chargement...</td></tr>';
+
+    // Résumé rapide (toujours en pending pour les badges)
+    try {
+        const [pending, approved, rejected] = await Promise.all([
+            fetch('/api/superadmin/withdrawals?status=pending', { headers: h }).then(r=>r.json()),
+            fetch('/api/superadmin/withdrawals?status=approved', { headers: h }).then(r=>r.json()),
+            fetch('/api/superadmin/withdrawals?status=rejected', { headers: h }).then(r=>r.json()),
+        ]);
+        const summaryEl = document.getElementById('withdrawal-summary');
+        if (summaryEl) {
+            summaryEl.innerHTML = `
+                <div class="stat-card" style="border-top:3px solid var(--warning);">
+                    <span class="ico"><i class="fas fa-clock"></i></span>
+                    <div class="val" style="color:var(--warning);">${pending.total || 0}</div>
+                    <div class="lbl">En attente</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${(pending.total_amount||0).toLocaleString()} XOF</div>
+                </div>
+                <div class="stat-card" style="border-top:3px solid var(--green);">
+                    <span class="ico"><i class="fas fa-check-circle"></i></span>
+                    <div class="val" style="color:var(--green);">${approved.total || 0}</div>
+                    <div class="lbl">Approuvés</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${(approved.total_amount||0).toLocaleString()} XOF</div>
+                </div>
+                <div class="stat-card" style="border-top:3px solid var(--error);">
+                    <span class="ico"><i class="fas fa-times-circle"></i></span>
+                    <div class="val" style="color:var(--error);">${rejected.total || 0}</div>
+                    <div class="lbl">Refusés</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${(rejected.total_amount||0).toLocaleString()} XOF</div>
+                </div>`;
+        }
+    } catch(e) {}
+
+    try {
+        const r = await fetch(`/api/superadmin/withdrawals?status=${status}&limit=100`, { headers: h });
+        const d = await r.json();
+        _wdData = d.withdrawals || [];
+        tbody.innerHTML = '';
+        const countEl = document.getElementById('withdrawal-count');
+        if (countEl) countEl.textContent = `${_wdData.length} demande${_wdData.length!==1?'s':''}`;
+        if (!d.success || !_wdData.length) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">
+                <i class="fas fa-inbox" style="font-size:28px;opacity:0.35;display:block;margin-bottom:8px;"></i>
+                Aucune demande ${status === 'pending' ? 'en attente' : status === 'approved' ? 'approuvée' : 'refusée'}
+            </td></tr>`;
+            return;
+        }
+        tbody.innerHTML = _wdData.map(w => {
+            const statusBadge = w.status === 'approved' ? 'badge-green' : w.status === 'pending' ? 'badge-yellow' : 'badge-red';
+            const statusLabel = w.status === 'approved' ? '✅ Approuvé' : w.status === 'pending' ? '⏳ En attente' : '❌ Refusé';
+            let details = w.payment_details || '—';
+            try { const p = JSON.parse(details); details = typeof p === 'string' ? p : JSON.stringify(p); } catch(e){}
+            return `<tr>
+                <td><strong>#${w.id}</strong></td>
+                <td>
+                    <div style="font-weight:700;">${w.reseller_username || '—'}</div>
+                    <div style="font-size:11px;color:var(--text-muted);">${w.business_name || ''}</div>
+                </td>
+                <td><strong style="color:var(--warning);font-size:15px;">${(w.amount||0).toLocaleString()} XOF</strong></td>
+                <td><span class="badge badge-blue">${w.payment_method || '—'}</span></td>
+                <td style="font-size:12px;max-width:180px;">
+                    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${details}">${details}</div>
+                    ${w.reference ? `<div style="color:var(--green);font-size:11px;margin-top:2px;">Réf: ${w.reference}</div>` : ''}
+                    ${w.admin_note ? `<div style="color:var(--error);font-size:11px;margin-top:2px;font-style:italic;">Note: ${w.admin_note}</div>` : ''}
+                </td>
+                <td style="font-size:12px;color:var(--text-muted);white-space:nowrap;">${w.created_at ? new Date(w.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—'}</td>
+                <td><span class="badge ${statusBadge}">${statusLabel}</span></td>
+                <td>
+                    ${w.status === 'pending' ? `
+                    <button class="btn btn-success btn-sm" onclick="openWithdrawalModal(${w.id})">
+                        <i class="fas fa-edit"></i> Traiter
+                    </button>` : `<span style="color:var(--text-muted);font-size:12px;">Traité le ${w.processed_at ? new Date(w.processed_at).toLocaleDateString('fr') : '—'}</span>`}
+                </td>
+            </tr>`;
+        }).join('');
+    } catch(e) { console.error(e); tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--error);padding:20px;">Erreur de chargement</td></tr>'; }
+}
+
+function openWithdrawalModal(id) {
+    const w = _wdData.find(x => x.id === id);
+    if (!w) return;
+    document.getElementById('wd-id').value = id;
+    document.getElementById('wd-reseller-name').textContent = w.reseller_username || '—';
+    document.getElementById('wd-business-name').textContent = w.business_name || '—';
+    document.getElementById('wd-amount').textContent = (w.amount||0).toLocaleString() + ' XOF';
+    document.getElementById('wd-method').textContent = formatMethod(w.payment_method);
+    let details = w.payment_details || '—';
+    try { const p = JSON.parse(details); details = typeof p === 'string' ? p : JSON.stringify(p, null, 2); } catch(e){}
+    document.getElementById('wd-details').textContent = details;
+    document.getElementById('wd-date').textContent = w.created_at ? new Date(w.created_at).toLocaleString('fr-FR') : '—';
+    document.getElementById('wd-reference').value = '';
+    document.getElementById('wd-approve-note').value = '';
+    document.getElementById('wd-reject-reason').value = '';
+    document.getElementById('wd-reject-section').style.display = 'none';
+    document.getElementById('wd-approve-section').style.display = 'block';
+    document.getElementById('wd-action-btns').style.display = 'flex';
+    document.getElementById('wd-confirm-reject-btns').style.display = 'none';
+    document.getElementById('wd-processed-info').style.display = 'none';
+    document.getElementById('modal-withdrawal').classList.add('active');
+}
+
+function toggleRejectForm() {
+    const rejectSec = document.getElementById('wd-reject-section');
+    const approveSec = document.getElementById('wd-approve-section');
+    const actionBtns = document.getElementById('wd-action-btns');
+    const confirmBtns = document.getElementById('wd-confirm-reject-btns');
+    const isShowing = rejectSec.style.display !== 'none';
+    rejectSec.style.display = isShowing ? 'none' : 'block';
+    approveSec.style.display = isShowing ? 'block' : 'none';
+    actionBtns.style.display = isShowing ? 'flex' : 'none';
+    confirmBtns.style.display = isShowing ? 'none' : 'block';
+}
+
+function formatMethod(m) {
+    const map = { wave:'Wave', orange_money:'Orange Money', mtn_money:'MTN Money', bank:'Virement bancaire' };
+    return map[m] || m || '—';
+}
+
+async function submitWithdrawalAction(action) {
+    const id = document.getElementById('wd-id').value;
+    const reference = document.getElementById('wd-reference').value.trim();
+    const admin_note = action === 'approved'
+        ? document.getElementById('wd-approve-note').value.trim()
+        : document.getElementById('wd-reject-reason').value.trim();
+
+    if (action === 'rejected' && !admin_note) {
+        document.getElementById('wd-reject-reason').style.borderColor = 'var(--error)';
+        document.getElementById('wd-reject-reason').focus();
+        document.getElementById('wd-reject-reason').placeholder = '⚠️ Motif obligatoire pour le refus !';
+        return;
+    }
+
+    const infoEl = document.getElementById('wd-processed-info');
+    infoEl.style.display = 'block';
+    infoEl.style.background = 'rgba(99,102,241,0.08)';
+    infoEl.style.border = '1px solid rgba(99,102,241,0.2)';
+    infoEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement en cours…';
+    document.getElementById('wd-action-btns').style.display = 'none';
+    document.getElementById('wd-confirm-reject-btns').style.display = 'none';
+
+    try {
+        const r = await fetch(`/api/superadmin/withdrawals/${id}/process`, {
+            method: 'POST', headers: h,
+            body: JSON.stringify({ action, reference, admin_note })
+        });
+        const d = await r.json();
+        if (d.success) {
+            infoEl.style.background = action === 'approved' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)';
+            infoEl.style.border = action === 'approved' ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.25)';
+            infoEl.innerHTML = action === 'approved'
+                ? `<i class="fas fa-check-circle" style="color:var(--green)"></i> <strong style="color:var(--green);">Retrait approuvé !</strong>${reference ? ` Réf: ${reference}` : ''}`
+                : `<i class="fas fa-times-circle" style="color:var(--error)"></i> <strong style="color:var(--error);">Retrait refusé.</strong> Le montant a été recrédité.`;
+            setTimeout(() => { closeModal('modal-withdrawal'); loadWithdrawals(); }, 1800);
+        } else {
+            infoEl.style.background = 'rgba(239,68,68,0.08)';
+            infoEl.style.border = '1px solid rgba(239,68,68,0.3)';
+            infoEl.innerHTML = `<i class="fas fa-exclamation-circle" style="color:var(--error)"></i> ${d.error || 'Erreur'}`;
+            document.getElementById('wd-action-btns').style.display = 'flex';
+        }
+    } catch(e) {
+        infoEl.innerHTML = '<i class="fas fa-exclamation-circle" style="color:var(--error)"></i> Erreur réseau';
+        document.getElementById('wd-action-btns').style.display = 'flex';
+    }
+}
+
+// ======= FINANCIAL =======
+async function loadFinancial() {
+    const container = document.getElementById('financial-content');
+    try {
+        const r = await fetch('/api/superadmin/financial-report', { headers: h });
+        const d = await r.json();
+        if (!d.success) { container.innerHTML = `<div class="alert alert-error">Erreur: ${d.error}</div>`; return; }
+        const f = d.report || d;
+        container.innerHTML = `
+            <div class="stats-grid">
+                ${statCard('Revenue total', (f.total_revenue || 0).toLocaleString() + ' XOF', 'fa-coins', '--warning')}
+                ${statCard('Revenue transactions', (f.transaction_revenue || 0).toLocaleString() + ' XOF', 'fa-receipt', '--green')}
+                ${statCard('Commissions totales', (f.total_commissions || 0).toLocaleString() + ' XOF', 'fa-handshake')}
+                ${statCard('Revenue net', (f.net_platform_revenue || 0).toLocaleString() + ' XOF', 'fa-chart-line', '--green')}
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-table"></i> Détails financiers</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+                    <div style="padding:10px;background:var(--accent-dim);border-radius:8px;"><strong>Revenue plateforme:</strong><br>${(f.platform_revenue || 0).toLocaleString()} XOF</div>
+                    <div style="padding:10px;background:rgba(16,185,129,0.08);border-radius:8px;"><strong>Revenue net:</strong><br>${(f.net_platform_revenue || 0).toLocaleString()} XOF</div>
+                </div>
+            </div>
+        `;
+    } catch(e) { container.innerHTML = '<div class="alert alert-error">Erreur chargement rapport financier</div>'; }
+}
+
+// ======= ADMINS =======
+async function loadAdmins() {
+    try {
+        const r = await fetch('/admin/admins/list', { headers: h });
+        const d = await r.json();
+        const tbody = document.getElementById('admins-tbody');
+        if (!d.success || !d.admins?.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Aucun admin</td></tr>';
+            return;
+        }
+        tbody.innerHTML = d.admins.map(a => `<tr>
+            <td><strong>#${a.id}</strong></td>
+            <td><strong>${a.username}</strong></td>
+            <td style="color:var(--text-muted);font-size:12px">${a.email}</td>
+            <td style="font-size:12px">${a.admin_expires_at ? new Date(a.admin_expires_at).toLocaleDateString('fr-FR') : 'Jamais'}</td>
+            <td>${a.server_count || 0}</td>
+            <td><button class="btn btn-danger btn-sm" onclick="revokeAdmin(${a.id})"><i class="fas fa-times"></i> Révoquer</button></td>
+        </tr>`).join('');
+    } catch(e) { console.error(e); }
+}
+
+let promoteSearchTimer;
+async function searchPromoteUser(query) {
+    const box = document.getElementById('promote-suggestions');
+    document.getElementById('promote-userid').value = '';
+    if (!query || query.length < 2) { box.style.display = 'none'; return; }
+    clearTimeout(promoteSearchTimer);
+    promoteSearchTimer = setTimeout(async () => {
+        try {
+            const r = await fetch(`/admin/users?search=${encodeURIComponent(query)}&limit=8&offset=0`, { headers: h });
+            const d = await r.json();
+            if (!d.success || !d.users?.length) { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+            box.innerHTML = d.users.map(u => `
+                <div onclick="selectPromoteUser(${u.id},'${u.username}')"
+                    style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);transition:background 0.15s;"
+                    onmouseover="this.style.background='var(--accent-dim)'" onmouseout="this.style.background=''">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;flex-shrink:0">${u.username[0].toUpperCase()}</div>
+                    <div>
+                        <div style="font-weight:700;font-size:13px;color:var(--text)">${u.username} <span style="font-size:11px;color:var(--text-muted)">#${u.id}</span></div>
+                        <div style="font-size:11px;color:var(--text-muted)">${u.email} · 🪙 ${u.coins || 0} coins</div>
+                    </div>
+                    <span class="badge badge-blue" style="margin-left:auto;font-size:10px">${u.role}</span>
+                </div>`).join('');
+        } catch(e) { box.style.display = 'none'; }
+    }, 300);
+}
+
+function selectPromoteUser(id, username) {
+    document.getElementById('promote-userid').value = id;
+    document.getElementById('promote-username').value = username + ' (#' + id + ')';
+    document.getElementById('promote-suggestions').style.display = 'none';
+}
+
+document.addEventListener('click', e => {
+    if (!e.target.closest('#promote-suggestions') && e.target.id !== 'promote-username') {
+        const box = document.getElementById('promote-suggestions');
+        if (box) box.style.display = 'none';
+    }
+});
+
+async function promoteUser() {
+    const uid = document.getElementById('promote-userid').value;
+    const days = parseInt(document.getElementById('promote-days').value) || 30;
+    if (!uid) { toast('Sélectionnez un utilisateur dans la liste de suggestions', 'warn'); return; }
+    try {
+        const r = await fetch(`/admin/users/${uid}/set-admin`, {
+            method: 'POST', headers: h, body: JSON.stringify({ duration_days: days })
+        });
+        const d = await r.json();
+        const div = document.getElementById('promote-result');
+        div.style.display = 'block';
+        div.className = d.success ? 'alert alert-success' : 'alert alert-error';
+        div.textContent = d.success ? `Accès admin accordé pour ${days} jours` : (d.error || 'Erreur');
+        if (d.success) { loadAdmins(); document.getElementById('promote-username').value = ''; document.getElementById('promote-userid').value = ''; }
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+async function revokeAdmin(id) {
+    if (!confirm(`Révoquer les droits admin de l'utilisateur #${id} ?`)) return;
+    try {
+        const r = await fetch(`/admin/users/${id}/revoke-admin`, { method: 'POST', headers: h });
+        const d = await r.json();
+        toast(d.success ? 'Droits révoqués avec succès' : d.error || 'Erreur', d.success ? 'success' : 'error');
+        loadAdmins();
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.modal-overlay').forEach(el => el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); }));
+
+// ---- ANNOUNCEMENTS ----
+async function loadAnnouncements() {
+    const el = document.getElementById('ann-list');
+    if (!el) return;
+    try {
+        const r = await fetch('/api/announcements', { headers: h });
+        const d = await r.json();
+        if (!d.announcements.length) { el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:24px;">Aucune annonce active</div>'; return; }
+        el.innerHTML = d.announcements.map(a => `
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:14px;">${a.title} <span style="font-size:11px;background:var(--accent-dim);color:var(--accent);padding:2px 8px;border-radius:10px;margin-left:6px;">${a.type}</span></div>
+                    <div style="color:var(--text-secondary);font-size:12px;margin-top:3px;">${a.message}</div>
+                    <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">${new Date(a.created_at).toLocaleString('fr-FR')}${a.expires_at ? ' · Expire ' + new Date(a.expires_at).toLocaleString('fr-FR') : ''}</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement(${a.id})"><i class="fas fa-trash"></i></button>
+            </div>`).join('');
+    } catch(e) { el.innerHTML = '<div style="color:red;">Erreur</div>'; }
+}
+async function createAnnouncement() {
+    const title = document.getElementById('ann-title').value.trim();
+    const message = document.getElementById('ann-message').value.trim();
+    const type = document.getElementById('ann-type').value;
+    const expires_at = document.getElementById('ann-expires').value || null;
+    if (!title || !message) { toast('Titre et message requis', 'error'); return; }
+    try {
+        const r = await fetch('/api/admin/announcements', { method:'POST', headers:{...h,'Content-Type':'application/json'}, body:JSON.stringify({title,message,type,expires_at}) });
+        const d = await r.json();
+        if (d.success) { toast('Annonce publiée', 'success'); document.getElementById('ann-title').value=''; document.getElementById('ann-message').value=''; loadAnnouncements(); }
+        else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+async function deleteAnnouncement(id) {
+    if (!confirm('Supprimer cette annonce ?')) return;
+    try {
+        const r = await fetch(`/api/admin/announcements/${id}`, { method:'DELETE', headers:h });
+        const d = await r.json();
+        if (d.success) { toast('Annonce supprimée','success'); loadAnnouncements(); }
+        else toast(d.error||'Erreur','error');
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+
+// ---- BROADCAST TABS ----
+function showBroadcastTab(name) {
+    ['announce','email','notif','history'].forEach(t => {
+        const c = document.getElementById('bc-' + t);
+        const b = document.getElementById('bt-' + t);
+        if (c) c.style.display = t === name ? '' : 'none';
+        if (b) b.className = `btn btn-sm ${t === name ? 'btn-primary' : 'btn-outline'}`;
+    });
+    if (name === 'announce') loadAnnouncements();
+    if (name === 'history') loadBroadcastHistory();
+}
+
+// Checkbox "aussi annonce in-app" dans l'onglet email
+document.addEventListener('DOMContentLoaded', () => {
+    const cb = document.getElementById('em-also-announce');
+    if (cb) cb.addEventListener('change', () => {
+        const f = document.getElementById('em-announce-title');
+        if (f) f.style.display = cb.checked ? '' : 'none';
+    });
+});
+
+async function sendBroadcastEmail() {
+    const subject = document.getElementById('em-subject')?.value.trim();
+    const message = document.getElementById('em-message')?.value.trim();
+    const type = document.getElementById('em-type')?.value || 'info';
+    const target = document.getElementById('em-target')?.value || 'all';
+    const alsoAnnounce = document.getElementById('em-also-announce')?.checked || false;
+    const announceTitle = document.getElementById('em-announce-title')?.value.trim();
+    if (!subject || !message) { toast('Sujet et message requis', 'error'); return; }
+    const status = document.getElementById('em-status');
+    if (status) status.textContent = 'Envoi en cours…';
+    const btn = document.querySelector('[onclick="sendBroadcastEmail()"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi…'; }
+    try {
+        const r = await fetch('/api/admin/broadcast/email', {
+            method: 'POST',
+            headers: { ...h, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subject, message, type, target, also_announce: alsoAnnounce, announce_title: announceTitle || subject })
+        });
+        const d = await r.json();
+        if (d.success) {
+            toast(`Email envoyé à ${d.sent}/${d.total} utilisateurs${d.failed > 0 ? ` (${d.failed} échecs)` : ''}`, 'success');
+            if (status) status.textContent = `✅ ${d.sent} envoyés, ${d.failed} échecs`;
+            document.getElementById('em-subject').value = '';
+            document.getElementById('em-message').value = '';
+        } else { toast(d.error || 'Erreur', 'error'); if (status) status.textContent = ''; }
+    } catch(e) { toast('Erreur réseau', 'error'); if (status) status.textContent = ''; }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer l\'email groupé'; } }
+}
+
+async function sendBroadcastNotification() {
+    const title = document.getElementById('notif-title')?.value.trim();
+    const message = document.getElementById('notif-message')?.value.trim();
+    const type = document.getElementById('notif-type')?.value || 'info';
+    const link = document.getElementById('notif-link')?.value.trim();
+    const target = document.getElementById('notif-target')?.value || 'all';
+    if (!title || !message) { toast('Titre et message requis', 'error'); return; }
+    const status = document.getElementById('notif-status');
+    if (status) status.textContent = 'Envoi…';
+    try {
+        const r = await fetch('/api/admin/broadcast/notification', {
+            method: 'POST',
+            headers: { ...h, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, message, type, link: link || null, target })
+        });
+        const d = await r.json();
+        if (d.success) {
+            toast(`Notification envoyée à ${d.sent_to} utilisateurs`, 'success');
+            if (status) status.textContent = `✅ ${d.sent_to} utilisateurs notifiés`;
+            document.getElementById('notif-title').value = '';
+            document.getElementById('notif-message').value = '';
+            document.getElementById('notif-link').value = '';
+        } else { toast(d.error || 'Erreur', 'error'); if (status) status.textContent = ''; }
+    } catch(e) { toast('Erreur réseau', 'error'); if (status) status.textContent = ''; }
+}
+
+async function loadBroadcastHistory() {
+    const el = document.getElementById('broadcast-history-list');
+    if (!el) return;
+    el.innerHTML = '<div class="loading">Chargement…</div>';
+    try {
+        const r = await fetch('/api/admin/broadcast/history', { headers: h });
+        const d = await r.json();
+        if (!d.history || !d.history.length) {
+            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:24px;">Aucun broadcast envoyé</div>';
+            return;
+        }
+        const icons = { broadcast_email:'fa-envelope', broadcast_notification:'fa-bell', create_announcement:'fa-bullhorn' };
+        const labels = { broadcast_email:'Email groupé', broadcast_notification:'Notification push', create_announcement:'Annonce' };
+        el.innerHTML = d.history.map(h => `
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="width:36px;height:36px;border-radius:50%;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas ${icons[h.action]||'fa-paper-plane'}" style="color:var(--accent);font-size:14px;"></i>
+                </div>
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:13px;">${labels[h.action]||h.action} <span style="font-size:11px;color:var(--text-secondary);margin-left:6px;">par ${h.admin_name||'Admin'}</span></div>
+                    <div style="color:var(--text-secondary);font-size:12px;">${h.details||''}</div>
+                    <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">${new Date(h.created_at).toLocaleString('fr-FR')}</div>
+                </div>
+            </div>`).join('');
+    } catch(e) { el.innerHTML = '<div style="color:red;">Erreur</div>'; }
+}
+
+// ---- REVENUE CHART ----
+let revenueChartInstance = null;
+async function loadRevenueChart(days) {
+    ['7','30','90'].forEach(d => {
+        const b = document.getElementById(`rev-btn-${d}`);
+        if(b) { b.className = `btn btn-sm ${d==days?'btn-primary':'btn-outline'}`; }
+    });
+    try {
+        const r = await fetch(`/api/admin/revenue-chart?days=${days}`, { headers: h });
+        const d = await r.json();
+        if (!d.success) { toast(d.error||'Erreur','error'); return; }
+        document.getElementById('rev-total').textContent = (d.total||0).toLocaleString('fr-FR') + ' XOF';
+        document.getElementById('rev-stat-total').textContent = (d.total||0).toLocaleString('fr-FR');
+        const count = d.chart.reduce((s,c)=>s+(c.count||0),0);
+        document.getElementById('rev-stat-count').textContent = count;
+        const avg = d.chart.length ? Math.round(d.total / d.chart.length) : 0;
+        document.getElementById('rev-stat-avg').textContent = avg.toLocaleString('fr-FR');
+        const labels = d.chart.map(c => c.day);
+        const values = d.chart.map(c => c.revenue || 0);
+        const ctx = document.getElementById('revenueChart');
+        if (!ctx) return;
+        if (revenueChartInstance) revenueChartInstance.destroy();
+        revenueChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: { labels, datasets: [{ label: 'Revenus (XOF)', data: values, borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', borderWidth: 2, fill: true, tension: 0.4, pointRadius: 3 }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', maxTicksLimit: 10 } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } } } }
+        });
+    } catch(e) { toast('Erreur réseau','error'); }
+}
+
+init();
+
+// ========== AUDIT LOG ==========
+async function loadAuditLogs() {
+    const search = document.getElementById('auditSearch')?.value || '';
+    const url = search ? `/api/admin/audit-logs?action=${encodeURIComponent(search)}` : '/api/admin/audit-logs';
+    const res = await fetch(url, { headers: h });
+    const data = await res.json();
+    const c = document.getElementById('auditLogsContainer');
+    if (!data.success || !data.logs.length) {
+        c.innerHTML = '<p style="padding:20px;color:#64748b;">Aucune entrée dans l\'audit log.</p>'; return;
+    }
+    c.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#0f172a;">
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;border-bottom:1px solid #1e293b;">Date</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;border-bottom:1px solid #1e293b;">Admin</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;border-bottom:1px solid #1e293b;">Action</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;border-bottom:1px solid #1e293b;">Cible</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;border-bottom:1px solid #1e293b;">IP</th>
+        </tr></thead>
+        <tbody>${data.logs.map(l => `<tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:10px 12px;font-size:12px;color:#64748b;">${new Date(l.created_at).toLocaleString('fr-FR')}</td>
+            <td style="padding:10px 12px;font-size:13px;font-weight:600;">${l.admin_name || '–'}</td>
+            <td style="padding:10px 12px;"><span style="background:#6366f120;color:#6366f1;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;">${l.action}</span></td>
+            <td style="padding:10px 12px;font-size:12px;color:#94a3b8;">${l.target_type || '–'} ${l.target_id ? '#'+l.target_id : ''}</td>
+            <td style="padding:10px 12px;font-size:12px;color:#64748b;">${l.ip || '–'}</td>
+        </tr>`).join('')}</tbody>
+    </table>`;
+}
+
+// ========== GEOMAP ==========
+async function loadGeoMap() {
+    const res = await fetch('/api/admin/geomap', { headers: h });
+    const data = await res.json();
+    const c = document.getElementById('geoIpTable');
+    if (!data.success || !data.ips.length) {
+        c.innerHTML = '<p style="color:#64748b;">Aucune donnée IP disponible. Les IPs des utilisateurs seront listées ici.</p>'; return;
+    }
+    const total = data.ips.reduce((s, r) => s + r.count, 0);
+    c.innerHTML = `
+        <div style="margin-bottom:16px;font-size:13px;color:#94a3b8;">${data.ips.length} adresses IP uniques • ${total} utilisateurs</div>
+        <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#0f172a;">
+                <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">Adresse IP</th>
+                <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">Nb. utilisateurs</th>
+                <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">%</th>
+            </tr></thead>
+            <tbody>${data.ips.map(ip => `<tr style="border-bottom:1px solid #1e293b;">
+                <td style="padding:10px 12px;font-family:monospace;font-size:13px;">${ip.ip_address}</td>
+                <td style="padding:10px 12px;font-size:13px;font-weight:600;">${ip.count}</td>
+                <td style="padding:10px 12px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="flex:1;height:6px;background:#1e293b;border-radius:10px;">
+                            <div style="width:${Math.round((ip.count/total)*100)}%;height:100%;background:#6366f1;border-radius:10px;"></div>
+                        </div>
+                        <span style="font-size:12px;color:#94a3b8;">${Math.round((ip.count/total)*100)}%</span>
+                    </div>
+                </td>
+            </tr>`).join('')}</tbody>
+        </table>`;
+}
+
+// ========== CHALLENGES ADMIN ==========
+async function loadChallengesAdmin() {
+    const res = await fetch('/api/admin/challenges', { headers: h });
+    const data = await res.json();
+    const c = document.getElementById('challengesAdminList');
+    if (!data.success || !data.challenges.length) {
+        c.innerHTML = '<p style="padding:20px;color:#64748b;">Aucun challenge. Créez-en un ci-dessus !</p>'; return;
+    }
+    c.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#0f172a;">
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">Nom</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">Type</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">Récompense</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">Mois</th>
+            <th style="padding:12px;text-align:left;font-size:12px;color:#94a3b8;">Statut</th>
+        </tr></thead>
+        <tbody>${data.challenges.map(ch => `<tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:10px 12px;font-weight:600;">${ch.name}</td>
+            <td style="padding:10px 12px;font-size:13px;color:#94a3b8;">${ch.type}</td>
+            <td style="padding:10px 12px;color:#6366f1;font-weight:700;">+${ch.reward_coins} coins</td>
+            <td style="padding:10px 12px;font-size:13px;">${ch.month || 'Permanent'}</td>
+            <td style="padding:10px 12px;"><span style="background:${ch.active?'#10b98120':'#ef444420'};color:${ch.active?'#10b981':'#ef4444'};border-radius:6px;padding:2px 8px;font-size:12px;">${ch.active?'Actif':'Inactif'}</span></td>
+        </tr>`).join('')}</tbody>
+    </table>`;
+}
+
+async function createChallenge() {
+    const name = document.getElementById('chName').value.trim();
+    const reward_coins = parseInt(document.getElementById('chCoins').value) || 50;
+    const description = document.getElementById('chDesc').value.trim();
+    if (!name) return toast('Nom requis', 'error');
+    const res = await fetch('/api/admin/challenges', {
+        method: 'POST', headers: { ...h, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, reward_coins, description })
+    });
+    const data = await res.json();
+    if (data.success) { toast('Challenge créé !', 'success'); loadChallengesAdmin(); document.getElementById('chName').value = ''; }
+    else toast(data.error || 'Erreur', 'error');
+}
+
+// ========== EXPORT CSV ==========
+function exportCSV(type) {
+    const token = localStorage.getItem('flyhost_token');
+    const a = document.createElement('a');
+    a.href = `/api/admin/export/${type}.csv`;
+    a.download = `flyhost_${type}.csv`;
+    fetch(a.href, { headers: h }).then(res => res.blob()).then(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url; link.download = `flyhost_${type}_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click(); URL.revokeObjectURL(url);
+        toast(`Export ${type} téléchargé !`, 'success');
+    }).catch(() => toast('Erreur export', 'error'));
+}
+
+// =============================================
+// EGGS PTERODACTYL — Configuration
+// =============================================
+const EGG_TECHS = [
+    { key: 'nodejs',  label: 'Node.js',      icon: 'fab fa-node-js',  color: '#68a063' },
+    { key: 'python',  label: 'Python',        icon: 'fab fa-python',   color: '#3572a5' },
+    { key: 'php',     label: 'PHP',           icon: 'fab fa-php',      color: '#8993be' },
+    { key: 'java',    label: 'Java',          icon: 'fab fa-java',     color: '#ea2d2e' },
+    { key: 'static',  label: 'HTML/Static',   icon: 'fas fa-code',     color: '#f59e0b' },
+    { key: 'discord', label: 'Discord Bot',   icon: 'fab fa-discord',  color: '#5865f2' }
+];
+
+let pterodactylNests = [];
+let currentEggMapping = {};
+
+async function backfillAllocPorts() {
+    const btn = document.getElementById('btn-backfill');
+    const result = document.getElementById('backfill-result');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> En cours...';
+    result.style.display = 'none';
+    try {
+        const token = localStorage.getItem('flyhost_token');
+        const res = await fetch('/api/admin/backfill-alloc-ports', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        result.style.display = 'block';
+        if (data.success) {
+            result.style.background = 'rgba(16,185,129,0.1)'; result.style.color = '#10b981';
+            result.style.border = '1px solid rgba(16,185,129,0.3)';
+            result.innerHTML = `<i class="fas fa-check-circle"></i> ${data.updated} serveur(s) mis à jour sur ${data.total} | ${data.failed} échec(s)`;
+        } else {
+            result.style.background = 'rgba(239,68,68,0.1)'; result.style.color = '#ef4444';
+            result.innerHTML = `<i class="fas fa-times-circle"></i> Erreur: ${data.error}`;
+        }
+    } catch(e) {
+        result.style.display = 'block'; result.style.background = 'rgba(239,68,68,0.1)'; result.style.color = '#ef4444';
+        result.innerHTML = `<i class="fas fa-times-circle"></i> Erreur réseau`;
+    }
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-sync"></i> Récupérer les ports manquants';
+}
+
+async function loadPterodactylEggs() {
+    const btn = document.getElementById('btn-load-eggs');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+    btn.disabled = true;
+    showEggsStatus('', '');
+
+    try {
+        const [nestsRes, mappingRes] = await Promise.all([
+            fetch('/api/admin/pterodactyl/eggs', { headers: h }),
+            fetch('/api/admin/egg-mapping', { headers: h })
+        ]);
+        const nestsData = await nestsRes.json();
+        const mappingData = await mappingRes.json();
+
+        if (!nestsData.success) throw new Error(nestsData.error || 'Erreur Pterodactyl');
+
+        pterodactylNests = nestsData.nests || [];
+        currentEggMapping = mappingData.mapping || {};
+
+        renderEggMappingGrid();
+        renderEggsRawList();
+
+        const totalEggs = pterodactylNests.reduce((sum, n) => sum + n.eggs.length, 0);
+        document.getElementById('eggs-count-badge').textContent = `${totalEggs} egg(s) sur ${pterodactylNests.length} nest(s)`;
+        document.getElementById('eggs-raw-card').style.display = '';
+
+        showEggsStatus(`✅ ${totalEggs} eggs chargés depuis Pterodactyl`, 'success');
+    } catch (err) {
+        showEggsStatus(`❌ Erreur : ${err.message}`, 'error');
+    }
+
+    btn.innerHTML = '<i class="fas fa-sync"></i> Charger les eggs';
+    btn.disabled = false;
+}
+
+function renderEggMappingGrid() {
+    const allEggs = pterodactylNests.flatMap(n => n.eggs.map(e => ({ ...e, nestName: n.name })));
+
+    const grid = document.getElementById('egg-mapping-grid');
+    if (!allEggs.length) {
+        grid.innerHTML = '<div style="color:var(--text-secondary);font-size:13px;padding:20px;text-align:center;grid-column:1/-1;">Aucun egg trouvé sur ce panel Pterodactyl</div>';
+        return;
+    }
+
+    grid.innerHTML = EGG_TECHS.map(tech => {
+        const currentEggId = currentEggMapping[`egg_${tech.key}`] || '15';
+        const currentDocker = currentEggMapping[`docker_${tech.key}`] || '';
+
+        const options = [
+            `<option value="15" ${currentEggId == '15' && !allEggs.find(e=>e.id==15) ? 'selected' : ''}>⚠️ Egg 15 (défaut)</option>`,
+            ...allEggs.map(e => `<option value="${e.id}" ${e.id == currentEggId ? 'selected' : ''}>[${e.nestName}] ${e.name} (ID: ${e.id})</option>`)
+        ].join('');
+
+        return `<div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <div style="width:36px;height:36px;border-radius:10px;background:${tech.color}22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="${tech.icon}" style="color:${tech.color};font-size:16px;"></i>
+                </div>
+                <div style="font-size:14px;font-weight:800;color:var(--text);">${tech.label}</div>
+            </div>
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);display:block;margin-bottom:5px;">Egg Pterodactyl</label>
+            <select id="egg-sel-${tech.key}" style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:#1e293b;color:#e2e8f0;font-size:12px;font-family:inherit;margin-bottom:10px;">${options}</select>
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);display:block;margin-bottom:5px;">Image Docker</label>
+            <input id="docker-inp-${tech.key}" type="text" value="${currentDocker}" placeholder="ghcr.io/parkervcp/yolks:..." style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:#1e293b;color:#e2e8f0;font-size:12px;font-family:'monospace',inherit;box-sizing:border-box;">
+        </div>`;
+    }).join('');
+}
+
+function renderEggsRawList() {
+    const list = document.getElementById('eggs-raw-list');
+    if (!pterodactylNests.length) { list.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;">Aucun nest trouvé</p>'; return; }
+
+    list.innerHTML = pterodactylNests.map(nest => `
+        <div style="margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+                📦 ${nest.name} (${nest.eggs.length} egg(s))
+            </div>
+            ${nest.eggs.map(egg => `
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);margin-bottom:4px;flex-wrap:wrap;">
+                    <span style="background:var(--accent-dim);color:var(--accent);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;">ID: ${egg.id}</span>
+                    <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;">${egg.name}</span>
+                    <span style="font-size:11px;color:var(--text-muted);font-family:monospace;word-break:break-all;">${egg.docker_image}</span>
+                    <button onclick="copyToClipboard('${egg.id}')" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer;" title="Copier l'ID"><i class="fas fa-copy"></i></button>
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
+async function saveEggMapping() {
+    if (!Object.keys(currentEggMapping).length && !pterodactylNests.length) {
+        showEggsStatus('⚠️ Chargez d\'abord les eggs Pterodactyl', 'warn');
+        return;
+    }
+
+    const body = {};
+    EGG_TECHS.forEach(tech => {
+        const sel = document.getElementById(`egg-sel-${tech.key}`);
+        const inp = document.getElementById(`docker-inp-${tech.key}`);
+        if (sel) body[`egg_${tech.key}`] = sel.value;
+        if (inp && inp.value.trim()) body[`docker_${tech.key}`] = inp.value.trim();
+    });
+
+    if (!Object.keys(body).length) { showEggsStatus('⚠️ Aucun champ à sauvegarder', 'warn'); return; }
+
+    try {
+        const res = await fetch('/api/admin/egg-mapping', { method: 'POST', headers: h, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (data.success) {
+            showEggsStatus('✅ ' + data.message, 'success');
+            currentEggMapping = { ...currentEggMapping, ...body };
+        } else {
+            showEggsStatus('❌ ' + (data.error || 'Erreur'), 'error');
+        }
+    } catch (err) {
+        showEggsStatus('❌ Erreur réseau : ' + err.message, 'error');
+    }
+}
+
+function showEggsStatus(msg, type) {
+    const el = document.getElementById('eggs-status');
+    if (!msg) { el.style.display = 'none'; return; }
+    const colors = { success: '#10b98122', error: '#ef444422', warn: '#f59e0b22' };
+    const texts  = { success: '#10b981', error: '#ef4444', warn: '#f59e0b' };
+    el.style.display = 'block';
+    el.style.background = colors[type] || colors.warn;
+    el.style.color = texts[type] || texts.warn;
+    el.style.border = `1px solid ${texts[type] || texts.warn}44`;
+    el.textContent = msg;
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(String(text)).then(() => toast('ID copié !', 'success')).catch(() => {});
+}
+
+// ===== PROMOTIONS =====
+const PROMO_PALETTES = {
+    purple: 'linear-gradient(135deg,#6366f1 0%,#7c3aed 100%)',
+    orange: 'linear-gradient(135deg,#f97316 0%,#ef4444 100%)',
+    green:  'linear-gradient(135deg,#10b981 0%,#06b6d4 100%)',
+    red:    'linear-gradient(135deg,#ef4444 0%,#dc2626 100%)',
+    blue:   'linear-gradient(135deg,#3b82f6 0%,#2563eb 100%)',
+    gold:   'linear-gradient(135deg,#f59e0b 0%,#d97706 100%)',
+};
+const PROMO_TEXT_COLORS = { purple:'#6366f1', orange:'#f97316', green:'#10b981', red:'#ef4444', blue:'#3b82f6', gold:'#f59e0b' };
+
+function updatePromoPreview() {
+    const title = document.getElementById('promo-title')?.value.trim();
+    const wrap = document.getElementById('promo-preview-wrap');
+    const container = document.getElementById('promo-preview-container');
+    if (!wrap || !container) return;
+    if (!title) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+
+    const subtitle = document.getElementById('promo-subtitle')?.value.trim();
+    const discount = document.getElementById('promo-discount')?.value;
+    const origPrice = document.getElementById('promo-orig-price')?.value;
+    const promoPrice = document.getElementById('promo-price')?.value;
+    const badge = document.getElementById('promo-badge')?.value || 'PROMO';
+    const serverType = document.getElementById('promo-server-type')?.value;
+    const color = document.getElementById('promo-color')?.value || 'purple';
+    const ctaText = document.getElementById('promo-cta-text')?.value || 'En profiter';
+    const bg = PROMO_PALETTES[color] || PROMO_PALETTES.purple;
+    const tc = PROMO_TEXT_COLORS[color] || '#6366f1';
+
+    container.innerHTML = `
+    <div style="background:${bg};border-radius:18px;position:relative;overflow:hidden;min-height:120px;display:flex;align-items:center;">
+        <div style="position:absolute;inset:0;background-image:radial-gradient(circle at 80% 50%,rgba(255,255,255,.08) 0%,transparent 60%);pointer-events:none;"></div>
+        <div style="position:relative;z-index:2;padding:20px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;width:100%;">
+            ${discount ? `<div style="flex-shrink:0;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.4);border-radius:16px;padding:10px 16px;text-align:center;">
+                <div style="font-size:32px;font-weight:900;color:#fff;line-height:1;">-${discount}%</div>
+                <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.06em;text-transform:uppercase;">${badge}</div>
+            </div>` : ''}
+            <div style="flex:1;min-width:160px;">
+                <div style="display:inline-block;background:rgba(255,255,255,.25);color:#fff;border-radius:20px;padding:2px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">${serverType || badge}</div>
+                <div style="font-size:20px;font-weight:800;color:#fff;">${title}</div>
+                ${subtitle ? `<div style="font-size:13px;color:rgba(255,255,255,.82);font-weight:500;margin-top:3px;">${subtitle}</div>` : ''}
+                ${(origPrice || promoPrice) ? `<div style="display:flex;align-items:center;gap:10px;margin-top:8px;">
+                    ${origPrice ? `<div style="font-size:14px;color:rgba(255,255,255,.55);text-decoration:line-through;font-weight:600;">${origPrice} coins</div>` : ''}
+                    ${promoPrice ? `<div style="font-size:24px;font-weight:900;color:#fff;">${promoPrice}</div><div style="font-size:12px;color:rgba(255,255,255,.7);font-weight:600;">coins</div>` : ''}
+                </div>` : ''}
+            </div>
+            <div style="flex-shrink:0;">
+                <div style="display:inline-flex;align-items:center;gap:7px;background:#fff;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;color:${tc};">
+                    ⚡ ${ctaText}
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+async function loadPromotions() {
+    const el = document.getElementById('promo-list');
+    if (!el) return;
+    try {
+        const r = await fetch('/api/promotions', { headers: h });
+        const d = await r.json();
+        if (!d.promotions?.length) {
+            el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:24px;">Aucune promotion active</div>';
+            return;
+        }
+        const typeLabels = { banner: '🖼️ Bannière', ticker: '📢 Ticker', popup: '💬 Popup' };
+        el.innerHTML = d.promotions.map(p => {
+            const bg = PROMO_PALETTES[p.color_scheme] || PROMO_PALETTES.purple;
+            return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="width:44px;height:44px;border-radius:10px;background:${bg};flex-shrink:0;"></div>
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;">
+                        ${p.title}
+                        ${p.discount_percent ? `<span style="background:rgba(239,68,68,.15);color:#ef4444;border-radius:20px;padding:1px 8px;font-size:11px;font-weight:800;">-${p.discount_percent}%</span>` : ''}
+                        <span style="background:var(--accent-dim);color:var(--accent);border-radius:20px;padding:1px 8px;font-size:11px;">${typeLabels[p.display_type] || p.display_type}</span>
+                        ${p.pinned ? '<span style="font-size:11px;">📌</span>' : ''}
+                    </div>
+                    ${p.subtitle ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${p.subtitle}</div>` : ''}
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">
+                        ${p.promo_price ? `${p.original_price ? `<s>${p.original_price}</s> → ` : ''}${p.promo_price} coins · ` : ''}
+                        Créée ${new Date(p.created_at).toLocaleDateString('fr-FR')}
+                        ${p.ends_at ? ` · Expire ${new Date(p.ends_at).toLocaleString('fr-FR')}` : ''}
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="deletePromotion(${p.id})"><i class="fas fa-trash"></i></button>
+            </div>`;
+        }).join('');
+    } catch(e) { el.innerHTML = '<div style="color:red;">Erreur chargement</div>'; }
+}
+
+async function createPromotion() {
+    const title = document.getElementById('promo-title')?.value.trim();
+    if (!title) { toast('Le titre est requis', 'error'); return; }
+    const body = {
+        title,
+        subtitle: document.getElementById('promo-subtitle')?.value.trim() || undefined,
+        discount_percent: parseInt(document.getElementById('promo-discount')?.value) || 0,
+        server_type: document.getElementById('promo-server-type')?.value.trim() || undefined,
+        original_price: parseInt(document.getElementById('promo-orig-price')?.value) || undefined,
+        promo_price: parseInt(document.getElementById('promo-price')?.value) || undefined,
+        badge_text: document.getElementById('promo-badge')?.value || 'PROMO',
+        color_scheme: document.getElementById('promo-color')?.value || 'purple',
+        cta_text: document.getElementById('promo-cta-text')?.value || 'En profiter',
+        cta_url: document.getElementById('promo-cta-url')?.value || '/pricing',
+        show_countdown: document.getElementById('promo-countdown')?.checked ? 1 : 0,
+        display_type: document.getElementById('promo-display-type')?.value || 'banner',
+        pinned: document.getElementById('promo-pinned')?.checked ? 1 : 0,
+        ends_at: document.getElementById('promo-ends-at')?.value || undefined,
+    };
+    try {
+        const r = await fetch('/api/admin/promotions', { method: 'POST', headers: h, body: JSON.stringify(body) });
+        const d = await r.json();
+        if (d.success) {
+            toast('✅ Promotion publiée ! Elle apparaît maintenant sur le dashboard.', 'success');
+            document.getElementById('promo-title').value = '';
+            document.getElementById('promo-subtitle').value = '';
+            document.getElementById('promo-discount').value = '';
+            document.getElementById('promo-orig-price').value = '';
+            document.getElementById('promo-price').value = '';
+            document.getElementById('promo-preview-wrap').style.display = 'none';
+            loadPromotions();
+        } else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+async function deletePromotion(id) {
+    if (!confirm('Supprimer cette promotion ? Elle disparaîtra du site immédiatement.')) return;
+    try {
+        const r = await fetch(`/api/admin/promotions/${id}`, { method: 'DELETE', headers: h });
+        const d = await r.json();
+        if (d.success) { toast('Promotion supprimée', 'success'); loadPromotions(); }
+        else toast(d.error || 'Erreur', 'error');
+    } catch(e) { toast('Erreur réseau', 'error'); }
+}
+
+// ===== T001 : DARK MODE (superadmin) =====
+function toggleThemeSA() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('fh_theme', next);
+    const icon = document.getElementById('themeIconSA');
+    if (icon) icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+}
+(function() {
+    const saved = localStorage.getItem('fh_theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        const icon = document.getElementById('themeIconSA');
+        if (icon) icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+})();
+
+// ===== T002 : SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</body>
+</html>

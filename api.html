@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API - FLYHOST</title>
+    <!-- Mêmes polices et icônes que index.html -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dim: rgba(99, 102, 241, 0.1);
+            --bg: #eef0f7;
+            --surface: rgba(255, 255, 255, 0.75);
+            --surface-strong: rgba(255, 255, 255, 0.92);
+            --border: rgba(99, 102, 241, 0.18);
+            --border-strong: rgba(99, 102, 241, 0.35);
+            --text: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --green: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 18px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 8px 20px -8px rgba(99, 102, 241, 0.2);
+            --shadow-hover: 0 20px 30px -12px rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        /* ========== FOND ANIMÉ ========== */
+        .animated-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+        .orb1 { width: 600px; height: 600px; background: rgba(99,102,241,0.6); top: -200px; left: -100px; animation-duration: 20s; }
+        .orb2 { width: 500px; height: 500px; background: rgba(139,92,246,0.5); bottom: -150px; right: -100px; animation-duration: 28s; animation-delay: -5s; }
+        .orb3 { width: 400px; height: 400px; background: rgba(45,212,191,0.5); top: 40%; left: 40%; animation-duration: 22s; animation-delay: -2s; }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes float { 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(80px,-60px) scale(1.3);} }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes glowPulse { 0%,100%{box-shadow:0 0 5px var(--accent-dim);} 50%{box-shadow:0 0 20px var(--accent),0 0 30px var(--accent-light);} }
+        @keyframes zoomIn { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+        @keyframes slideInLeft { from{opacity:0;transform:translateX(-30px);} to{opacity:1;transform:translateX(0);} }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--accent-dim); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+
+        /* ========== TOPBAR ========== */
+        .topbar {
+            position: fixed;
+            top: 0; width: 100%; height: 64px;
+            background: #1e1e2e;
+            border-top: 3px solid var(--accent);
+            z-index: 90;
+            display: flex; align-items: center;
+            padding: 0 24px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease-out;
+        }
+        .hamburger {
+            background: transparent; border: none;
+            width: 42px; height: 42px;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 6px; cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
+        .hamburger span {
+            display: block; width: 22px; height: 2px;
+            background-color: white; border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .hamburger:hover span { background: var(--accent-light); }
+        .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .logo-area { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+        .logo-mark {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+            animation: glowPulse 3s infinite;
+            flex-shrink: 0;
+        }
+        .logo-text { font-weight: 800; font-size: 18px; color: white; white-space: nowrap; }
+        .topbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .avatar-circle {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: white;
+            cursor: pointer; border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            flex-shrink: 0;
+        }
+        .avatar-circle:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
+
+        /* ========== DRAWER ========== */
+        .drawer {
+            position: fixed; top: 0; left: 0;
+            width: 300px; height: 100vh;
+            background: rgba(238,240,247,0.97);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 40px rgba(99,102,241,0.15);
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            overflow-y: auto; overflow-x: hidden;
+            padding: 0; display: flex; flex-direction: column;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .drawer-logo { display: flex; align-items: center; gap: 10px; }
+        .drawer-logo .logo-mark { width: 36px; height: 36px; font-size: 14px; }
+        .drawer-logo span { font-weight: 800; font-size: 18px; color: var(--text); }
+        .close-drawer {
+            background: transparent; border: none; font-size: 28px;
+            color: var(--text-muted); cursor: pointer;
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .close-drawer:hover { color: var(--error); background: rgba(239,68,68,0.1); }
+
+        .drawer-user {
+            display: flex; align-items: center; gap: 16px;
+            padding: 20px; border-bottom: 1px solid var(--border);
+        }
+        .drawer-avatar {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 22px; color: white;
+            flex-shrink: 0;
+        }
+        .drawer-user-info { flex: 1; min-width: 0; }
+        .drawer-username { font-weight: 700; font-size: 16px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .drawer-coins { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--warning); font-weight: 600; margin: 4px 0; }
+        .drawer-role-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 30px;
+            font-size: 11px; font-weight: 700;
+            background: var(--accent-dim); color: var(--accent);
+        }
+        .drawer-role-badge.admin { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .drawer-role-badge.superadmin { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        .drawer-nav { flex: 1; padding: 16px 12px; }
+        .nav-section { margin: 20px 0 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .nav-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 16px; border-radius: 12px;
+            color: var(--text-secondary); text-decoration: none;
+            font-weight: 600; font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer; margin-bottom: 2px;
+            position: relative; overflow: hidden;
+        }
+        .nav-item::before {
+            content: ''; position: absolute; left: 0; top: 0;
+            height: 100%; width: 3px; background: var(--accent);
+            transform: scaleY(0); transition: transform 0.3s ease;
+        }
+        .nav-item:hover::before, .nav-item.active::before { transform: scaleY(1); }
+        .nav-item i { width: 20px; font-size: 16px; color: var(--accent); transition: all 0.3s ease; }
+        .nav-item:hover i { transform: scale(1.2); }
+        .nav-item:hover { background: var(--accent-dim); color: var(--accent); }
+        .nav-item.active { background: var(--accent); color: white; }
+        .nav-item.active i { color: white; }
+
+        .drawer-footer { padding: 20px; border-top: 1px solid var(--border); }
+        .drawer-stats { display: flex; justify-content: space-between; text-align: center; margin-bottom: 20px; }
+        .stat-item { flex: 1; }
+        .stat-item .value { font-weight: 800; font-size: 18px; color: var(--accent); display: block; line-height: 1.3; }
+        .stat-item .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+        .logout-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; width: 100%; padding: 14px; border-radius: 30px;
+            background: rgba(239,68,68,0.1); border: none;
+            color: var(--error); font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.2); }
+
+        /* ========== OVERLAY ========== */
+        .drawer-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 199; display: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .drawer-overlay.active { display: block; opacity: 1; }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            padding: 80px 24px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative; z-index: 5;
+            width: 100%;
+        }
+
+        /* ========== TABLES — TOUJOURS SCROLLABLES ========== */
+        .table-container,
+        .table-responsive,
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            max-width: 100%;
+        }
+        .table-container table,
+        .table-responsive table,
+        .table-wrapper table {
+            min-width: 600px;
+            width: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* ========== RESPONSIVE ========== */
+
+        /* Tablette large */
+        @media (max-width: 1200px) {
+            .main-content { padding: 80px 20px 20px; }
+        }
+
+        /* Tablette */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .quick-actions { grid-template-columns: repeat(3, 1fr) !important; }
+            .servers-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+            table { font-size: 13px; }
+        }
+
+        /* Mobile (768px) */
+        @media (max-width: 768px) {
+            .topbar { padding: 0 14px; gap: 8px; }
+            .logo-text { display: none; }
+            .topbar-right { gap: 8px; }
+            .drawer { width: min(300px, 85vw); }
+            .main-content { padding: 72px 12px 20px !important; max-width: 100% !important; }
+
+            /* Grilles */
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .servers-grid { grid-template-columns: 1fr !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: 1fr !important; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+
+            /* Flex */
+            .section-header { flex-wrap: wrap; gap: 10px; }
+            .server-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+            .server-actions { grid-template-columns: 1fr 1fr !important; }
+            .profile-grid { grid-template-columns: 1fr !important; }
+            .info-grid { grid-template-columns: 1fr !important; }
+            .form-row { flex-direction: column !important; gap: 12px !important; }
+            .form-grid { grid-template-columns: 1fr !important; }
+            .btn-group { flex-direction: column !important; width: 100% !important; }
+            .btn-group .btn { width: 100% !important; justify-content: center; }
+
+            /* Filtres */
+            .filter-row, .filters-bar, .filter-bar, .filters {
+                flex-direction: column !important;
+                gap: 8px !important;
+                align-items: stretch !important;
+            }
+            .filter-select, .filter-input { width: 100% !important; }
+            .search-bar, .search-input { width: 100% !important; }
+
+            /* Tables — renforcement mobile */
+            .table-container,
+            .table-responsive,
+            .table-wrapper {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            table { font-size: 12px !important; }
+            th, td { padding: 8px 10px !important; white-space: nowrap; }
+            .table-actions { display: flex; gap: 4px; }
+
+            /* Modals */
+            .modal-content {
+                width: 96% !important; max-width: 96vw !important;
+                padding: 16px !important; margin: 8px auto;
+                max-height: 92vh; overflow-y: auto;
+            }
+            .modal-actions { flex-direction: column !important; gap: 8px !important; }
+            .modal-actions .btn { width: 100% !important; justify-content: center; }
+            .modal-header h3 { font-size: 16px !important; }
+
+            /* Cards */
+            .card { padding: 16px !important; border-radius: 16px !important; }
+
+            /* Onglets */
+            .tabs, .admin-tabs, .modal-tabs {
+                overflow-x: auto !important; -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap !important; padding-bottom: 4px;
+                scrollbar-width: none;
+            }
+            .tabs::-webkit-scrollbar, .admin-tabs::-webkit-scrollbar { display: none; }
+            .tab-btn, .tab { flex-shrink: 0 !important; }
+
+            /* Pages spécifiques */
+            .file-toolbar { flex-direction: column !important; gap: 8px !important; }
+            .file-path { width: 100% !important; }
+            .file-grid { grid-template-columns: 1fr !important; }
+            .terminal { font-size: 12px !important; }
+            .action-card { padding: 14px 8px !important; }
+            .action-card i { font-size: 20px !important; }
+            .action-card span { font-size: 12px !important; }
+            h1 { font-size: clamp(20px, 6vw, 36px) !important; }
+            h2 { font-size: clamp(16px, 5vw, 24px) !important; }
+
+            /* Résolution boutons sélection + export */
+            .selection-actions, .export-bar {
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+        }
+
+        /* Petit mobile (480px) */
+        @media (max-width: 480px) {
+            .topbar { padding: 0 10px; }
+            .hamburger { margin-right: 10px; }
+            .main-content { padding: 70px 10px 16px !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .card { padding: 12px !important; border-radius: 14px !important; }
+            .section-header h2 { font-size: 15px !important; }
+            .modal-content { padding: 12px !important; }
+            .btn { padding: 10px 14px !important; font-size: 13px !important; }
+            .drawer { width: 88vw; }
+            .drawer-stats .value { font-size: 15px !important; }
+            th, td { padding: 6px 8px !important; font-size: 11px !important; }
+        }
+
+        /* Très petit (360px) */
+        @media (max-width: 360px) {
+            .logo-mark { width: 34px; height: 34px; font-size: 13px; }
+            .avatar-circle { width: 32px; height: 32px; font-size: 13px; }
+            .main-content { padding: 68px 8px 12px !important; }
+            .drawer { width: 92vw; }
+        }
+
+        /* ========== STYLES SPÉCIFIQUES ========== */
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Fond animé */
+        
+
+        
+
+        
+
+        
+
+        
+
+
+        /* Navbar */
+        
+
+        
+
+        
+        
+
+        
+        .nav-links a {
+            padding: 7px 14px;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
+        .btn-login {
+            padding: 8px 18px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: none;
+            border: 1px solid var(--border-strong);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-decoration: none;
+        }
+        .btn-login:hover { background: white; color: var(--text); }
+        .btn-cta {
+            padding: 8px 18px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 3px 12px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-cta:hover { background: #5254d4; transform: translateY(-2px); }
+
+        /* Page container */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 5% 4rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* API Header */
+        .api-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .api-header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .api-header h1 em { font-style: normal; color: var(--accent); }
+        .api-header p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 16px;
+            font-size: 16px;
+        }
+        .version-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 50px;
+            background: var(--surface-strong);
+            border: 1px solid var(--border-strong);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            display: none;
+            position: relative;
+            padding-left: 3rem;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+        .alert::before {
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+        .alert-success { border-left: 4px solid var(--green); }
+        .alert-success::before { content: '\f00c'; color: var(--green); }
+        .alert-error { border-left: 4px solid #ef4444; }
+        .alert-error::before { content: '\f071'; color: #ef4444; }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 26px 28px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-3px);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .card-header i {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--accent-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 18px;
+        }
+        .card-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* API Key Display */
+        .api-key-container {
+            background: #1e1e2e;
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            margin: 16px 0;
+            position: relative;
+        }
+        .api-key-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .api-key-shield { display: flex; align-items: center; gap: 6px; }
+        .api-key-shield i { color: var(--green); }
+        .api-key-display {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            color: #a5b4fc;
+            margin-bottom: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .api-key-display:hover { background: rgba(255,255,255,0.08); }
+
+        /* Rate limit bar */
+        .rate-limit-bar-wrap {
+            margin: 10px 0 0;
+        }
+        .rate-limit-bar-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 6px; font-size: 12px; color: rgba(255,255,255,0.6);
+        }
+        .rate-limit-bar-header .lbl { display: flex; align-items: center; gap: 6px; }
+        .rate-limit-bar-header .lbl i { color: var(--accent); }
+        .rate-limit-bar-track {
+            height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;
+        }
+        .rate-limit-bar-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--green), var(--accent));
+            transition: width 0.6s ease;
+        }
+        .rate-limit-bar-fill.warn { background: linear-gradient(90deg, var(--warning), #ef4444); }
+
+        .api-key-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 12px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+        }
+        .stat-item i { color: var(--accent); width: 16px; }
+        .stat-value { color: white; font-weight: 700; margin-left: 2px; }
+
+        .api-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 3px 12px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover { background: #5254d4; transform: translateY(-2px); }
+        .btn-outline {
+            background: white;
+            border: 1px solid var(--border-strong);
+            color: var(--text-secondary);
+        }
+        .btn-outline:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+        .btn-danger {
+            background: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+        }
+        .btn-danger:hover { background: #fecaca; }
+
+        .security-note {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .security-note i { color: #f59e0b; margin-right: 8px; }
+
+        /* Role badge */
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 12px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--border-strong);
+            text-transform: uppercase;
+        }
+
+        /* Documentation */
+        .doc-section {
+            margin-top: 32px;
+        }
+        .doc-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        .doc-section h3 i { color: var(--accent); }
+        .endpoint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 18px;
+            margin: 16px 0 24px;
+        }
+        .endpoint {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .endpoint:hover {
+            border-color: var(--accent-light);
+            box-shadow: var(--shadow-sm);
+        }
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .endpoint-method {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 30px;
+            text-transform: uppercase;
+        }
+        .method-get { background: #dbeafe; color: #2563eb; }
+        .method-post { background: #dcfce7; color: #16a34a; }
+        .method-put { background: #fef9c3; color: #ca8a04; }
+        .method-delete { background: #fee2e2; color: #dc2626; }
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--accent);
+            margin: 6px 0 8px;
+            word-break: break-all;
+        }
+        .endpoint-description {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .permission-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            background: var(--accent-dim);
+            color: var(--accent);
+            margin: 2px 4px 2px 0;
+        }
+
+        .code-block {
+            background: #1e1e2f;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+        .code-block pre {
+            margin: 0;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .copy-code-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #94a3b8;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-code-btn:hover { background: var(--accent); color: white; }
+
+        .lang-tabs {
+            display: flex;
+            gap: 6px;
+            margin: 20px 0 10px;
+            flex-wrap: wrap;
+        }
+        .lang-tab {
+            padding: 4px 12px;
+            border-radius: 30px;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .lang-content { display: none; }
+        .lang-content.active { display: block; }
+
+        .info-box {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .info-box i { color: var(--accent); margin-right: 6px; }
+
+        hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+        @media (max-width: 700px) {
+            .api-header h1 { font-size: 34px; }
+            .endpoint-grid { grid-template-columns: 1fr; }
+            .api-actions { flex-direction: column; }
+            
+        }
+    
+    </style>
+</head>
+<body>
+    <!-- FOND ANIMÉ -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb1"></div>
+        <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="logo-area">
+            <div class="logo-mark">FH</div>
+            <span class="logo-text">FLYHOST</span>
+        </div>
+        <div class="topbar-right">
+            <div class="avatar-circle" id="topbarAvatar" onclick="openSidebar()">?</div>
+        </div>
+    </header>
+
+    <!-- OVERLAY -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeSidebar()"></div>
+
+    <!-- DRAWER -->
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">
+                <div class="logo-mark">FH</div>
+                <span>FLYHOST</span>
+            </div>
+            <button class="close-drawer" onclick="closeSidebar()">&times;</button>
+        </div>
+
+        <div class="drawer-user" id="drawerUser">
+            <div class="drawer-avatar" id="drawerAvatar">?</div>
+            <div class="drawer-user-info">
+                <div class="drawer-username" id="drawerUsername">Chargement...</div>
+                <div class="drawer-coins">
+                    <i class="fas fa-coins"></i>
+                    <span id="drawerCoins">0</span>
+                </div>
+                <span class="drawer-role-badge" id="drawerRole">Utilisateur</span>
+            </div>
+        </div>
+
+        <nav class="drawer-nav" id="drawerNav">
+            <div class="nav-section">PRINCIPAL</div>
+            <a href="/dashboard" class="nav-item" data-page="dashboard">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/payment" class="nav-item" data-page="payment">
+                <i class="fas fa-credit-card"></i>
+                <span>Paiement</span>
+            </a>
+            <a href="/deploy" class="nav-item" data-page="deploy">
+                <i class="fas fa-rocket"></i>
+                <span>Déploiement</span>
+            </a>
+            <a href="/profile" class="nav-item" data-page="profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="/api-keys" class="nav-item" data-page="api">
+                <i class="fas fa-key"></i>
+                <span>API</span>
+            </a>
+            <a href="/dev" class="nav-item" data-page="info">
+                <i class="fas fa-info-circle"></i>
+                <span>Informations</span>
+            </a>
+            <a href="/chat" class="nav-item" data-page="chat">
+                <i class="fas fa-comment"></i>
+                <span>Chat</span>
+            </a>
+
+            <div class="nav-section" id="resellerSectionTitle">REVENDEUR</div>
+            <a href="/panel-admin" class="nav-item" id="resellerDashboardLink" data-page="reseller">
+                <i class="fas fa-store"></i>
+                <span>Espace Revendeur</span>
+            </a>
+
+            <div class="nav-section" id="adminSectionTitle">ADMINISTRATION</div>
+            <a href="/root" class="nav-item" id="adminDashboardLink" data-page="admin">
+                <i class="fas fa-crown"></i>
+                <span>Administration</span>
+            </a>
+        </nav>
+
+        <div class="drawer-footer">
+            <div class="drawer-stats" id="drawerStats">
+                <div class="stat-item">
+                    <span class="value" id="statServersDrawer">0</span>
+                    <span class="label">Serveurs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statReferralsDrawer">0</span>
+                    <span class="label">Filleuls</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statStreakDrawer">0</span>
+                    <span class="label">Série</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+    </aside>
+
+
+    <!-- Fond animé identique à index.html -->
+    <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- Navbar -->
+    <div class="page">
+
+        <!-- Header API -->
+        <div class="api-header">
+            <h1>Documentation <em>API</em></h1>
+            <p>Interface de programmation FLYHOST – accès sécurisé à vos ressources</p>
+            <div class="version-badge">
+                <i class="fas fa-code-branch"></i> v1 · Authentification Bearer
+            </div>
+        </div>
+
+        <!-- Alertes dynamiques -->
+        <div id="api-success-message" class="alert alert-success"></div>
+        <div id="api-error-message" class="alert alert-error"></div>
+
+        <!-- SECTION : MA CLÉ API (privée) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-key"></i>
+                <h2>Ma clé API personnelle <span id="role-badge" class="role-badge">utilisateur</span></h2>
+            </div>
+
+            <div class="api-key-container">
+                <div class="api-key-label">
+                    <div class="api-key-shield"><i class="fas fa-shield-check"></i> CLÉ PRIVÉE — NE JAMAIS PARTAGER</div>
+                    <span id="api-key-created" style="color:rgba(255,255,255,0.4);font-size:11px;">—</span>
+                </div>
+
+                <div class="api-key-display" id="api-key-display" onclick="copyApiKeyInline()" title="Cliquer pour copier">
+                    <span id="api-key-text">Chargement...</span>
+                </div>
+
+                <div class="rate-limit-bar-wrap">
+                    <div class="rate-limit-bar-header">
+                        <div class="lbl"><i class="fas fa-tachometer-alt"></i> Appels aujourd'hui</div>
+                        <span><span id="api-calls-today">0</span> / <span id="api-calls-limit">50</span></span>
+                    </div>
+                    <div class="rate-limit-bar-track">
+                        <div class="rate-limit-bar-fill" id="rate-limit-fill" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="api-key-stats">
+                    <div class="stat-item"><i class="fas fa-calendar-alt"></i> Compte créé: <span class="stat-value" id="api-key-created-2">-</span></div>
+                    <div class="stat-item"><i class="fas fa-sync"></i> Réinit. à minuit UTC</div>
+                </div>
+            </div>
+
+            <div class="api-actions">
+                <button class="btn btn-primary" id="copy-api-key-btn"><i class="fas fa-copy"></i> Copier la clé</button>
+                <button class="btn btn-outline" id="toggle-api-key-btn"><i class="fas fa-eye"></i> Afficher</button>
+                <button class="btn btn-danger" id="regenerate-api-key-btn"><i class="fas fa-sync-alt"></i> Régénérer</button>
+            </div>
+
+            <div class="security-note">
+                <i class="fas fa-exclamation-triangle"></i> Cette clé est strictement personnelle. Toute personne possédant cette clé peut agir en votre nom sur la plateforme. Ne la partagez jamais.
+            </div>
+        </div>
+
+        <!-- Informations sur les limites de taux -->
+        <div class="info-box">
+            <i class="fas fa-tachometer-alt"></i> <strong>Limites de taux</strong> — Plan gratuit : 50 appels/jour · 1GB : 200 · 2GB : 500 · 4GB : 1000 · 8GB : 2000 · Illimité : 5000. Réinitialisation à minuit UTC.
+        </div>
+
+        <!-- Documentation des endpoints (filtrée selon le rôle) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-plug"></i>
+                <h2>Authentification</h2>
+            </div>
+            <p style="margin-bottom:12px;">Inclure la clé dans l'en-tête <code>Authorization: Bearer VOTRE_CLE</code>.</p>
+
+            <div class="lang-tabs" id="auth-tabs">
+                <div class="lang-tab active" onclick="switchLang('auth', 'curl')">cURL</div>
+                <div class="lang-tab" onclick="switchLang('auth', 'js')">JavaScript</div>
+                <div class="lang-tab" onclick="switchLang('auth', 'python')">Python</div>
+            </div>
+            <div id="auth-curl" class="lang-content active">
+                <div class="code-block">
+                    <button class="copy-code-btn" onclick="copyCode(this)">Copier</button>
+                    <pre><code>curl -X GET "https://flihost.site/api/v1/me" \
+  -H "Authorization: Bearer VOTRE_CLE_API"</code></pre>
+                </div>
+            </div>
+            <div id="auth-js" class="lang-content">
+                <div class="code-block">
+                    <button class="copy-code-btn" onclick="copyCode(this)">Copier</button>
+                    <pre><code>fetch('https://flihost.site/api/v1/me', {
+  headers: { 'Authorization': 'Bearer VOTRE_CLE_API' }
+})</code></pre>
+                </div>
+            </div>
+            <div id="auth-python" class="lang-content">
+                <div class="code-block">
+                    <button class="copy-code-btn" onclick="copyCode(this)">Copier</button>
+                    <pre><code>import requests
+headers = {'Authorization': 'Bearer VOTRE_CLE_API'}
+r = requests.get('https://flihost.site/api/v1/me', headers=headers)</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints communs à tous les utilisateurs (s'affichent toujours) -->
+        <div class="card" id="user-endpoints">
+            <div class="card-header">
+                <i class="fas fa-user"></i>
+                <h2>Endpoints utilisateur (accès standard)</h2>
+            </div>
+            <div class="endpoint-grid">
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/me</strong></div>
+                    <div class="endpoint-url">/v1/me</div>
+                    <div class="endpoint-description">Informations du profil connecté.</div>
+                    <span class="permission-tag">can_view_own_stats</span>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/servers</strong></div>
+                    <div class="endpoint-url">/v1/servers</div>
+                    <div class="endpoint-description">Liste de vos serveurs actifs.</div>
+                    <span class="permission-tag">can_view_own_servers</span>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/servers/:id/power</strong></div>
+                    <div class="endpoint-url">/v1/servers/{id}/power</div>
+                    <div class="endpoint-description">start/stop/restart.</div>
+                    <span class="permission-tag">can_power_own_servers</span>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/servers/:id/stats</strong></div>
+                    <div class="endpoint-url">/v1/servers/{id}/stats</div>
+                    <div class="endpoint-description">CPU, RAM, disque, uptime.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/transactions</strong></div>
+                    <div class="endpoint-url">/v1/transactions</div>
+                    <div class="endpoint-description">Historique des achats.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/daily-reward/status</strong></div>
+                    <div class="endpoint-url">/v1/daily-reward/status</div>
+                    <div class="endpoint-description">Vérifie si vous pouvez réclamer.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/daily-reward/claim</strong></div>
+                    <div class="endpoint-url">/v1/daily-reward/claim</div>
+                    <div class="endpoint-description">Réclame la récompense.</div>
+                </div>
+                <div class="endpoint">
+                    <div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/coins</strong></div>
+                    <div class="endpoint-url">/v1/coins</div>
+                    <div class="endpoint-description">Solde de coins actuel.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endpoints Revendeur (cachés par défaut, affichés si rôle >= admin) -->
+        <div class="card" id="reseller-endpoints" style="display:none;">
+            <div class="card-header">
+                <i class="fas fa-store"></i>
+                <h2>Endpoints revendeur <span class="role-badge" style="background:rgba(245,158,11,0.1); color:#f59e0b;">revendeur</span></h2>
+            </div>
+            <div class="endpoint-grid">
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/reseller/dashboard</strong></div><div class="endpoint-url">/v1/reseller/dashboard</div><span class="permission-tag">can_view_commission</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/reseller/clients</strong></div><div class="endpoint-url">/v1/reseller/clients</div><span class="permission-tag">can_view_clients</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/reseller/clients/:id/servers</strong></div><div class="endpoint-url">/v1/reseller/clients/{id}/servers</div><span class="permission-tag">can_view_client_servers</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/reseller/commissions</strong></div><div class="endpoint-url">/v1/reseller/commissions</div><span class="permission-tag">can_view_commission</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/reseller/commission-balance</strong></div><div class="endpoint-url">/v1/reseller/commission-balance</div></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/reseller/withdraw</strong></div><div class="endpoint-url">/v1/reseller/withdraw</div><span class="permission-tag">can_request_withdrawal</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/reseller/bulk-purchase</strong></div><div class="endpoint-url">/v1/reseller/bulk-purchase</div><span class="permission-tag">can_bulk_purchase</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/reseller/promo-codes</strong></div><div class="endpoint-url">/v1/reseller/promo-codes</div><span class="permission-tag">can_create_promo_codes</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/reseller/affiliate-info</strong></div><div class="endpoint-url">/v1/reseller/affiliate-info</div></div>
+            </div>
+        </div>
+
+        <!-- Endpoints SuperAdmin (cachés par défaut, affichés si rôle superadmin) -->
+        <div class="card" id="superadmin-endpoints" style="display:none;">
+            <div class="card-header">
+                <i class="fas fa-crown"></i>
+                <h2>Endpoints superadmin <span class="role-badge" style="background:rgba(239,68,68,0.1); color:#ef4444;">superadmin</span></h2>
+            </div>
+            <div class="endpoint-grid">
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/admin/users</strong></div><div class="endpoint-url">/v1/admin/users</div><span class="permission-tag">can_view_all_users</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/admin/users/:id/ban</strong></div><div class="endpoint-url">/v1/admin/users/{id}/ban</div><span class="permission-tag">can_ban_users</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/admin/users/:id/coins</strong></div><div class="endpoint-url">/v1/admin/users/{id}/coins</div><span class="permission-tag">can_add_coins_to_any_user</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/admin/resellers</strong></div><div class="endpoint-url">/v1/admin/resellers</div><span class="permission-tag">can_manage_resellers</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/admin/withdrawals</strong></div><div class="endpoint-url">/v1/admin/withdrawals</div><span class="permission-tag">can_approve_withdrawals</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/admin/withdrawals/:id/process</strong></div><div class="endpoint-url">/v1/admin/withdrawals/{id}/process</div></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/admin/financial-report</strong></div><div class="endpoint-url">/v1/admin/financial-report</div><span class="permission-tag">can_view_financial_reports</span></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-get">GET</span> <strong>/admin/stats</strong></div><div class="endpoint-url">/v1/admin/stats</div></div>
+                <div class="endpoint"><div class="endpoint-header"><span class="endpoint-method method-post">POST</span> <strong>/admin/settings</strong></div><div class="endpoint-url">/v1/admin/settings</div><span class="permission-tag">can_manage_platform_settings</span></div>
+            </div>
+        </div>
+
+        <!-- Codes d'erreur (utile pour tous) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-exclamation-circle"></i>
+                <h2>Codes d'erreur fréquents</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:4px;">
+                <div style="padding:14px 16px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.15);border-radius:12px;">
+                    <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#f87171;margin-bottom:4px;">TOKEN_REQUIRED</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">Token JWT manquant dans la requête</div>
+                </div>
+                <div style="padding:14px 16px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.15);border-radius:12px;">
+                    <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#f87171;margin-bottom:4px;">INVALID_TOKEN</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">Token invalide ou session expirée</div>
+                </div>
+                <div style="padding:14px 16px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.15);border-radius:12px;">
+                    <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#f87171;margin-bottom:4px;">API_KEY_REQUIRED</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">Clé API absente du header Authorization</div>
+                </div>
+                <div style="padding:14px 16px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;">
+                    <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:4px;">PERMISSION_DENIED</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">Droits insuffisants pour cette ressource</div>
+                </div>
+                <div style="padding:14px 16px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;">
+                    <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:4px;">DAILY_LIMIT_REACHED</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">Limite de taux journalière atteinte</div>
+                </div>
+                <div style="padding:14px 16px;background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.15);border-radius:12px;">
+                    <div style="font-family:'Courier New',monospace;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;">Format réponse</div>
+                    <div style="font-size:13px;color:var(--text-secondary);font-family:'Courier New',monospace;">{"success": false, "error": "CODE"}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        (function() {
+            // ---------- ÉTAT ----------
+            const token = localStorage.getItem('flyhost_token');
+            let currentUser = null;
+            let fullApiKey = '';
+            let masked = true;
+
+            // Éléments DOM
+            const apiKeySpan = document.getElementById('api-key-text');
+            const copyBtn = document.getElementById('copy-api-key-btn');
+            const toggleBtn = document.getElementById('toggle-api-key-btn');
+            const regenerateBtn = document.getElementById('regenerate-api-key-btn');
+            const roleBadge = document.getElementById('role-badge');
+            const userWelcome = document.getElementById('user-welcome');
+            const loginLink = document.getElementById('login-link');
+            const registerLink = document.getElementById('register-link');
+            const logoutLink = document.getElementById('logout-link');
+
+            // ---------- MISE À JOUR UI SELON AUTH ----------
+            function updateUIBasedOnAuth() {
+                if (token) {
+                    if (loginLink) loginLink.style.display = 'none';
+                    if (registerLink) registerLink.style.display = 'none';
+                    if (logoutLink) logoutLink.style.display = 'inline-flex';
+                    fetchUserData();
+                } else {
+                    if (loginLink) loginLink.style.display = 'inline-flex';
+                    if (registerLink) registerLink.style.display = 'inline-flex';
+                    if (logoutLink) logoutLink.style.display = 'none';
+                    if (apiKeySpan) apiKeySpan.textContent = 'Connectez-vous pour voir votre clé';
+                    if (roleBadge) roleBadge.textContent = 'non connecté';
+                    if (userWelcome) userWelcome.textContent = '';
+                }
+            }
+
+            // ---------- RÉCUPÉRATION UTILISATEUR ----------
+            async function fetchUserData() {
+                try {
+                    const resp = await fetch('/api/user/me', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                        currentUser = data.user;
+                        fullApiKey = currentUser.api_key || '';
+                        const role = currentUser.role || 'user';
+                        // Mise à jour UI
+                        if (userWelcome) userWelcome.textContent = `👋 ${currentUser.username}`;
+                        if (roleBadge) roleBadge.textContent = role === 'superadmin' ? 'superadmin' : (role === 'admin' ? 'revendeur' : 'utilisateur');
+                        const created = new Date(currentUser.created_at || Date.now()).toLocaleDateString('fr-FR');
+                        document.getElementById('api-key-created').textContent = created;
+                        const el2 = document.getElementById('api-key-created-2'); if(el2) el2.textContent = created;
+                        const callsToday = currentUser.api_calls_today || 0;
+                        const callsLimit = currentUser.api_calls_limit || 50;
+                        document.getElementById('api-calls-today').textContent = callsToday;
+                        document.getElementById('api-calls-limit').textContent = callsLimit;
+                        const pct = Math.min(100, Math.round(callsToday / callsLimit * 100));
+                        const bar = document.getElementById('rate-limit-fill');
+                        if (bar) { bar.style.width = pct + '%'; if (pct > 70) bar.classList.add('warn'); }
+
+                        // Afficher/masquer sections selon rôle
+                        document.getElementById('reseller-endpoints').style.display = (role === 'admin' || role === 'superadmin') ? 'block' : 'none';
+                        document.getElementById('superadmin-endpoints').style.display = (role === 'superadmin') ? 'block' : 'none';
+
+                        updateApiKeyDisplay();
+                    } else {
+                        logout();
+                    }
+                } catch (e) {
+                    console.warn('Impossible de récupérer utilisateur', e);
+                    logout();
+                }
+            }
+
+            function updateApiKeyDisplay() {
+                if (!apiKeySpan) return;
+                if (!fullApiKey) {
+                    apiKeySpan.textContent = 'Clé non disponible';
+                    return;
+                }
+                if (masked) {
+                    if (fullApiKey.length > 16) {
+                        apiKeySpan.textContent = fullApiKey.substring(0, 8) + '•'.repeat(20) + fullApiKey.substring(fullApiKey.length - 8);
+                    } else {
+                        apiKeySpan.textContent = '••••••••';
+                    }
+                    if (toggleBtn) toggleBtn.innerHTML = '<i class="fas fa-eye"></i> Afficher';
+                } else {
+                    apiKeySpan.textContent = fullApiKey;
+                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> Masquer';
+                }
+            }
+
+            // ---------- ACTIONS ----------
+            window.copyApiKeyInline = async function() {
+                if (!fullApiKey) return showMessage('Aucune clé disponible', 'error');
+                await navigator.clipboard.writeText(fullApiKey);
+                const display = document.getElementById('api-key-display');
+                const orig = display.style.borderColor;
+                display.style.borderColor = 'var(--green)';
+                display.style.background = 'rgba(16,185,129,0.08)';
+                setTimeout(() => { display.style.borderColor = orig; display.style.background = ''; }, 1000);
+                showMessage('✅ Clé copiée !', 'success');
+            };
+
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async () => {
+                    if (!fullApiKey) return showMessage('Aucune clé disponible', 'error');
+                    await navigator.clipboard.writeText(fullApiKey);
+                    showMessage('✅ Clé copiée dans le presse-papiers !', 'success');
+                });
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    masked = !masked;
+                    updateApiKeyDisplay();
+                });
+            }
+
+            if (regenerateBtn) {
+                regenerateBtn.addEventListener('click', async () => {
+                    if (!confirm('Régénérer votre clé API ? Les anciennes applications cesseront de fonctionner.')) return;
+                    try {
+                        const resp = await fetch('/api/user/regenerate-api-key', {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        const data = await resp.json();
+                        if (data.success) {
+                            fullApiKey = data.new_api_key;
+                            masked = true;
+                            updateApiKeyDisplay();
+                            showMessage('Nouvelle clé générée', 'success');
+                        } else {
+                            showMessage(data.error || 'Erreur', 'error');
+                        }
+                    } catch (err) {
+                        showMessage('Erreur réseau', 'error');
+                    }
+                });
+            }
+
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+
+
+            // ---------- MESSAGES ----------
+            function showMessage(msg, type) {
+                const el = document.getElementById(type === 'success' ? 'api-success-message' : 'api-error-message');
+                if (!el) return;
+                el.textContent = msg;
+                el.style.display = 'block';
+                setTimeout(() => { el.style.display = 'none'; }, 4000);
+            }
+
+            // ---------- LANGUES TABS ----------
+            window.switchLang = function(group, lang) {
+                document.querySelectorAll(`#${group}-tabs .lang-tab`).forEach(t => t.classList.remove('active'));
+                document.querySelector(`#${group}-tabs .lang-tab[onclick*="'${lang}'"]`).classList.add('active');
+                document.querySelectorAll(`[id^="${group}-"]`).forEach(c => c.classList.remove('active'));
+                document.getElementById(`${group}-${lang}`).classList.add('active');
+            };
+
+            window.copyCode = function(btn) {
+                const pre = btn.closest('.code-block').querySelector('pre');
+                const code = pre?.innerText || '';
+                navigator.clipboard.writeText(code);
+                btn.innerHTML = 'Copié !';
+                setTimeout(() => { btn.innerHTML = 'Copier'; }, 1500);
+            };
+
+            // ---------- INIT ----------
+            updateUIBasedOnAuth();
+            hljs.highlightAll();
+        })();
+    
+        // ========== DRAWER / SIDEBAR ==========
+        function toggleSidebar() {
+            const drawer = document.getElementById('drawer');
+            if (drawer.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
+        }
+        function openSidebar() {
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('hamburgerBtn').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('hamburgerBtn').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        window.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebar(); });
+
+        // Chargement infos utilisateur dans le drawer
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('flyhost_user') || '{}');
+                if (user.username) {
+                    const init = user.username.charAt(0).toUpperCase();
+                    const a1 = document.getElementById('topbarAvatar');
+                    const a2 = document.getElementById('drawerAvatar');
+                    if (a1) a1.textContent = init;
+                    if (a2) a2.textContent = init;
+                    const un = document.getElementById('drawerUsername');
+                    if (un) un.textContent = user.username;
+                    const co = document.getElementById('drawerCoins');
+                    if (co) co.textContent = user.coins || 0;
+                    const ro = document.getElementById('drawerRole');
+                    if (ro) {
+                        ro.textContent = user.role === 'superadmin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : 'Utilisateur';
+                        ro.className = 'drawer-role-badge' + (user.role ? ' ' + user.role : '');
+                    }
+                }
+                // Highlight active page
+                const page = window.location.pathname.replace('/', '').split('/')[0] || 'dashboard';
+                document.querySelectorAll('.nav-item[data-page]').forEach(function(el) {
+                    if (el.dataset.page === page) el.classList.add('active');
+                    else el.classList.remove('active');
+                });
+            } catch(e) {}
+        })();
+
+        if (typeof logout === 'undefined') {
+            function logout() {
+                localStorage.removeItem('flyhost_token');
+                localStorage.removeItem('flyhost_user');
+                window.location.href = '/login';
+            }
+        }
+</script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique — FLYHOST</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{
+            --accent:#6366f1;--accent-light:#818cf8;--accent-dim:rgba(99,102,241,.1);
+            --bg:#eef0f7;--surface:rgba(255,255,255,.75);--surface-strong:rgba(255,255,255,.92);
+            --border:rgba(99,102,241,.18);--border-strong:rgba(99,102,241,.35);
+            --text:#0f172a;--text-secondary:#334155;--text-muted:#64748b;
+            --green:#10b981;--warning:#f59e0b;--error:#ef4444;
+            --radius:16px;
+        }
+        [data-theme="dark"]{
+            --bg:#0d1117;--surface:rgba(22,27,34,.85);--surface-strong:rgba(30,37,48,.95);
+            --border:rgba(99,102,241,.25);--border-strong:rgba(99,102,241,.45);
+            --text:#f0f6fc;--text-secondary:#c9d1d9;--text-muted:#8b949e;
+        }
+        body{
+            font-family:'Plus Jakarta Sans',sans-serif;
+            background:var(--bg);color:var(--text);
+            min-height:100vh;padding-top:64px;overflow-x:hidden;
+        }
+        /* Fond animé */
+        .animated-bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
+        .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;}
+        .blob1{width:500px;height:500px;background:var(--accent);top:-150px;right:-100px;}
+        .blob2{width:400px;height:400px;background:#8b5cf6;bottom:-100px;left:-100px;}
+
+        /* Page layout */
+        .page{padding:32px 24px 60px;max-width:960px;margin:0 auto;width:100%;}
+
+        /* Header */
+        .page-title{font-size:clamp(22px,5vw,32px);font-weight:800;margin-bottom:6px;
+            display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+        .page-title i{color:var(--accent);}
+        .page-sub{color:var(--text-muted);font-size:14px;margin-bottom:28px;}
+
+        /* Chart card */
+        .chart-card{
+            background:var(--surface-strong);border:1px solid var(--border);
+            border-radius:var(--radius);padding:24px;margin-bottom:24px;
+            box-shadow:0 4px 20px rgba(99,102,241,.08);
+        }
+        .chart-card-header{
+            display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;
+        }
+        .chart-card-title{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;}
+        .chart-card-title i{color:var(--accent);}
+        .chart-period-btns{display:flex;gap:6px;flex-wrap:wrap;}
+        .period-btn{
+            padding:5px 14px;border-radius:20px;border:1px solid var(--border);
+            background:var(--surface);color:var(--text-muted);
+            font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit;
+        }
+        .period-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+        .chart-wrap{position:relative;height:200px;}
+
+        /* Summary cards */
+        .summary-grid{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+            gap:12px;margin-bottom:24px;
+        }
+        .summary-card{
+            background:var(--surface-strong);border:1px solid var(--border);
+            border-radius:14px;padding:18px 16px;text-align:center;
+            box-shadow:0 2px 12px rgba(99,102,241,.05);
+        }
+        .summary-val{font-size:26px;font-weight:800;line-height:1.1;}
+        .summary-val.pos{color:var(--green);}
+        .summary-val.neg{color:var(--error);}
+        .summary-val.acc{color:var(--accent);}
+        .summary-lbl{font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+
+        /* Filters */
+        .filters{
+            display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center;
+        }
+        .filter-btn{
+            padding:8px 16px;border-radius:20px;border:1px solid var(--border);
+            background:var(--surface);color:var(--text-muted);
+            font-size:13px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit;
+        }
+        .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+        .filter-btn:hover:not(.active){border-color:var(--accent-light);color:var(--text);}
+        .search-box{
+            flex:1;min-width:160px;max-width:300px;
+            padding:8px 16px;border-radius:20px;
+            border:1px solid var(--border);background:var(--surface);
+            color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:.2s;
+        }
+        .search-box:focus{border-color:var(--accent);}
+
+        /* Timeline */
+        .timeline-wrap{
+            background:var(--surface-strong);border:1px solid var(--border);
+            border-radius:var(--radius);overflow:hidden;
+        }
+        .timeline-item{
+            display:flex;gap:14px;padding:16px 20px;
+            border-bottom:1px solid var(--border);transition:.15s;align-items:flex-start;
+        }
+        .timeline-item:last-child{border-bottom:none;}
+        .timeline-item:hover{background:rgba(99,102,241,.03);}
+        .tl-icon{
+            width:40px;height:40px;border-radius:12px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:15px;flex-shrink:0;margin-top:1px;
+        }
+        .tl-icon.credit{background:rgba(16,185,129,.12);color:var(--green);}
+        .tl-icon.debit{background:rgba(239,68,68,.12);color:var(--error);}
+        .tl-icon.neutral{background:rgba(99,102,241,.12);color:var(--accent);}
+        .tl-icon.warn{background:rgba(245,158,11,.12);color:var(--warning);}
+        .tl-body{flex:1;min-width:0;}
+        .tl-title{font-weight:700;font-size:14px;line-height:1.3;}
+        .tl-sub{color:var(--text-muted);font-size:12px;margin-top:3px;}
+        .tl-badge{
+            display:inline-block;padding:2px 8px;border-radius:20px;
+            font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:4px;
+        }
+        .tl-right{text-align:right;flex-shrink:0;min-width:80px;}
+        .tl-amount{font-weight:800;font-size:16px;}
+        .tl-amount.pos{color:var(--green);}
+        .tl-amount.neg{color:var(--error);}
+        .tl-amount.zero{color:var(--text-muted);}
+        .tl-date{font-size:11px;color:var(--text-muted);margin-top:3px;}
+
+        /* Empty */
+        .empty{text-align:center;padding:48px 20px;color:var(--text-muted);}
+        .empty i{font-size:40px;margin-bottom:12px;display:block;opacity:.4;}
+
+        /* Load more */
+        .load-more{
+            width:100%;padding:14px;margin-top:16px;
+            background:var(--surface);border:1px solid var(--border);
+            border-radius:var(--radius);color:var(--text-muted);
+            font-size:14px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit;
+        }
+        .load-more:hover{border-color:var(--accent);color:var(--accent);}
+
+        /* Invoices section */
+        .section-title{
+            font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px;
+            margin:32px 0 16px;
+        }
+        .section-title i{color:var(--accent);}
+        .invoices-grid{
+            display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;
+        }
+        .invoice-card{
+            background:var(--surface-strong);border:1px solid var(--border);
+            border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;
+        }
+        .invoice-card-header{display:flex;align-items:center;justify-content:space-between;}
+        .invoice-id{font-size:13px;font-weight:700;}
+        .invoice-date{font-size:11px;color:var(--text-muted);}
+        .invoice-desc{font-size:14px;color:var(--text-secondary);}
+        .invoice-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+        .invoice-amount{font-weight:800;font-size:20px;color:var(--accent);}
+        .invoice-status{
+            font-size:11px;padding:3px 10px;border-radius:20px;
+            background:rgba(16,185,129,.12);color:var(--green);font-weight:700;
+        }
+        .invoice-dl-btn{
+            width:100%;padding:10px;border-radius:10px;
+            background:var(--accent);border:none;color:#fff;
+            font-weight:700;font-size:13px;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            font-family:inherit;transition:.2s;
+        }
+        .invoice-dl-btn:hover{opacity:.85;}
+
+        /* Toast */
+        .toast-container{position:fixed;bottom:24px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:calc(100vw - 40px);}
+        .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:12px;
+            background:#fff;border-left:4px solid;box-shadow:0 8px 24px rgba(0,0,0,.15);
+            pointer-events:all;animation:toastIn .3s ease;font-size:13px;font-weight:600;}
+        .toast.error{border-left-color:var(--error);}
+        [data-theme="dark"] .toast{background:#1e1e2e;color:var(--text);}
+        @keyframes toastIn{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
+
+        /* Responsive */
+        @media(max-width:600px){
+            .page{padding:24px 14px 48px;}
+            .summary-grid{grid-template-columns:1fr 1fr;}
+            .filters{flex-direction:column;align-items:stretch;}
+            .search-box{max-width:100%;}
+            .chart-wrap{height:160px;}
+        }
+    </style>
+</head>
+<body>
+<div class="animated-bg"><div class="blob blob1"></div><div class="blob blob2"></div></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="page">
+    <h1 class="page-title"><i class="fas fa-clock-rotate-left"></i> Historique</h1>
+    <p class="page-sub">Toutes vos opérations de coins et activités sur FLYHOST</p>
+
+    <!-- GRAPHIQUE -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div class="chart-card-title"><i class="fas fa-chart-area"></i> Évolution des coins</div>
+            <div class="chart-period-btns">
+                <button class="period-btn active" onclick="setPeriod(7,this)">7j</button>
+                <button class="period-btn" onclick="setPeriod(14,this)">14j</button>
+                <button class="period-btn" onclick="setPeriod(30,this)">30j</button>
+            </div>
+        </div>
+        <div class="chart-wrap"><canvas id="coinsChart"></canvas></div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-grid">
+        <div class="summary-card"><div class="summary-val pos" id="sumEarned">+0</div><div class="summary-lbl">Coins gagnés</div></div>
+        <div class="summary-card"><div class="summary-val neg" id="sumSpent">-0</div><div class="summary-lbl">Coins dépensés</div></div>
+        <div class="summary-card"><div class="summary-val acc" id="sumTotal">0</div><div class="summary-lbl">Solde net</div></div>
+        <div class="summary-card"><div class="summary-val" id="sumCount" style="color:var(--text);">0</div><div class="summary-lbl">Opérations</div></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('',this)">Tout</button>
+        <button class="filter-btn" onclick="setFilter('server_created',this)">Serveurs</button>
+        <button class="filter-btn" onclick="setFilter('daily_reward',this)">Récompenses</button>
+        <button class="filter-btn" onclick="setFilter('referral_reward',this)">Parrainage</button>
+        <button class="filter-btn" onclick="setFilter('auto_renew',this)">Auto-renew</button>
+        <input class="search-box" id="searchBox" placeholder="Rechercher…" oninput="filterLocal()">
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-wrap" id="timeline"></div>
+    <button class="load-more" id="loadMore" onclick="loadMore()" style="display:none;"><i class="fas fa-plus"></i> Charger plus</button>
+
+    <!-- FACTURES -->
+    <div class="section-title"><i class="fas fa-file-invoice"></i> Mes factures</div>
+    <div class="invoices-grid" id="invoicesList">
+        <p style="color:var(--text-muted);font-size:14px;padding:4px;">Chargement…</p>
+    </div>
+</div>
+
+<script src="/shared-nav.js"></script>
+<script>
+    const token = localStorage.getItem('flyhost_token');
+    if (!token) window.location.href = '/login';
+
+    let allData = [], currentFilter = '', offset = 0;
+    const LIMIT = 50;
+    let chartPeriod = 7;
+    let coinsChartInst = null;
+
+    const ICONS = {
+        server_created:       {icon:'fa-server',       type:'debit'},
+        server_deleted:       {icon:'fa-trash',         type:'warn'},
+        daily_reward:         {icon:'fa-gift',          type:'credit'},
+        referral_reward:      {icon:'fa-user-plus',    type:'credit'},
+        referral_registered:  {icon:'fa-users',        type:'neutral'},
+        payment:              {icon:'fa-credit-card',  type:'credit'},
+        auto_renew:           {icon:'fa-sync',         type:'debit'},
+        server_created_promo: {icon:'fa-tag',          type:'credit'},
+        coins_added:          {icon:'fa-coins',        type:'credit'},
+        coins_removed:        {icon:'fa-minus-circle', type:'debit'},
+        login_bonus:          {icon:'fa-star',         type:'credit'},
+    };
+    const TYPE_COLORS = {
+        credit:'rgba(16,185,129,.15);color:#10b981',
+        debit:'rgba(239,68,68,.15);color:#ef4444',
+        neutral:'rgba(99,102,241,.15);color:#6366f1',
+        warn:'rgba(245,158,11,.15);color:#f59e0b'
+    };
+
+    function toast(msg, type='error') {
+        const c = document.getElementById('toastContainer');
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        el.innerHTML = `<i class="fas fa-${type==='error'?'times':'check'}-circle"></i>${msg}`;
+        c.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+    }
+
+    async function loadHistory() {
+        try {
+            const url = `/api/history?limit=${LIMIT}&offset=${offset}` + (currentFilter ? `&type=${currentFilter}` : '');
+            const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+            const d = await r.json();
+            if (!d.success) throw new Error(d.error);
+            allData = offset === 0 ? d.history : [...allData, ...d.history];
+            renderTimeline(allData);
+            document.getElementById('loadMore').style.display = d.total > allData.length ? '' : 'none';
+            if (offset === 0) {
+                computeSummary();
+                buildChart(chartPeriod);
+            }
+        } catch(e) { toast(e.message); }
+    }
+
+    function computeSummary() {
+        let earned = 0, spent = 0;
+        allData.forEach(r => {
+            if (r.coins_earned > 0) earned += r.coins_earned;
+            if (r.coins_earned < 0) spent += Math.abs(r.coins_earned);
+        });
+        document.getElementById('sumEarned').textContent = '+' + earned.toLocaleString('fr-FR');
+        document.getElementById('sumSpent').textContent = '-' + spent.toLocaleString('fr-FR');
+        const net = earned - spent;
+        document.getElementById('sumTotal').textContent = (net >= 0 ? '+' : '') + net.toLocaleString('fr-FR');
+        document.getElementById('sumCount').textContent = allData.length;
+    }
+
+    function buildChart(days) {
+        const labels = [], earned = [], spent = [];
+        const now = new Date(); now.setHours(0,0,0,0);
+        for (let i = days - 1; i >= 0; i--) {
+            const d = new Date(now); d.setDate(d.getDate() - i);
+            labels.push(d.toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit'}));
+            const dayRows = allData.filter(r => {
+                const rd = new Date(r.created_at); rd.setHours(0,0,0,0);
+                return rd.getTime() === d.getTime();
+            });
+            earned.push(dayRows.filter(r=>r.coins_earned>0).reduce((a,r)=>a+r.coins_earned,0));
+            spent.push(dayRows.filter(r=>r.coins_earned<0).reduce((a,r)=>a+Math.abs(r.coins_earned),0));
+        }
+        const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+        const gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+        const textColor = isDark ? '#8b949e' : '#64748b';
+        if (coinsChartInst) coinsChartInst.destroy();
+        const ctx = document.getElementById('coinsChart').getContext('2d');
+        coinsChartInst = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    { label:'Gagnés', data:earned, backgroundColor:'rgba(16,185,129,.7)', borderRadius:6, borderSkipped:false },
+                    { label:'Dépensés', data:spent, backgroundColor:'rgba(239,68,68,.7)', borderRadius:6, borderSkipped:false }
+                ]
+            },
+            options: {
+                responsive:true, maintainAspectRatio:false,
+                plugins:{legend:{labels:{color:textColor,font:{size:12,weight:600},boxWidth:12,boxHeight:12}}},
+                scales:{
+                    x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:11},maxRotation:0}},
+                    y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:11}},beginAtZero:true}
+                }
+            }
+        });
+    }
+
+    function setPeriod(days, btn) {
+        chartPeriod = days;
+        document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        buildChart(days);
+    }
+
+    function renderTimeline(rows) {
+        const t = document.getElementById('timeline');
+        if (!rows.length) {
+            t.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i>Aucune activité trouvée</div>';
+            return;
+        }
+        t.innerHTML = rows.map(row => {
+            const meta = ICONS[row.activity_type] || {icon:'fa-circle', type:'neutral'};
+            const coins = row.coins_earned;
+            const sign = coins > 0 ? 'pos' : coins < 0 ? 'neg' : 'zero';
+            const label = coins > 0 ? `+${coins}` : coins < 0 ? `${coins}` : '—';
+            const typeLabel = (row.activity_type || '').replace(/_/g, ' ');
+            return `<div class="timeline-item">
+                <div class="tl-icon ${meta.type}"><i class="fas ${meta.icon}"></i></div>
+                <div class="tl-body">
+                    <div class="tl-title">${row.description || typeLabel}</div>
+                    <div class="tl-sub">
+                        <span class="tl-badge" style="background:${TYPE_COLORS[meta.type]}">${typeLabel}</span>
+                    </div>
+                </div>
+                <div class="tl-right">
+                    <div class="tl-amount ${sign}">${label} <small style="font-size:10px;opacity:.7;">coins</small></div>
+                    <div class="tl-date">${new Date(row.created_at).toLocaleString('fr-FR')}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function setFilter(f, btn) {
+        currentFilter = f;
+        offset = 0;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        loadHistory();
+    }
+
+    function filterLocal() {
+        const q = document.getElementById('searchBox').value.toLowerCase();
+        const rows = allData.filter(r => (r.description || '').toLowerCase().includes(q) || (r.activity_type || '').toLowerCase().includes(q));
+        renderTimeline(rows);
+    }
+
+    function loadMore() { offset += LIMIT; loadHistory(); }
+
+    loadHistory();
+
+    async function loadInvoices() {
+        try {
+            const r = await fetch('/api/invoices', { headers: { Authorization: `Bearer ${token}` } });
+            const d = await r.json();
+            const c = document.getElementById('invoicesList');
+            if (!d.success || !d.invoices || !d.invoices.length) {
+                c.innerHTML = '<p style="color:var(--text-muted);font-size:14px;padding:4px;">Aucune facture disponible.</p>';
+                return;
+            }
+            c.innerHTML = d.invoices.map(inv => `
+                <div class="invoice-card">
+                    <div class="invoice-card-header">
+                        <span class="invoice-id">Facture #${inv.id}</span>
+                        <span class="invoice-date">${new Date(inv.created_at).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                    <div class="invoice-desc">${inv.description || 'Paiement FLYHOST'}</div>
+                    <div class="invoice-footer">
+                        <span class="invoice-amount">${inv.amount} ${inv.currency || 'XOF'}</span>
+                        <span class="invoice-status">${inv.status === 'paid' ? 'Payée' : inv.status}</span>
+                    </div>
+                    <button class="invoice-dl-btn" onclick="downloadInvoice(${inv.id})">
+                        <i class="fas fa-file-pdf"></i> Télécharger PDF
+                    </button>
+                </div>`).join('');
+        } catch(e) {
+            document.getElementById('invoicesList').innerHTML = '<p style="color:var(--text-muted);">Erreur lors du chargement.</p>';
+        }
+    }
+    loadInvoices();
+
+    async function downloadInvoice(id) {
+        try {
+            const r = await fetch(`/api/invoices/${id}/pdf`, { headers: { Authorization: `Bearer ${token}` } });
+            if (!r.ok) { toast('Erreur téléchargement PDF'); return; }
+            const blob = await r.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `facture-flyhost-${id}.pdf`;
+            a.click(); URL.revokeObjectURL(url);
+        } catch(e) { toast('Erreur : ' + e.message); }
+    }
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+</script>
+</body>
+</html>

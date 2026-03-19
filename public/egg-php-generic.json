@@ -1,0 +1,65 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2024-01-01T00:00:00+00:00",
+    "name": "PHP Generic",
+    "author": "flyhost@gmail.com",
+    "description": "Run generic PHP applications with built-in web server or artisan serve (Laravel). Supports Composer for dependency management.",
+    "features": null,
+    "docker_images": {
+        "PHP 8.3": "ghcr.io/parkervcp/yolks:php_8.3",
+        "PHP 8.2": "ghcr.io/parkervcp/yolks:php_8.2",
+        "PHP 8.1": "ghcr.io/parkervcp/yolks:php_8.1",
+        "PHP 8.0": "ghcr.io/parkervcp/yolks:php_8.0"
+    },
+    "file_denylist": [],
+    "startup": "if [ -f /home/container/composer.json ]; then composer install --no-interaction --no-dev --optimize-autoloader 2>&1 || true; fi; php -S 0.0.0.0:{{SERVER_PORT}} -t /home/container/{{DOCUMENT_ROOT}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"Development Server\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\napt-get update\napt-get install -y curl unzip git\ncurl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer\nif [ ! -z ${GIT_ADDRESS} ]; then\n  git clone ${GIT_ADDRESS} /mnt/server\nfi",
+            "container": "ghcr.io/parkervcp/yolks:php_8.3",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Document Root",
+            "description": "The directory to serve. Use '.' for root or 'public' for Laravel.",
+            "env_variable": "DOCUMENT_ROOT",
+            "default_value": ".",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Repository",
+            "description": "Optional: Git repository URL to clone during installation.",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "User Upload",
+            "description": "If set to true, do not run git commands.",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

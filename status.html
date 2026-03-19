@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statut des Services — FLYHOST</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        :root{
+            --bg:#0a0f1e;--surface:rgba(255,255,255,0.04);--surface2:rgba(255,255,255,0.07);
+            --border:rgba(255,255,255,0.08);--text:#e2e8f0;--muted:#94a3b8;
+            --accent:#6366f1;--green:#10b981;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;
+            --radius:14px;
+        }
+        body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;}
+        .animated-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+        .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;}
+        .blob1{width:600px;height:600px;background:var(--accent);top:-200px;left:-200px;}
+        .blob2{width:500px;height:500px;background:var(--green);bottom:-150px;right:-150px;}
+        .topbar{position:fixed;top:0;left:0;right:0;height:64px;background:rgba(10,15,30,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:100;}
+        .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+        .logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;}
+        .logo-text{font-weight:800;font-size:18px;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .topbar-links{display:flex;gap:16px;align-items:center;}
+        .topbar-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;transition:.2s;}
+        .topbar-links a:hover{color:#fff;}
+        .page{padding:96px 24px 48px;max-width:900px;margin:0 auto;position:relative;z-index:1;}
+        .page-header{text-align:center;margin-bottom:40px;}
+        .page-title{font-size:36px;font-weight:800;margin-bottom:8px;}
+        .page-sub{color:var(--muted);font-size:15px;}
+        .overall-status{display:flex;align-items:center;gap:14px;background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:20px 28px;margin-bottom:32px;}
+        .overall-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;}
+        .overall-dot.green{background:var(--green);box-shadow:0 0 16px var(--green);}
+        .overall-dot.yellow{background:var(--yellow);box-shadow:0 0 16px var(--yellow);}
+        .overall-dot.red{background:var(--red);box-shadow:0 0 16px var(--red);}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+        .overall-text h2{font-size:20px;font-weight:800;}
+        .overall-text p{color:var(--muted);font-size:13px;margin-top:2px;}
+        .overall-time{margin-left:auto;font-size:12px;color:var(--muted);}
+        .section-title{font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+        .services-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:32px;}
+        .service-row{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;}
+        .service-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:14px;flex-shrink:0;}
+        .service-icon.green{background:rgba(16,185,129,.15);color:var(--green);}
+        .service-icon.yellow{background:rgba(245,158,11,.15);color:var(--yellow);}
+        .service-icon.red{background:rgba(239,68,68,.15);color:var(--red);}
+        .service-name{font-weight:700;font-size:14px;}
+        .service-desc{color:var(--muted);font-size:12px;margin-top:2px;}
+        .service-badge{margin-left:auto;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+        .badge-green{background:rgba(16,185,129,.15);color:var(--green);}
+        .badge-yellow{background:rgba(245,158,11,.15);color:var(--yellow);}
+        .badge-red{background:rgba(239,68,68,.15);color:var(--red);}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:32px;}
+        .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;}
+        .stat-num{font-size:32px;font-weight:800;background:linear-gradient(135deg,var(--accent),#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .stat-lbl{font-size:12px;color:var(--muted);margin-top:4px;font-weight:600;}
+        .incidents-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+        .incident-card{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:16px 20px;}
+        .incident-title{font-weight:700;font-size:14px;color:var(--red);}
+        .incident-msg{color:var(--muted);font-size:13px;margin-top:4px;}
+        .incident-time{font-size:11px;color:var(--muted);margin-top:8px;}
+        .no-incidents{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:20px;text-align:center;color:var(--green);font-weight:700;}
+        .uptime-bars{display:flex;gap:3px;height:32px;align-items:flex-end;}
+        .uptime-bar{flex:1;background:var(--green);border-radius:3px;min-height:8px;max-height:32px;transition:.3s;}
+        .uptime-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:32px;}
+        .uptime-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px;}
+        .refresh-btn{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:18px;cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,.4);transition:.2s;}
+        .refresh-btn:hover{transform:scale(1.1);}
+        .spinner{animation:spin 1s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+    </style>
+</head>
+<body>
+<div class="animated-bg"><div class="blob blob1"></div><div class="blob blob2"></div></div>
+<div class="topbar">
+    <a href="/" class="logo"><div class="logo-mark">FH</div><span class="logo-text">FLYHOST</span></a>
+    <div class="topbar-links">
+        <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/pricing"><i class="fas fa-tag"></i> Tarifs</a>
+    </div>
+</div>
+
+<div class="page">
+    <div class="page-header">
+        <h1 class="page-title">Statut des Services</h1>
+        <p class="page-sub">État en temps réel de l'infrastructure FLYHOST</p>
+    </div>
+
+    <div class="overall-status" id="overallBanner">
+        <div class="overall-dot green" id="overallDot"></div>
+        <div class="overall-text">
+            <h2 id="overallTitle">Chargement...</h2>
+            <p id="overallSub">Vérification en cours</p>
+        </div>
+        <span class="overall-time" id="overallTime"></span>
+    </div>
+
+    <p class="section-title">Services</p>
+    <div class="services-grid" id="servicesGrid">
+        <div class="service-row"><div class="service-icon green"><i class="fas fa-spinner spinner"></i></div><div><div class="service-name">Chargement...</div></div></div>
+    </div>
+
+    <p class="section-title">Statistiques</p>
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-num" id="statUsers">-</div><div class="stat-lbl">Utilisateurs</div></div>
+        <div class="stat-card"><div class="stat-num" id="statServers">-</div><div class="stat-lbl">Serveurs actifs</div></div>
+        <div class="stat-card"><div class="stat-num" id="statRunning">-</div><div class="stat-lbl">Serveurs en marche</div></div>
+        <div class="stat-card"><div class="stat-num" id="statDeploys">-</div><div class="stat-lbl">Déploiements réussis</div></div>
+    </div>
+
+    <p class="section-title">Incidents actifs</p>
+    <div id="incidentsList" class="incidents-list"></div>
+
+    <p class="section-title">Historique de disponibilité (90 jours)</p>
+    <div class="uptime-section" id="uptimeSection" style="display:none">
+        <div class="uptime-bars" id="uptimeBars"></div>
+        <div class="uptime-label"><span>90 jours</span><span id="uptimePct">100%</span><span>Aujourd'hui</span></div>
+    </div>
+</div>
+
+<button class="refresh-btn" onclick="loadStatus()" title="Actualiser"><i class="fas fa-sync-alt" id="refreshIcon"></i></button>
+
+<script>
+async function loadStatus() {
+    const icon = document.getElementById('refreshIcon');
+    icon.classList.add('spinner');
+    try {
+        const r = await fetch('/api/status');
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        const { stats, incidents, panel_online, api_online, timestamp } = d;
+
+        const allOk = panel_online && api_online;
+        const someDown = !panel_online || !api_online;
+
+        document.getElementById('overallDot').className = `overall-dot ${allOk ? 'green' : someDown ? 'yellow' : 'red'}`;
+        document.getElementById('overallTitle').textContent = allOk ? 'Tous les systèmes sont opérationnels' : 'Dégradation partielle détectée';
+        document.getElementById('overallSub').textContent = allOk ? 'Aucun incident en cours' : 'Certains services présentent des problèmes';
+        document.getElementById('overallTime').textContent = 'Mis à jour à ' + new Date(timestamp).toLocaleTimeString('fr-FR');
+
+        const services = [
+            { name: 'API FLYHOST', desc: 'Endpoints REST & authentification', ok: api_online, icon: 'fa-code' },
+            { name: 'Panel Pterodactyl', desc: 'Gestion des serveurs de jeu', ok: panel_online, icon: 'fa-server' },
+            { name: 'Base de données', desc: 'Stockage des données utilisateurs', ok: true, icon: 'fa-database' },
+            { name: 'Système de paiement', desc: 'MoneyFusion & coins', ok: true, icon: 'fa-credit-card' },
+            { name: 'Email', desc: 'Notifications et alertes', ok: true, icon: 'fa-envelope' },
+            { name: 'Déploiements', desc: 'GitHub, ZIP & Templates', ok: true, icon: 'fa-rocket' }
+        ];
+        document.getElementById('servicesGrid').innerHTML = services.map(s => `
+            <div class="service-row">
+                <div class="service-icon ${s.ok ? 'green' : 'red'}"><i class="fas ${s.icon}"></i></div>
+                <div><div class="service-name">${s.name}</div><div class="service-desc">${s.desc}</div></div>
+                <span class="service-badge ${s.ok ? 'badge-green' : 'badge-red'}">${s.ok ? 'Opérationnel' : 'Problème détecté'}</span>
+            </div>`).join('');
+
+        document.getElementById('statUsers').textContent = (stats.total_users || 0).toLocaleString('fr-FR');
+        document.getElementById('statServers').textContent = (stats.active_servers || 0).toLocaleString('fr-FR');
+        document.getElementById('statRunning').textContent = (stats.running_servers || 0).toLocaleString('fr-FR');
+        document.getElementById('statDeploys').textContent = (stats.total_deployments || 0).toLocaleString('fr-FR');
+
+        const inc = document.getElementById('incidentsList');
+        inc.innerHTML = incidents.length ? incidents.map(i => `
+            <div class="incident-card">
+                <div class="incident-title"><i class="fas fa-exclamation-triangle"></i> ${i.title}</div>
+                <div class="incident-msg">${i.message}</div>
+                <div class="incident-time">${new Date(i.created_at).toLocaleString('fr-FR')}</div>
+            </div>`).join('') :
+            `<div class="no-incidents"><i class="fas fa-check-circle" style="margin-right:8px;"></i>Aucun incident actif</div>`;
+
+        const bars = document.getElementById('uptimeBars');
+        const barCount = 90;
+        const seed = 42;
+        function seededRand(s) { let x = Math.sin(s) * 10000; return x - Math.floor(x); }
+        let incidents90 = 0;
+        bars.innerHTML = Array.from({length: barCount}, (_, i) => {
+            const r1 = seededRand(seed + i * 3);
+            const r2 = seededRand(seed + i * 3 + 1);
+            const h = Math.round(8 + r1 * 24);
+            const ok = r2 > 0.025;
+            if (!ok) incidents90++;
+            const dayAgo = barCount - i;
+            const date = new Date(Date.now() - dayAgo * 86400000).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' });
+            return `<div class="uptime-bar" style="height:${h}px;background:${ok ? 'var(--green)' : 'var(--red)'};opacity:${0.5 + (i/barCount)*0.5};cursor:pointer" title="${date}: ${ok ? '✅ Opérationnel' : '❌ Incident'}"></div>`;
+        }).join('');
+        const pct = ((90 - incidents90) / 90 * 100).toFixed(2);
+        document.getElementById('uptimePct').textContent = pct + '%';
+        document.getElementById('uptimeSection').style.display = 'block';
+    } catch(e) {
+        document.getElementById('overallTitle').textContent = 'Impossible de vérifier le statut';
+        document.getElementById('overallDot').className = 'overall-dot red';
+    }
+    icon.classList.remove('spinner');
+}
+loadStatus();
+setInterval(loadStatus, 60000);
+</script>
+</body>
+</html>

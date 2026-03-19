@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLYHOST — Contrat Revendeur</title>
+    <meta name="description" content="Devenez revendeur FLYHOST et gagnez des commissions sur vos ventes">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dim: rgba(99, 102, 241, 0.1);
+            --bg: #eef0f7;
+            --surface: rgba(255, 255, 255, 0.75);
+            --surface-strong: rgba(255, 255, 255, 0.92);
+            --border: rgba(99, 102, 241, 0.18);
+            --border-strong: rgba(99, 102, 241, 0.35);
+            --text: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --green: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 18px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 8px 20px -8px rgba(99, 102, 241, 0.2);
+            --shadow-hover: 0 20px 30px -12px rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        /* ========== FOND ANIMÉ ========== */
+        .animated-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+        .orb1 { width: 600px; height: 600px; background: rgba(99,102,241,0.6); top: -200px; left: -100px; animation-duration: 20s; }
+        .orb2 { width: 500px; height: 500px; background: rgba(139,92,246,0.5); bottom: -150px; right: -100px; animation-duration: 28s; animation-delay: -5s; }
+        .orb3 { width: 400px; height: 400px; background: rgba(45,212,191,0.5); top: 40%; left: 40%; animation-duration: 22s; animation-delay: -2s; }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes float { 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(80px,-60px) scale(1.3);} }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes glowPulse { 0%,100%{box-shadow:0 0 5px var(--accent-dim);} 50%{box-shadow:0 0 20px var(--accent),0 0 30px var(--accent-light);} }
+        @keyframes zoomIn { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+        @keyframes slideInLeft { from{opacity:0;transform:translateX(-30px);} to{opacity:1;transform:translateX(0);} }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--accent-dim); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+
+        /* ========== TOPBAR ========== */
+        .topbar {
+            position: fixed;
+            top: 0; width: 100%; height: 64px;
+            background: #1e1e2e;
+            border-top: 3px solid var(--accent);
+            z-index: 90;
+            display: flex; align-items: center;
+            padding: 0 24px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease-out;
+        }
+        .hamburger {
+            background: transparent; border: none;
+            width: 42px; height: 42px;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 6px; cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
+        .hamburger span {
+            display: block; width: 22px; height: 2px;
+            background-color: white; border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .hamburger:hover span { background: var(--accent-light); }
+        .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .logo-area { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+        .logo-mark {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+            animation: glowPulse 3s infinite;
+            flex-shrink: 0;
+        }
+        .logo-text { font-weight: 800; font-size: 18px; color: white; white-space: nowrap; }
+        .topbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .avatar-circle {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: white;
+            cursor: pointer; border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            flex-shrink: 0;
+        }
+        .avatar-circle:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
+
+        /* ========== DRAWER ========== */
+        .drawer {
+            position: fixed; top: 0; left: 0;
+            width: 300px; height: 100vh;
+            background: rgba(238,240,247,0.97);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 40px rgba(99,102,241,0.15);
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            overflow-y: auto; overflow-x: hidden;
+            padding: 0; display: flex; flex-direction: column;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .drawer-logo { display: flex; align-items: center; gap: 10px; }
+        .drawer-logo .logo-mark { width: 36px; height: 36px; font-size: 14px; }
+        .drawer-logo span { font-weight: 800; font-size: 18px; color: var(--text); }
+        .close-drawer {
+            background: transparent; border: none; font-size: 28px;
+            color: var(--text-muted); cursor: pointer;
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .close-drawer:hover { color: var(--error); background: rgba(239,68,68,0.1); }
+
+        .drawer-user {
+            display: flex; align-items: center; gap: 16px;
+            padding: 20px; border-bottom: 1px solid var(--border);
+        }
+        .drawer-avatar {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 22px; color: white;
+            flex-shrink: 0;
+        }
+        .drawer-user-info { flex: 1; min-width: 0; }
+        .drawer-username { font-weight: 700; font-size: 16px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .drawer-coins { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--warning); font-weight: 600; margin: 4px 0; }
+        .drawer-role-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 30px;
+            font-size: 11px; font-weight: 700;
+            background: var(--accent-dim); color: var(--accent);
+        }
+        .drawer-role-badge.admin { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .drawer-role-badge.superadmin { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        .drawer-nav { flex: 1; padding: 16px 12px; }
+        .nav-section { margin: 20px 0 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .nav-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 16px; border-radius: 12px;
+            color: var(--text-secondary); text-decoration: none;
+            font-weight: 600; font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer; margin-bottom: 2px;
+            position: relative; overflow: hidden;
+        }
+        .nav-item::before {
+            content: ''; position: absolute; left: 0; top: 0;
+            height: 100%; width: 3px; background: var(--accent);
+            transform: scaleY(0); transition: transform 0.3s ease;
+        }
+        .nav-item:hover::before, .nav-item.active::before { transform: scaleY(1); }
+        .nav-item i { width: 20px; font-size: 16px; color: var(--accent); transition: all 0.3s ease; }
+        .nav-item:hover i { transform: scale(1.2); }
+        .nav-item:hover { background: var(--accent-dim); color: var(--accent); }
+        .nav-item.active { background: var(--accent); color: white; }
+        .nav-item.active i { color: white; }
+
+        .drawer-footer { padding: 20px; border-top: 1px solid var(--border); }
+        .drawer-stats { display: flex; justify-content: space-between; text-align: center; margin-bottom: 20px; }
+        .stat-item { flex: 1; }
+        .stat-item .value { font-weight: 800; font-size: 18px; color: var(--accent); display: block; line-height: 1.3; }
+        .stat-item .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+        .logout-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; width: 100%; padding: 14px; border-radius: 30px;
+            background: rgba(239,68,68,0.1); border: none;
+            color: var(--error); font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.2); }
+
+        /* ========== OVERLAY ========== */
+        .drawer-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 199; display: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .drawer-overlay.active { display: block; opacity: 1; }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            padding: 80px 24px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative; z-index: 5;
+            width: 100%;
+        }
+
+        /* ========== TABLES — TOUJOURS SCROLLABLES ========== */
+        .table-container,
+        .table-responsive,
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            max-width: 100%;
+        }
+        .table-container table,
+        .table-responsive table,
+        .table-wrapper table {
+            min-width: 600px;
+            width: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* ========== RESPONSIVE ========== */
+
+        /* Tablette large */
+        @media (max-width: 1200px) {
+            .main-content { padding: 80px 20px 20px; }
+        }
+
+        /* Tablette */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .quick-actions { grid-template-columns: repeat(3, 1fr) !important; }
+            .servers-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+            table { font-size: 13px; }
+        }
+
+        /* Mobile (768px) */
+        @media (max-width: 768px) {
+            .topbar { padding: 0 14px; gap: 8px; }
+            .logo-text { display: none; }
+            .topbar-right { gap: 8px; }
+            .drawer { width: min(300px, 85vw); }
+            .main-content { padding: 72px 12px 20px !important; max-width: 100% !important; }
+
+            /* Grilles */
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .servers-grid { grid-template-columns: 1fr !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: 1fr !important; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+
+            /* Flex */
+            .section-header { flex-wrap: wrap; gap: 10px; }
+            .server-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+            .server-actions { grid-template-columns: 1fr 1fr !important; }
+            .profile-grid { grid-template-columns: 1fr !important; }
+            .info-grid { grid-template-columns: 1fr !important; }
+            .form-row { flex-direction: column !important; gap: 12px !important; }
+            .form-grid { grid-template-columns: 1fr !important; }
+            .btn-group { flex-direction: column !important; width: 100% !important; }
+            .btn-group .btn { width: 100% !important; justify-content: center; }
+
+            /* Filtres */
+            .filter-row, .filters-bar, .filter-bar, .filters {
+                flex-direction: column !important;
+                gap: 8px !important;
+                align-items: stretch !important;
+            }
+            .filter-select, .filter-input { width: 100% !important; }
+            .search-bar, .search-input { width: 100% !important; }
+
+            /* Tables — renforcement mobile */
+            .table-container,
+            .table-responsive,
+            .table-wrapper {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            table { font-size: 12px !important; }
+            th, td { padding: 8px 10px !important; white-space: nowrap; }
+            .table-actions { display: flex; gap: 4px; }
+
+            /* Modals */
+            .modal-content {
+                width: 96% !important; max-width: 96vw !important;
+                padding: 16px !important; margin: 8px auto;
+                max-height: 92vh; overflow-y: auto;
+            }
+            .modal-actions { flex-direction: column !important; gap: 8px !important; }
+            .modal-actions .btn { width: 100% !important; justify-content: center; }
+            .modal-header h3 { font-size: 16px !important; }
+
+            /* Cards */
+            .card { padding: 16px !important; border-radius: 16px !important; }
+
+            /* Onglets */
+            .tabs, .admin-tabs, .modal-tabs {
+                overflow-x: auto !important; -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap !important; padding-bottom: 4px;
+                scrollbar-width: none;
+            }
+            .tabs::-webkit-scrollbar, .admin-tabs::-webkit-scrollbar { display: none; }
+            .tab-btn, .tab { flex-shrink: 0 !important; }
+
+            /* Pages spécifiques */
+            .file-toolbar { flex-direction: column !important; gap: 8px !important; }
+            .file-path { width: 100% !important; }
+            .file-grid { grid-template-columns: 1fr !important; }
+            .terminal { font-size: 12px !important; }
+            .action-card { padding: 14px 8px !important; }
+            .action-card i { font-size: 20px !important; }
+            .action-card span { font-size: 12px !important; }
+            h1 { font-size: clamp(20px, 6vw, 36px) !important; }
+            h2 { font-size: clamp(16px, 5vw, 24px) !important; }
+
+            /* Résolution boutons sélection + export */
+            .selection-actions, .export-bar {
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+        }
+
+        /* Petit mobile (480px) */
+        @media (max-width: 480px) {
+            .topbar { padding: 0 10px; }
+            .hamburger { margin-right: 10px; }
+            .main-content { padding: 70px 10px 16px !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .card { padding: 12px !important; border-radius: 14px !important; }
+            .section-header h2 { font-size: 15px !important; }
+            .modal-content { padding: 12px !important; }
+            .btn { padding: 10px 14px !important; font-size: 13px !important; }
+            .drawer { width: 88vw; }
+            .drawer-stats .value { font-size: 15px !important; }
+            th, td { padding: 6px 8px !important; font-size: 11px !important; }
+        }
+
+        /* Très petit (360px) */
+        @media (max-width: 360px) {
+            .logo-mark { width: 34px; height: 34px; font-size: 13px; }
+            .avatar-circle { width: 32px; height: 32px; font-size: 13px; }
+            .main-content { padding: 68px 8px 12px !important; }
+            .drawer { width: 92vw; }
+        }
+
+        /* ========== STYLES SPÉCIFIQUES ========== */
+        
+
+        
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+        }
+
+
+        
+        .nav-links a {
+            padding: 7px 14px;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
+        .btn-login {
+            padding: 8px 18px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: none;
+            border: 1px solid var(--border-strong);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-decoration: none;
+        }
+        .btn-login:hover { background: white; color: var(--text); }
+
+        .user-welcome {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        
+        .main-content {
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contract-container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+
+        /* Cartes */
+        .card {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .card-header h2 {
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* Grille avantages */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .benefit-item {
+            background: var(--accent-dim);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-3px);
+        }
+
+        .benefit-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .benefit-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Tableau des paliers */
+        .tiers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .tiers-table th {
+            text-align: left;
+            padding: 1rem;
+            background: var(--accent-dim);
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tiers-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .tiers-table tr:hover td {
+            background: var(--accent-dim);
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: inherit;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover { background: #5254d4; }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        .btn-outline:hover { background: var(--accent); color: white; }
+
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Formulaires */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--surface-strong);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--accent-dim);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent);
+            margin-top: 3px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .checkbox-group a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .checkbox-group a:hover { text-decoration: underline; }
+
+        /* Alertes */
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .alert-success {
+            background: rgba(16,185,129,0.12);
+            color: var(--green);
+            border: 1px solid rgba(16,185,129,0.2);
+        }
+
+        .alert-error {
+            background: rgba(239,68,68,0.12);
+            color: var(--error);
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+
+        .alert-info {
+            background: rgba(99,102,241,0.12);
+            color: var(--accent);
+            border: 1px solid var(--border-strong);
+        }
+
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        .loading i { animation: spin 1s linear infinite; }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+        .badge-warning { background: rgba(245,158,11,0.12); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
+        .badge-info { background: rgba(99,102,241,0.12); color: var(--accent); border: 1px solid var(--border-strong); }
+
+        /* Termes du contrat */
+        .contract-terms {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: var(--accent-dim);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .contract-terms h3 {
+            color: var(--text);
+            margin: 1.5rem 0 0.5rem;
+        }
+        .contract-terms h3:first-child { margin-top: 0; }
+
+        .contract-terms ul, .contract-terms ol {
+            margin-left: 1.5rem;
+            color: var(--text-secondary);
+        }
+        .contract-terms li { margin: 0.5rem 0; }
+        .contract-terms p { color: var(--text-secondary); }
+
+        /* Responsive */
+        
+            .card { padding: 1.5rem; }
+            .card-header h1 { font-size: 1.5rem; }
+            .benefits-grid { grid-template-columns: 1fr; }
+            .benefit-item { padding: 1rem; }
+            .contract-terms { max-height: 300px; }
+        }
+    
+    </style>
+</head>
+<body>
+    <!-- FOND ANIMÉ -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb1"></div>
+        <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="logo-area">
+            <div class="logo-mark">FH</div>
+            <span class="logo-text">FLYHOST</span>
+        </div>
+        <div class="topbar-right">
+            <div class="avatar-circle" id="topbarAvatar" onclick="openSidebar()">?</div>
+        </div>
+    </header>
+
+    <!-- OVERLAY -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeSidebar()"></div>
+
+    <!-- DRAWER -->
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">
+                <div class="logo-mark">FH</div>
+                <span>FLYHOST</span>
+            </div>
+            <button class="close-drawer" onclick="closeSidebar()">&times;</button>
+        </div>
+
+        <div class="drawer-user" id="drawerUser">
+            <div class="drawer-avatar" id="drawerAvatar">?</div>
+            <div class="drawer-user-info">
+                <div class="drawer-username" id="drawerUsername">Chargement...</div>
+                <div class="drawer-coins">
+                    <i class="fas fa-coins"></i>
+                    <span id="drawerCoins">0</span>
+                </div>
+                <span class="drawer-role-badge" id="drawerRole">Utilisateur</span>
+            </div>
+        </div>
+
+        <nav class="drawer-nav" id="drawerNav">
+            <div class="nav-section">PRINCIPAL</div>
+            <a href="/dashboard" class="nav-item" data-page="dashboard">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/payment" class="nav-item" data-page="payment">
+                <i class="fas fa-credit-card"></i>
+                <span>Paiement</span>
+            </a>
+            <a href="/deploy" class="nav-item" data-page="deploy">
+                <i class="fas fa-rocket"></i>
+                <span>Déploiement</span>
+            </a>
+            <a href="/profile" class="nav-item" data-page="profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="/api-keys" class="nav-item" data-page="api">
+                <i class="fas fa-key"></i>
+                <span>API</span>
+            </a>
+            <a href="/dev" class="nav-item" data-page="info">
+                <i class="fas fa-info-circle"></i>
+                <span>Informations</span>
+            </a>
+            <a href="/chat" class="nav-item" data-page="chat">
+                <i class="fas fa-comment"></i>
+                <span>Chat</span>
+            </a>
+
+            <div class="nav-section" id="resellerSectionTitle">REVENDEUR</div>
+            <a href="/panel-admin" class="nav-item" id="resellerDashboardLink" data-page="reseller">
+                <i class="fas fa-store"></i>
+                <span>Espace Revendeur</span>
+            </a>
+
+            <div class="nav-section" id="adminSectionTitle">ADMINISTRATION</div>
+            <a href="/root" class="nav-item" id="adminDashboardLink" data-page="admin">
+                <i class="fas fa-crown"></i>
+                <span>Administration</span>
+            </a>
+        </nav>
+
+        <div class="drawer-footer">
+            <div class="drawer-stats" id="drawerStats">
+                <div class="stat-item">
+                    <span class="value" id="statServersDrawer">0</span>
+                    <span class="label">Serveurs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statReferralsDrawer">0</span>
+                    <span class="label">Filleuls</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statStreakDrawer">0</span>
+                    <span class="label">Série</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+    </aside>
+
+    <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- Navbar -->
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="contract-container">
+            <!-- Loading -->
+            <div id="loading-screen" class="card" style="display: none;">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-3x" style="margin-bottom: 1rem;"></i>
+                    <h3>Chargement de votre profil...</h3>
+                    <p style="color: var(--text-muted);">Veuillez patienter</p>
+                </div>
+            </div>
+
+            <!-- Erreur (non admin) -->
+            <div id="error-screen" class="card" style="display: none;">
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error); margin-bottom: 1rem;"></i>
+                    <h2 style="margin-bottom: 1rem;">Accès non autorisé</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Cette page est réservée aux utilisateurs ayant le grade Admin.
+                    </p>
+                    <a href="/dashboard" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+                    </a>
+                </div>
+            </div>
+
+            <!-- Déjà revendeur (profil existant) -->
+            <div id="already-reseller-screen" class="card" style="display: none;">
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--green); margin-bottom: 1rem;"></i>
+                    <h2 style="margin-bottom: 1rem;">Vous êtes déjà revendeur !</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        Votre profil revendeur est actif. Vous pouvez accéder à votre panel.
+                    </p>
+                    <div id="existing-profile-info" style="background: var(--accent-dim); padding: 1rem; border-radius: 10px; margin: 1.5rem 0;">
+                        <p><strong>Nom commercial:</strong> <span id="existing-business-name">-</span></p>
+                        <p><strong>Email support:</strong> <span id="existing-support-email">-</span></p>
+                        <p><strong>Code affiliation:</strong> <code id="existing-affiliate-code">-</code></p>
+                        <p><strong>Accepté le:</strong> <span id="existing-accepted-at">-</span></p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <a href="/panel-admin" class="btn btn-primary">
+                            <i class="fas fa-tachometer-alt"></i> Panel revendeur
+                        </a>
+                        <a href="/dashboard" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contrat principal -->
+            <div id="contract-screen">
+                <div class="card">
+                    <div class="card-header">
+                        <h1>
+                            <i class="fas fa-handshake" style="color: var(--accent);"></i>
+                            Devenez Revendeur FLYHOST
+                        </h1>
+                    </div>
+
+                    <!-- Section avantages -->
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="margin-bottom: 1rem;">🎁 Vos avantages</h2>
+                        <div class="benefits-grid">
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="fas fa-percent"></i></div>
+                                <div class="benefit-title">Commission de 15%</div>
+                                <div class="benefit-desc">Sur chaque vente réalisée par vos clients</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="fas fa-cubes"></i></div>
+                                <div class="benefit-title">Achats en gros</div>
+                                <div class="benefit-desc">Bénéficiez de remises jusqu'à 20%</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="fas fa-tags"></i></div>
+                                <div class="benefit-title">Codes promo personnalisés</div>
+                                <div class="benefit-desc">Créez vos propres offres pour attirer des clients</div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="fas fa-link"></i></div>
+                                <div class="benefit-title">Lien d'affiliation</div>
+                                <div class="benefit-desc">Gagnez des commissions à vie sur vos filleuls</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paliers de remise -->
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="margin-bottom: 1rem;">📦 Paliers de remise (achats en gros)</h2>
+                        <table class="tiers-table">
+                            <thead>
+                                <tr>
+                                    <th>Quantité</th>
+                                    <th>Remise</th>
+                                    <th>Économie</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>5+ unités</td>
+                                    <td><span class="badge badge-success">5%</span></td>
+                                    <td>Ex: 5× 1GB = 237,5 coins au lieu de 250</td>
+                                </tr>
+                                <tr>
+                                    <td>10+ unités</td>
+                                    <td><span class="badge badge-success">10%</span></td>
+                                    <td>Ex: 10× 2GB = 720 coins au lieu de 800</td>
+                                </tr>
+                                <tr>
+                                    <td>20+ unités</td>
+                                    <td><span class="badge badge-success">15%</span></td>
+                                    <td>Ex: 20× 4GB = 2210 coins au lieu de 2600</td>
+                                </tr>
+                                <tr>
+                                    <td>50+ unités</td>
+                                    <td><span class="badge badge-success">20%</span></td>
+                                    <td>Ex: 50× 8GB = 6800 coins au lieu de 8500</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Termes du contrat -->
+                    <div style="margin-bottom: 2rem;">
+                        <h2 style="margin-bottom: 1rem;">📜 Conditions générales revendeur</h2>
+                        <div class="contract-terms">
+                            <h3>1. Acceptation du contrat</h3>
+                            <p>En acceptant ce contrat, vous devenez revendeur officiel de FLYHOST. Vous vous engagez à respecter les présentes conditions générales.</p>
+
+                            <h3>2. Commission</h3>
+                            <p>Vous percevrez une commission de <strong>15%</strong> sur le montant de chaque transaction réalisée par vos clients directs. Cette commission est créditée instantanément sur votre solde revendeur.</p>
+
+                            <h3>3. Retraits</h3>
+                            <p>Les retraits sont possibles à partir de <strong>5000 XOF</strong>. Les délais de traitement sont généralement de 2 jours ouvrés. Modes de retrait acceptés : Wave, Orange Money, MTN Money, virement bancaire.</p>
+
+                            <h3>4. Achats en gros</h3>
+                            <p>Vous pouvez acheter des serveurs en quantité pour les revendre à vos clients. Des remises dégressives s'appliquent selon les paliers indiqués ci-dessus. Les achats en gros sont définitifs et non remboursables.</p>
+
+                            <h3>5. Codes promo</h3>
+                            <p>Vous pouvez créer jusqu'à 50 codes promo actifs simultanément. Chaque code consomme des coins correspondant à la valeur du serveur × le nombre d'utilisations. Les codes expirés ou inutilisés ne sont pas remboursés.</p>
+
+                            <h3>6. Affiliation</h3>
+                            <p>Votre lien d'affiliation vous permet de gagner des commissions sur tous les clients que vous nous apportez, même s'ils n'achètent pas immédiatement. La commission s'applique à vie sur ces clients.</p>
+
+                            <h3>7. Obligations du revendeur</h3>
+                            <ul>
+                                <li>Vous ne devez pas utiliser de méthodes de spam ou de publicité trompeuse.</li>
+                                <li>Vous êtes responsable du support de premier niveau pour vos clients.</li>
+                                <li>Vous devez respecter la politique d'utilisation acceptable de FLYHOST.</li>
+                                <li>Toute activité frauduleuse entraînera la résiliation immédiate du contrat et la perte des commissions non versées.</li>
+                            </ul>
+
+                            <h3>8. Résiliation</h3>
+                            <p>FLYHOST se réserve le droit de résilier ce contrat à tout moment avec un préavis de 7 jours. En cas de manquement grave, la résiliation peut être immédiate. Les commissions déjà acquises vous seront versées selon les conditions en vigueur.</p>
+
+                            <h3>9. Modification des conditions</h3>
+                            <p>FLYHOST peut modifier ces conditions à tout moment. Vous serez informé par email 15 jours avant l'entrée en vigueur des modifications.</p>
+
+                            <p style="margin-top: 2rem; font-style: italic;">En cochant la case ci-dessous, vous reconnaissez avoir lu, compris et accepté ces conditions générales.</p>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire d'inscription revendeur -->
+                    <form id="reseller-contract-form" onsubmit="acceptContract(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="business-name">Nom commercial <span style="color: var(--error);">*</span></label>
+                            <input type="text" id="business-name" class="form-control" placeholder="Ex: Votre Société, Votre Marque" required>
+                            <small style="color: var(--text-muted);">Ce nom apparaîtra sur votre panel revendeur</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="support-email">Email de support <span style="color: var(--error);">*</span></label>
+                            <input type="email" id="support-email" class="form-control" placeholder="support@votre-domaine.com" required>
+                            <small style="color: var(--text-muted);">Vos clients pourront vous contacter à cette adresse</small>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="accept-terms" required>
+                            <label for="accept-terms">
+                                J'ai lu et j'accepte les <a href="#" onclick="showTermsModal(); return false;">Conditions Générales Revendeur</a> et je certifie que les informations fournies sont exactes.
+                            </label>
+                        </div>
+
+                        <div id="contract-alert" class="alert" style="display: none;"></div>
+
+                        <button type="submit" class="btn btn-primary btn-full btn-large" id="submit-btn">
+                            <i class="fas fa-check-circle"></i> Accepter le contrat et devenir revendeur
+                        </button>
+                    </form>
+
+                    <div style="margin-top: 1.5rem; text-align: center;">
+                        <a href="/dashboard" class="btn btn-outline btn-small">
+                            <i class="fas fa-times"></i> Retour sans accepter
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Carte d'information sur le grade Admin -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="background: var(--accent-dim); padding: 1rem; border-radius: 12px;">
+                            <i class="fas fa-shield-alt" style="font-size: 2rem; color: var(--accent);"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin-bottom: 0.25rem;">Vous avez déjà le grade Admin</h3>
+                            <p style="color: var(--text-secondary);">Votre compte a déjà le grade requis. Il ne vous reste plus qu'à accepter le contrat pour activer toutes les fonctionnalités revendeur.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal conditions détaillées -->
+    <div class="modal" id="terms-modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>Conditions Générales Revendeur</h3>
+                <button class="modal-close" onclick="closeTermsModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="max-height: 60vh; overflow-y: auto; padding-right: 0.5rem;">
+                <h4 style="margin: 1rem 0 0.5rem;">1. Acceptation du contrat</h4>
+                <p style="color: var(--text-secondary);">En acceptant ce contrat, vous devenez revendeur officiel de FLYHOST. Vous vous engagez à respecter les présentes conditions générales.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">2. Commission</h4>
+                <p style="color: var(--text-secondary);">Vous percevrez une commission de <strong>15%</strong> sur le montant de chaque transaction réalisée par vos clients directs. Cette commission est créditée instantanément sur votre solde revendeur. Les commissions sont calculées sur le montant hors taxes et hors frais de paiement.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">3. Retraits</h4>
+                <p style="color: var(--text-secondary);">Les retraits sont possibles à partir de <strong>5000 XOF</strong>. Les délais de traitement sont généralement de 2 jours ouvrés. Modes de retrait acceptés : Wave, Orange Money, MTN Money, virement bancaire. Un justificatif vous sera fourni pour chaque retrait effectué.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">4. Achats en gros</h4>
+                <p style="color: var(--text-secondary);">Vous pouvez acheter des serveurs en quantité pour les revendre à vos clients. Des remises dégressives s'appliquent selon les paliers indiqués. Les achats en gros sont définitifs et non remboursables. Les coins achetés en gros sont crédités sur votre compte et peuvent être utilisés pour créer des serveurs ou des codes promo.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">5. Codes promo</h4>
+                <p style="color: var(--text-secondary);">Vous pouvez créer jusqu'à 50 codes promo actifs simultanément. Chaque code consomme des coins correspondant à la valeur du serveur × le nombre d'utilisations. Les codes expirés ou inutilisés ne sont pas remboursés. Vous êtes responsable de la diffusion de vos codes promo.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">6. Affiliation</h4>
+                <p style="color: var(--text-secondary);">Votre lien d'affiliation vous permet de gagner des commissions sur tous les clients que vous nous apportez, même s'ils n'achètent pas immédiatement. La commission s'applique à vie sur ces clients. Le suivi se fait via des cookies et des paramètres URL.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">7. Obligations du revendeur</h4>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+                    <li>Vous ne devez pas utiliser de méthodes de spam ou de publicité trompeuse.</li>
+                    <li>Vous êtes responsable du support de premier niveau pour vos clients.</li>
+                    <li>Vous devez respecter la politique d'utilisation acceptable de FLYHOST.</li>
+                    <li>Vous ne pouvez pas revendre les serveurs à des prix abusifs.</li>
+                    <li>Vous devez conserver une copie de vos transactions pour une durée légale.</li>
+                    <li>Toute activité frauduleuse entraînera la résiliation immédiate du contrat et la perte des commissions non versées.</li>
+                </ul>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">8. Résiliation</h4>
+                <p style="color: var(--text-secondary);">FLYHOST se réserve le droit de résilier ce contrat à tout moment avec un préavis de 7 jours. En cas de manquement grave, la résiliation peut être immédiate. Les commissions déjà acquises vous seront versées selon les conditions en vigueur. Vous pouvez résilier ce contrat à tout moment en nous contactant par email.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">9. Modification des conditions</h4>
+                <p style="color: var(--text-secondary);">FLYHOST peut modifier ces conditions à tout moment. Vous serez informé par email 15 jours avant l'entrée en vigueur des modifications. Passé ce délai, votre maintien dans le programme revendeur vaudra acceptation des nouvelles conditions.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">10. Propriété intellectuelle</h4>
+                <p style="color: var(--text-secondary);">Vous n'acquérez aucun droit de propriété intellectuelle sur la marque FLYHOST ou ses produits. Vous pouvez utiliser notre marque dans le cadre de votre activité de revendeur, sans créer de confusion quant à votre relation avec nous.</p>
+
+                <h4 style="margin: 1.5rem 0 0.5rem;">11. Confidentialité</h4>
+                <p style="color: var(--text-secondary);">Les informations concernant vos clients sont confidentielles. Vous vous engagez à ne pas les divulguer à des tiers et à respecter la réglementation en vigueur sur la protection des données (RGPD).</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeTermsModal()">J'ai compris</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface-strong);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease-out;
+            box-shadow: var(--shadow-hover);
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--error);
+            transform: scale(1.1);
+        }
+
+        .modal-footer {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+    </style>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+        let authToken = localStorage.getItem('flyhost_token');
+        let currentUser = null;
+        let resellerProfile = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!authToken) {
+                window.location.href = '/login';
+                return;
+            }
+            loadUserData();
+        });
+
+        async function loadUserData() {
+            showLoading(true);
+
+            try {
+                const userRes = await fetch('/api/user/me', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const userData = await userRes.json();
+
+                if (!userData.success) {
+                    logout();
+                    return;
+                }
+
+                currentUser = userData.user;
+                const _uw=document.getElementById('user-welcome'); if(_uw) _uw.textContent = `Bonjour, ${currentUser.username}`;
+
+                // Vérifier si l'utilisateur a le grade admin
+                if (currentUser.role !== 'admin' && currentUser.role !== 'superadmin') {
+                    showNonAdminError();
+                    return;
+                }
+
+                // Vérifier si l'utilisateur a déjà un profil revendeur
+                const profileRes = await fetch('/api/reseller/dashboard', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const profileData = await profileRes.json();
+
+                if (profileData.success) {
+                    // Profil revendeur existant
+                    resellerProfile = profileData.dashboard;
+                    showAlreadyReseller();
+                } else {
+                    // Pas de profil, afficher le contrat
+                    showContractForm();
+                }
+
+            } catch (error) {
+                console.error('Erreur chargement données:', error);
+                showError('Impossible de charger vos données. Veuillez rafraîchir la page.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading-screen').style.display = show ? 'block' : 'none';
+            document.getElementById('error-screen').style.display = 'none';
+            document.getElementById('already-reseller-screen').style.display = 'none';
+            document.getElementById('contract-screen').style.display = show ? 'none' : 'block';
+        }
+
+        function showNonAdminError() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'block';
+            document.getElementById('already-reseller-screen').style.display = 'none';
+            document.getElementById('contract-screen').style.display = 'none';
+        }
+
+        function showAlreadyReseller() {
+            document.getElementById('existing-business-name').textContent = resellerProfile?.business_name || 'Non défini';
+            document.getElementById('existing-support-email').textContent = resellerProfile?.support_email || 'Non défini';
+            document.getElementById('existing-affiliate-code').textContent = resellerProfile?.affiliate_code || 'Non disponible';
+            document.getElementById('existing-accepted-at').textContent = resellerProfile?.contract_accepted_at 
+                ? new Date(resellerProfile.contract_accepted_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
+                : 'Date inconnue';
+
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'none';
+            document.getElementById('already-reseller-screen').style.display = 'block';
+            document.getElementById('contract-screen').style.display = 'none';
+        }
+
+        function showContractForm() {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('error-screen').style.display = 'none';
+            document.getElementById('already-reseller-screen').style.display = 'none';
+            document.getElementById('contract-screen').style.display = 'block';
+        }
+
+        function showError(message) {
+            const alertDiv = document.getElementById('contract-alert');
+            alertDiv.className = 'alert alert-error';
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            setTimeout(() => { alertDiv.style.display = 'none'; }, 5000);
+        }
+
+        async function acceptContract(event) {
+            event.preventDefault();
+
+            const businessName = document.getElementById('business-name').value.trim();
+            const supportEmail = document.getElementById('support-email').value.trim();
+            const acceptTerms = document.getElementById('accept-terms').checked;
+
+            if (!businessName || !supportEmail) {
+                showError('Veuillez remplir tous les champs obligatoires.');
+                return;
+            }
+
+            if (!acceptTerms) {
+                showError('Vous devez accepter les conditions générales.');
+                return;
+            }
+
+            // Validation email simple
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(supportEmail)) {
+                showError('Veuillez entrer une adresse email valide.');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement en cours...';
+
+            try {
+                const response = await fetch('/api/reseller/contract/accept', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        business_name: businessName,
+                        support_email: supportEmail
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Succès
+                    const alertDiv = document.getElementById('contract-alert');
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.innerHTML = `
+                        <strong>✅ Félicitations !</strong> Vous êtes maintenant revendeur FLYHOST.<br>
+                        <strong>Code affiliation:</strong> <code>${data.affiliate_code}</code><br>
+                        <strong>Taux commission:</strong> ${data.commission_rate}%<br><br>
+                        Redirection vers votre panel...
+                    `;
+                    alertDiv.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = '/panel-admin';
+                    }, 3000);
+                } else {
+                    showError(data.error || 'Une erreur est survenue. Veuillez réessayer.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Accepter le contrat et devenir revendeur';
+                }
+            } catch (error) {
+                console.error('Erreur acceptation contrat:', error);
+                showError('Erreur de communication avec le serveur. Vérifiez votre connexion.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Accepter le contrat et devenir revendeur';
+            }
+        }
+
+        function showTermsModal() {
+            document.getElementById('terms-modal').classList.add('active');
+        }
+
+        function closeTermsModal() {
+            document.getElementById('terms-modal').classList.remove('active');
+        }
+
+
+        // Fermer le modal avec la touche Echap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('terms-modal').classList.contains('active')) {
+                closeTermsModal();
+            }
+        });
+    
+        // ========== DRAWER / SIDEBAR ==========
+        function toggleSidebar() {
+            const drawer = document.getElementById('drawer');
+            if (drawer.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
+        }
+        function openSidebar() {
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('hamburgerBtn').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('hamburgerBtn').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        window.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebar(); });
+
+        // Chargement infos utilisateur dans le drawer
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('flyhost_user') || '{}');
+                if (user.username) {
+                    const init = user.username.charAt(0).toUpperCase();
+                    const a1 = document.getElementById('topbarAvatar');
+                    const a2 = document.getElementById('drawerAvatar');
+                    if (a1) a1.textContent = init;
+                    if (a2) a2.textContent = init;
+                    const un = document.getElementById('drawerUsername');
+                    if (un) un.textContent = user.username;
+                    const co = document.getElementById('drawerCoins');
+                    if (co) co.textContent = user.coins || 0;
+                    const ro = document.getElementById('drawerRole');
+                    if (ro) {
+                        ro.textContent = user.role === 'superadmin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : 'Utilisateur';
+                        ro.className = 'drawer-role-badge' + (user.role ? ' ' + user.role : '');
+                    }
+                }
+                // Highlight active page
+                const page = window.location.pathname.replace('/', '').split('/')[0] || 'dashboard';
+                document.querySelectorAll('.nav-item[data-page]').forEach(function(el) {
+                    if (el.dataset.page === page) el.classList.add('active');
+                    else el.classList.remove('active');
+                });
+            } catch(e) {}
+        })();
+
+        if (typeof logout === 'undefined') {
+            function logout() {
+                localStorage.removeItem('flyhost_token');
+                localStorage.removeItem('flyhost_user');
+                window.location.href = '/login';
+            }
+        }
+</script>
+</body>
+</html>

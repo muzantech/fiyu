@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paiement & Création de Serveur - FLYHOST</title>
+    <meta name="description" content="Achetez, renouvelez ou transférez vos serveurs FLYHOST avec MoneyFusion ou vos coins. Devenez revendeur en un clic.">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/manifest.json">
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+            --accent-dim: rgba(99, 102, 241, 0.1);
+            --bg: #eef0f7;
+            --surface: rgba(255, 255, 255, 0.75);
+            --surface-strong: rgba(255, 255, 255, 0.92);
+            --border: rgba(99, 102, 241, 0.18);
+            --border-strong: rgba(99, 102, 241, 0.35);
+            --text: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --green: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --radius: 18px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 8px 20px -8px rgba(99, 102, 241, 0.2);
+            --shadow-hover: 0 20px 30px -12px rgba(99, 102, 241, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0d1117;
+            --surface: rgba(22,27,34,0.85);
+            --surface-strong: rgba(30,37,48,0.95);
+            --border: rgba(99,102,241,0.25);
+            --border-strong: rgba(99,102,241,0.45);
+            --text: #f0f6fc;
+            --text-secondary: #c9d1d9;
+            --text-muted: #8b949e;
+        }
+
+        .theme-toggle-btn {
+            background: transparent; border: none; cursor: pointer;
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 16px; transition: background 0.2s; flex-shrink: 0;
+        }
+        .theme-toggle-btn:hover { background: rgba(255,255,255,0.1); }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+            position: relative;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ========== FOND ANIMÉ ========== */
+        .animated-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            animation: float 25s infinite alternate ease-in-out;
+        }
+        .orb1 { width: 600px; height: 600px; background: rgba(99,102,241,0.6); top: -200px; left: -100px; animation-duration: 20s; }
+        .orb2 { width: 500px; height: 500px; background: rgba(139,92,246,0.5); bottom: -150px; right: -100px; animation-duration: 28s; animation-delay: -5s; }
+        .orb3 { width: 400px; height: 400px; background: rgba(45,212,191,0.5); top: 40%; left: 40%; animation-duration: 22s; animation-delay: -2s; }
+
+        /* ========== ANIMATIONS ========== */
+        @keyframes float { 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(80px,-60px) scale(1.3);} }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes glowPulse { 0%,100%{box-shadow:0 0 5px var(--accent-dim);} 50%{box-shadow:0 0 20px var(--accent),0 0 30px var(--accent-light);} }
+        @keyframes zoomIn { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+        @keyframes spin { to{transform:rotate(360deg);} }
+        @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+        @keyframes slideInRight { from{opacity:0;transform:translateX(30px);} to{opacity:1;transform:translateX(0);} }
+        @keyframes slideInLeft { from{opacity:0;transform:translateX(-30px);} to{opacity:1;transform:translateX(0);} }
+
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--accent-dim); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+
+        /* ========== TOPBAR ========== */
+        .topbar {
+            position: fixed;
+            top: 0; width: 100%; height: 64px;
+            background: #1e1e2e;
+            border-top: 3px solid var(--accent);
+            z-index: 90;
+            display: flex; align-items: center;
+            padding: 0 24px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease-out;
+        }
+        .hamburger {
+            background: transparent; border: none;
+            width: 42px; height: 42px;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            gap: 6px; cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .hamburger:hover { background: rgba(255,255,255,0.1); }
+        .hamburger span {
+            display: block; width: 22px; height: 2px;
+            background-color: white; border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .hamburger:hover span { background: var(--accent-light); }
+        .hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .logo-area { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+        .logo-mark {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+            animation: glowPulse 3s infinite;
+            flex-shrink: 0;
+        }
+        .logo-text { font-weight: 800; font-size: 18px; color: white; white-space: nowrap; }
+        .topbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .avatar-circle {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 15px; color: white;
+            cursor: pointer; border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            flex-shrink: 0;
+        }
+        .avatar-circle:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
+
+        /* ========== DRAWER ========== */
+        .drawer {
+            position: fixed; top: 0; left: 0;
+            width: 300px; height: 100vh;
+            background: rgba(238,240,247,0.97);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 40px rgba(99,102,241,0.15);
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            overflow-y: auto; overflow-x: hidden;
+            padding: 0; display: flex; flex-direction: column;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .drawer-logo { display: flex; align-items: center; gap: 10px; }
+        .drawer-logo .logo-mark { width: 36px; height: 36px; font-size: 14px; }
+        .drawer-logo span { font-weight: 800; font-size: 18px; color: var(--text); }
+        .close-drawer {
+            background: transparent; border: none; font-size: 28px;
+            color: var(--text-muted); cursor: pointer;
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .close-drawer:hover { color: var(--error); background: rgba(239,68,68,0.1); }
+
+        .drawer-user {
+            display: flex; align-items: center; gap: 16px;
+            padding: 20px; border-bottom: 1px solid var(--border);
+        }
+        .drawer-avatar {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 22px; color: white;
+            flex-shrink: 0;
+        }
+        .drawer-user-info { flex: 1; min-width: 0; }
+        .drawer-username { font-weight: 700; font-size: 16px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .drawer-coins { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--warning); font-weight: 600; margin: 4px 0; }
+        .drawer-role-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 30px;
+            font-size: 11px; font-weight: 700;
+            background: var(--accent-dim); color: var(--accent);
+        }
+        .drawer-role-badge.admin { background: rgba(245,158,11,0.1); color: #f59e0b; }
+        .drawer-role-badge.superadmin { background: rgba(239,68,68,0.1); color: #ef4444; }
+
+        .drawer-nav { flex: 1; padding: 16px 12px; }
+        .nav-section { margin: 20px 0 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+        .nav-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 16px; border-radius: 12px;
+            color: var(--text-secondary); text-decoration: none;
+            font-weight: 600; font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer; margin-bottom: 2px;
+            position: relative; overflow: hidden;
+        }
+        .nav-item::before {
+            content: ''; position: absolute; left: 0; top: 0;
+            height: 100%; width: 3px; background: var(--accent);
+            transform: scaleY(0); transition: transform 0.3s ease;
+        }
+        .nav-item:hover::before, .nav-item.active::before { transform: scaleY(1); }
+        .nav-item i { width: 20px; font-size: 16px; color: var(--accent); transition: all 0.3s ease; }
+        .nav-item:hover i { transform: scale(1.2); }
+        .nav-item:hover { background: var(--accent-dim); color: var(--accent); }
+        .nav-item.active { background: var(--accent); color: white; }
+        .nav-item.active i { color: white; }
+
+        .drawer-footer { padding: 20px; border-top: 1px solid var(--border); }
+        .drawer-stats { display: flex; justify-content: space-between; text-align: center; margin-bottom: 20px; }
+        .stat-item { flex: 1; }
+        .stat-item .value { font-weight: 800; font-size: 18px; color: var(--accent); display: block; line-height: 1.3; }
+        .stat-item .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+        .logout-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; width: 100%; padding: 14px; border-radius: 30px;
+            background: rgba(239,68,68,0.1); border: none;
+            color: var(--error); font-weight: 700; font-size: 14px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.2); }
+
+        /* ========== OVERLAY ========== */
+        .drawer-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 199; display: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .drawer-overlay.active { display: block; opacity: 1; }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            padding: 80px 24px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative; z-index: 5;
+            width: 100%;
+        }
+
+        /* ========== TABLES — TOUJOURS SCROLLABLES ========== */
+        .table-container,
+        .table-responsive,
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            max-width: 100%;
+        }
+        .table-container table,
+        .table-responsive table,
+        .table-wrapper table {
+            min-width: 600px;
+            width: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* ========== RESPONSIVE ========== */
+
+        /* Tablette large */
+        @media (max-width: 1200px) {
+            .main-content { padding: 80px 20px 20px; }
+        }
+
+        /* Tablette */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .quick-actions { grid-template-columns: repeat(3, 1fr) !important; }
+            .servers-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+            .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+            table { font-size: 13px; }
+        }
+
+        /* Mobile (768px) */
+        @media (max-width: 768px) {
+            .topbar { padding: 0 14px; gap: 8px; }
+            .logo-text { display: none; }
+            .topbar-right { gap: 8px; }
+            .drawer { width: min(300px, 85vw); }
+            .main-content { padding: 72px 12px 20px !important; max-width: 100% !important; }
+
+            /* Grilles */
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .servers-grid { grid-template-columns: 1fr !important; }
+            .power-controls { grid-template-columns: repeat(2, 1fr) !important; }
+            .card-grid { grid-template-columns: 1fr !important; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+
+            /* Flex */
+            .section-header { flex-wrap: wrap; gap: 10px; }
+            .server-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+            .server-actions { grid-template-columns: 1fr 1fr !important; }
+            .profile-grid { grid-template-columns: 1fr !important; }
+            .info-grid { grid-template-columns: 1fr !important; }
+            .form-row { flex-direction: column !important; gap: 12px !important; }
+            .form-grid { grid-template-columns: 1fr !important; }
+            .btn-group { flex-direction: column !important; width: 100% !important; }
+            .btn-group .btn { width: 100% !important; justify-content: center; }
+
+            /* Filtres */
+            .filter-row, .filters-bar, .filter-bar, .filters {
+                flex-direction: column !important;
+                gap: 8px !important;
+                align-items: stretch !important;
+            }
+            .filter-select, .filter-input { width: 100% !important; }
+            .search-bar, .search-input { width: 100% !important; }
+
+            /* Tables — renforcement mobile */
+            .table-container,
+            .table-responsive,
+            .table-wrapper {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            table { font-size: 12px !important; }
+            th, td { padding: 8px 10px !important; white-space: nowrap; }
+            .table-actions { display: flex; gap: 4px; }
+
+            /* Modals */
+            .modal-content {
+                width: 96% !important; max-width: 96vw !important;
+                padding: 16px !important; margin: 8px auto;
+                max-height: 92vh; overflow-y: auto;
+            }
+            .modal-actions { flex-direction: column !important; gap: 8px !important; }
+            .modal-actions .btn { width: 100% !important; justify-content: center; }
+            .modal-header h3 { font-size: 16px !important; }
+
+            /* Cards */
+            .card { padding: 16px !important; border-radius: 16px !important; }
+
+            /* Onglets */
+            .tabs, .admin-tabs, .modal-tabs {
+                overflow-x: auto !important; -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap !important; padding-bottom: 4px;
+                scrollbar-width: none;
+            }
+            .tabs::-webkit-scrollbar, .admin-tabs::-webkit-scrollbar { display: none; }
+            .tab-btn, .tab { flex-shrink: 0 !important; }
+
+            /* Pages spécifiques */
+            .file-toolbar { flex-direction: column !important; gap: 8px !important; }
+            .file-path { width: 100% !important; }
+            .file-grid { grid-template-columns: 1fr !important; }
+            .terminal { font-size: 12px !important; }
+            .action-card { padding: 14px 8px !important; }
+            .action-card i { font-size: 20px !important; }
+            .action-card span { font-size: 12px !important; }
+            h1 { font-size: clamp(20px, 6vw, 36px) !important; }
+            h2 { font-size: clamp(16px, 5vw, 24px) !important; }
+
+            /* Résolution boutons sélection + export */
+            .selection-actions, .export-bar {
+                flex-direction: row !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+            }
+        }
+
+        /* Petit mobile (480px) */
+        @media (max-width: 480px) {
+            .topbar { padding: 0 10px; }
+            .hamburger { margin-right: 10px; }
+            .main-content { padding: 70px 10px 16px !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .card { padding: 12px !important; border-radius: 14px !important; }
+            .section-header h2 { font-size: 15px !important; }
+            .modal-content { padding: 12px !important; }
+            .btn { padding: 10px 14px !important; font-size: 13px !important; }
+            .drawer { width: 88vw; }
+            .drawer-stats .value { font-size: 15px !important; }
+            th, td { padding: 6px 8px !important; font-size: 11px !important; }
+        }
+
+        /* Très petit (360px) */
+        @media (max-width: 360px) {
+            .logo-mark { width: 34px; height: 34px; font-size: 13px; }
+            .avatar-circle { width: 32px; height: 32px; font-size: 13px; }
+            .main-content { padding: 68px 8px 12px !important; }
+            .drawer { width: 92vw; }
+        }
+
+        /* ========== STYLES SPÉCIFIQUES PAYMENT ========== */
+
+        /* Plans grid responsive */
+        @media (max-width: 640px) {
+            .plans-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .plan-card { padding: 1.5rem 1.2rem !important; }
+            .plan-price { font-size: 26px !important; }
+            .page { padding: 1.5rem 4% !important; }
+            .page-title { font-size: 22px !important; }
+            .promo-box {
+                flex-direction: column !important;
+                gap: 12px !important;
+                padding: 1rem !important;
+            }
+            .promo-input { min-width: 0 !important; width: 100% !important; }
+            .promo-input input { font-size: 14px !important; }
+            .servers-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            .server-card { padding: 1.2rem !important; }
+            .sec-header h2 { font-size: 17px !important; }
+            .reseller-card { padding: 1.2rem !important; }
+            .reseller-card h3 { font-size: 18px !important; }
+        }
+
+        /* Modal responsive */
+        @media (max-width: 480px) {
+            .env-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+            }
+            .env-card { padding: 8px 4px !important; }
+            .env-card i { font-size: 18px !important; }
+            .modal-content { padding: 16px !important; border-radius: 16px !important; }
+            .cfg-summary { padding: 10px 12px !important; }
+            .cfg-row { font-size: 12px !important; }
+        }
+
+        /* Servers grid toujours 1 col sur petits écrans */
+        @media (max-width: 520px) {
+            .servers-grid { grid-template-columns: 1fr !important; }
+            .server-header { flex-wrap: wrap; gap: 8px; }
+            .server-actions { flex-wrap: wrap; gap: 6px; }
+            .btn-sm { padding: 8px 10px !important; font-size: 12px !important; }
+        }
+
+        /* Very narrow phones */
+        @media (max-width: 380px) {
+            .plans-grid { grid-template-columns: 1fr !important; }
+            .env-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .plan-price { font-size: 22px !important; }
+            .page { padding: 1rem 3% !important; }
+            .btn-plan { padding: 10px 8px !important; font-size: 13px !important; }
+        }
+
+        
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            position: relative;
+        }
+
+
+        
+        .nav-links a {
+            padding: 7px 14px;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
+        .user-coins {
+            padding: 8px 14px;
+            border-radius: 9px;
+            background: var(--surface-strong);
+            border: 1px solid var(--border-strong);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .user-coins i { color: var(--warning); }
+        .btn-logout {
+            padding: 8px 14px;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: none;
+            border: 1px solid var(--border-strong);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            text-decoration: none;
+        }
+        .btn-logout:hover { background: white; color: var(--text); }
+
+        
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+            position: relative;
+            z-index: 5;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 6px;
+        }
+        .page-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        
+        .section {
+            padding: 2rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section + .section { border-top: 1px solid var(--border); }
+
+        .sec-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .sec-header i {
+            font-size: 24px;
+            color: var(--accent);
+        }
+        .sec-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid transparent;
+        }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--green);
+        }
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+        .alert-info {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--border-strong);
+            color: var(--accent);
+        }
+
+        
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .server-card {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+        .server-card:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-4px);
+        }
+        .server-card.expiring { border-color: var(--warning); background: rgba(245,158,11,0.05); }
+        .server-card.expired { border-color: var(--error); background: rgba(239,68,68,0.05); }
+
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .server-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .server-type {
+            background: var(--accent-dim);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .server-details {
+            margin-bottom: 1.2rem;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(99,102,241,0.05);
+            font-size: 14px;
+        }
+        .detail-label { color: var(--text-secondary); }
+        .detail-value { font-weight: 600; color: var(--text); }
+
+        .server-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--border-strong);
+            background: white;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-family: inherit;
+        }
+        .btn-sm:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .btn-sm.renew { background: rgba(245,158,11,0.1); color: var(--warning); border-color: rgba(245,158,11,0.3); }
+        .btn-sm.renew:hover { background: var(--warning); color: white; }
+        .btn-sm.transfer { background: rgba(99,102,241,0.1); color: var(--accent); border-color: var(--border-strong); }
+        .btn-sm.transfer:hover { background: var(--accent); color: white; }
+
+        
+        .promo-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .promo-input {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .promo-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-strong);
+            background: white;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .promo-input button {
+            padding: 12px 20px;
+            border-radius: 10px;
+            background: var(--accent-dim);
+            border: 1px solid var(--border-strong);
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .promo-input button:hover {
+            background: var(--accent);
+            color: white;
+        }
+        .promo-message { font-size: 14px; margin-left: 10px; }
+
+        
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+            gap: 1.5rem;
+        }
+        .plan-card {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+        .plan-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-hover);
+        }
+        .plan-card.popular {
+            border-color: var(--accent);
+            background: linear-gradient(145deg, rgba(99,102,241,0.05), transparent);
+        }
+        .plan-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .plan-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .plan-price {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--accent);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .plan-price small {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        .plan-price-coins {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--warning);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .plan-features {
+            list-style: none;
+            margin: 20px 0;
+        }
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .plan-features i { color: var(--green); font-size: 12px; }
+        .plan-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .btn-plan {
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1.5px solid var(--border-strong);
+            background: white;
+            color: var(--accent);
+            transition: 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-plan:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn-plan.coins { background: rgba(245,158,11,0.1); color: var(--warning); border-color: rgba(245,158,11,0.3); }
+        .btn-plan.coins:hover { background: var(--warning); color: white; }
+
+        
+        .reseller-card {
+            background: linear-gradient(145deg, rgba(99,102,241,0.1), transparent);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .reseller-card h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .reseller-price {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 15px 0;
+        }
+        .reseller-price small {
+            font-size: 16px;
+            color: var(--text-muted);
+        }
+
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--surface-strong);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 90%;
+            padding: 2rem;
+            box-shadow: var(--shadow-hover);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-header h3 {
+            font-size: 22px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .modal-body .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .modal-body label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .modal-body input, .modal-body select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-strong);
+            font-family: inherit;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        /* Env type picker in modal */
+        .env-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .env-card {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+            background: transparent;
+        }
+        .env-card:hover { border-color: var(--accent-light); background: var(--accent-dim); }
+        .env-card.active { border-color: var(--accent); background: var(--accent-dim); }
+        .env-card i { font-size: 20px; display: block; margin-bottom: 4px; color: var(--accent-light); }
+        .env-card.active i { color: var(--accent); }
+        .env-card span { font-size: 11px; font-weight: 700; color: var(--text-secondary); }
+        .env-card.active span { color: var(--accent); }
+
+        /* Config summary */
+        .cfg-summary {
+            background: var(--accent-dim);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-top: 4px;
+        }
+        .cfg-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        .cfg-row span:first-child { color: var(--text-muted); }
+        .cfg-row strong { font-weight: 700; }
+
+        
+        .footer {
+            padding: 30px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .toast-container{position:fixed;top:72px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+        .toast{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;background:white;border:1px solid #e5e7eb;border-left:4px solid;box-shadow:0 8px 30px rgba(0,0,0,0.1);min-width:280px;max-width:380px;pointer-events:all;animation:toastIn .35s cubic-bezier(.34,1.56,.64,1);font-size:14px;font-weight:600;}
+        .toast.success{border-left-color:#10b981;}.toast.error{border-left-color:#ef4444;}.toast.info{border-left-color:#6366f1;}
+        .toast i{font-size:16px;flex-shrink:0;}.toast.success i{color:#10b981;}.toast.error i{color:#ef4444;}.toast.info i{color:#6366f1;}
+        .toast.out{animation:toastOut .25s ease forwards;}
+        @keyframes toastIn{from{opacity:0;transform:translateX(100%);}to{opacity:1;transform:translateX(0);}}
+        @keyframes toastOut{to{opacity:0;transform:translateX(100%);}}
+    </style>
+</head>
+<body>
+    <!-- FOND ANIMÉ -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb1"></div>
+        <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="logo-area">
+            <div class="logo-mark">FH</div>
+            <span class="logo-text">FLYHOST</span>
+        </div>
+        <div class="topbar-right">
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="Mode sombre/clair">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+            <div class="avatar-circle" id="topbarAvatar" onclick="openSidebar()">?</div>
+        </div>
+    </header>
+
+    <!-- OVERLAY -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeSidebar()"></div>
+
+    <!-- DRAWER -->
+    <aside class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-logo">
+                <div class="logo-mark">FH</div>
+                <span>FLYHOST</span>
+            </div>
+            <button class="close-drawer" onclick="closeSidebar()">&times;</button>
+        </div>
+
+        <div class="drawer-user" id="drawerUser">
+            <div class="drawer-avatar" id="drawerAvatar">?</div>
+            <div class="drawer-user-info">
+                <div class="drawer-username" id="drawerUsername">Chargement...</div>
+                <div class="drawer-coins">
+                    <i class="fas fa-coins"></i>
+                    <span id="drawerCoins">0</span>
+                </div>
+                <span class="drawer-role-badge" id="drawerRole">Utilisateur</span>
+            </div>
+        </div>
+
+        <nav class="drawer-nav" id="drawerNav">
+            <div class="nav-section">PRINCIPAL</div>
+            <a href="/dashboard" class="nav-item" data-page="dashboard">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/payment" class="nav-item" data-page="payment">
+                <i class="fas fa-credit-card"></i>
+                <span>Paiement</span>
+            </a>
+            <a href="/deploy" class="nav-item" data-page="deploy">
+                <i class="fas fa-rocket"></i>
+                <span>Déploiement</span>
+            </a>
+            <a href="/profile" class="nav-item" data-page="profile">
+                <i class="fas fa-user-circle"></i>
+                <span>Mon Profil</span>
+            </a>
+            <a href="/api-keys" class="nav-item" data-page="api">
+                <i class="fas fa-key"></i>
+                <span>API</span>
+            </a>
+            <a href="/dev" class="nav-item" data-page="info">
+                <i class="fas fa-info-circle"></i>
+                <span>Informations</span>
+            </a>
+            <a href="/chat" class="nav-item" data-page="chat">
+                <i class="fas fa-comment"></i>
+                <span>Chat</span>
+            </a>
+
+            <div class="nav-section" id="resellerSectionTitle">REVENDEUR</div>
+            <a href="/panel-admin" class="nav-item" id="resellerDashboardLink" data-page="reseller">
+                <i class="fas fa-store"></i>
+                <span>Espace Revendeur</span>
+            </a>
+
+            <div class="nav-section" id="adminSectionTitle">ADMINISTRATION</div>
+            <a href="/root" class="nav-item" id="adminDashboardLink" data-page="admin">
+                <i class="fas fa-crown"></i>
+                <span>Administration</span>
+            </a>
+        </nav>
+
+        <div class="drawer-footer">
+            <div class="drawer-stats" id="drawerStats">
+                <div class="stat-item">
+                    <span class="value" id="statServersDrawer">0</span>
+                    <span class="label">Serveurs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statReferralsDrawer">0</span>
+                    <span class="label">Filleuls</span>
+                </div>
+                <div class="stat-item">
+                    <span class="value" id="statStreakDrawer">0</span>
+                    <span class="label">Série</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </button>
+        </div>
+    </aside>
+
+
+    <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- NAVBAR -->
+    <div class="page">
+
+        <!-- TITRE -->
+        <h1 class="page-title">Création & Paiement</h1>
+        <p class="page-subtitle">Achetez, renouvelez ou transférez vos serveurs. Payez par MoneyFusion ou avec vos coins.</p>
+
+        <!-- ALERTES DYNAMIQUES -->
+
+        <!-- SECTION : SERVEURS EXISTANTS -->
+        <section class="section" id="existingServersSection">
+            <div class="sec-header">
+                <i class="fas fa-server"></i>
+                <h2>Mes serveurs existants</h2>
+            </div>
+            <div id="existingServersContainer" class="servers-grid">
+                <!-- injecté via JS -->
+                <div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:2rem;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Chargement...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION : CODE PROMO -->
+        <section class="section" id="promoSection">
+            <div class="promo-box">
+                <i class="fas fa-ticket-alt" style="font-size:24px; color:var(--warning);"></i>
+                <div class="promo-input">
+                    <input type="text" id="promoCodeInput" placeholder="Code promo (ex: FLY-ABCDEF)" autocomplete="off">
+                    <button onclick="applyPromoCode()">Appliquer</button>
+                </div>
+                <div id="promoMessage" class="promo-message"></div>
+                <div id="promoCountdown" style="display:none;margin-top:10px;background:linear-gradient(135deg,#fef9c3,#fefce8);border:1px solid #facc15;border-radius:10px;padding:10px 14px;font-size:13px;color:#854d0e;display:flex;align-items:center;gap:8px;">
+                    <i class="fas fa-clock"></i>
+                    Ce coupon expire dans : <strong id="promoCountdownTimer" style="font-size:15px;color:#b45309;"></strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION : PLANS DE SERVEURS -->
+        <section class="section" id="plansSection">
+            <div class="sec-header">
+                <i class="fas fa-rocket"></i>
+                <h2>Créer un nouveau serveur</h2>
+            </div>
+            <div class="plans-grid" id="plansGrid">
+                <!-- Les plans seront générés en JS -->
+            </div>
+        </section>
+
+        <!-- SECTION : GRADE REVENDEUR (ADMIN) -->
+        <section class="section" id="resellerSection">
+            <div class="sec-header">
+                <i class="fas fa-crown"></i>
+                <h2>Devenir revendeur (grade Admin)</h2>
+            </div>
+            <div class="reseller-card">
+                <h3>Accès revendeur premium</h3>
+                <p>Créez des codes promo, gérez vos clients, obtenez des commissions (15%) et des achats en gros.</p>
+                <div class="reseller-price">
+                    800 <small>coins</small> ou 10 <small>FCFA</small>
+                </div>
+                <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                    <button class="btn-plan" onclick="purchaseResellerGrade('coins')">
+                        <i class="fas fa-coins"></i> Acheter avec coins
+                    </button>
+                    <button class="btn-plan" onclick="purchaseResellerGrade('money')">
+                        <i class="fas fa-credit-card"></i> Payer MoneyFusion
+                    </button>
+                </div>
+                <p style="margin-top:15px; font-size:13px; color:var(--text-muted);">Durée: 30 jours, renouvelable.</p>
+            </div>
+        </section>
+
+        <!-- SECTION : TRANSFERT DE SERVEUR (MODAL) -->
+        <div class="modal" id="transferModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Transférer un serveur</h3>
+                    <span class="close-modal" onclick="closeTransferModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="transferForm">
+                        <div class="form-group">
+                            <label>Serveur sélectionné</label>
+                            <input type="text" id="transferServerName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Email ou nom d'utilisateur du destinataire</label>
+                            <input type="text" id="transferTarget" placeholder="ex: jean@email.com ou jean23" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-plan" onclick="executeTransfer()">Confirmer le transfert</button>
+                    <button class="btn-plan" onclick="closeTransferModal()">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL CONFIGURATION SERVEUR -->
+        <div class="modal" id="serverConfigModal">
+            <div class="modal-content" style="max-width:520px;">
+                <div class="modal-header">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:40px;height:40px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-server" style="color:var(--accent);font-size:18px;"></i>
+                        </div>
+                        <div>
+                            <h3 style="font-size:18px;margin:0;">Créer un serveur</h3>
+                            <p style="font-size:12px;color:var(--text-muted);margin:0;" id="configModalSubtitle">Configurez votre nouveau serveur</p>
+                        </div>
+                    </div>
+                    <span class="close-modal" onclick="closeConfigModal()" style="font-size:22px;line-height:1;">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag" style="margin-right:5px;color:var(--accent);"></i>Nom du serveur</label>
+                        <input type="text" id="configServerName" placeholder="Mon serveur (3–30 caractères)" required autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-code" style="margin-right:5px;color:var(--accent);"></i>Environnement / Technologie</label>
+                        <div class="env-grid" id="configEnvGrid">
+                            <div class="env-card active" id="cfg-env-nodejs" onclick="selectConfigEnv('nodejs')">
+                                <i class="fab fa-node-js" style="color:#68a063;"></i>
+                                <span>Node.js</span>
+                            </div>
+                            <div class="env-card" id="cfg-env-python" onclick="selectConfigEnv('python')">
+                                <i class="fab fa-python" style="color:#3776ab;"></i>
+                                <span>Python</span>
+                            </div>
+                            <div class="env-card" id="cfg-env-php" onclick="selectConfigEnv('php')">
+                                <i class="fab fa-php" style="color:#7a86b8;"></i>
+                                <span>PHP</span>
+                            </div>
+                            <div class="env-card" id="cfg-env-java" onclick="selectConfigEnv('java')">
+                                <i class="fab fa-java" style="color:#e76f00;"></i>
+                                <span>Java</span>
+                            </div>
+                            <div class="env-card" id="cfg-env-static" onclick="selectConfigEnv('static')">
+                                <i class="fab fa-html5" style="color:#e34f26;"></i>
+                                <span>HTML/Static</span>
+                            </div>
+                            <div class="env-card" id="cfg-env-discord" onclick="selectConfigEnv('nodejs')" style="position:relative;">
+                                <i class="fab fa-discord" style="color:#5865f2;"></i>
+                                <span>Discord Bot</span>
+                            </div>
+                        </div>
+                        <p style="font-size:11px;color:var(--text-muted);margin-top:6px;"><i class="fas fa-info-circle"></i> Détermine l'image Docker et le runtime utilisés sur Pterodactyl.</p>
+                    </div>
+
+                    <div class="form-group" id="configPhoneGroup" style="display:none;">
+                        <label><i class="fas fa-mobile-alt" style="margin-right:5px;color:var(--accent);"></i>Numéro MoneyFusion</label>
+                        <input type="tel" id="configPhoneNumber" placeholder="+24176209643">
+                    </div>
+
+                    <div class="cfg-summary" id="configSummary"></div>
+                </div>
+                <div class="modal-actions" style="flex-direction:column;gap:8px;">
+                    <button class="btn-plan" id="configCreateBtn" onclick="confirmServerCreation()" style="width:100%;justify-content:center;padding:14px;font-size:15px;font-weight:700;border-radius:14px;">
+                        <i class="fas fa-rocket" style="margin-right:8px;"></i>Créer le serveur
+                    </button>
+                    <button class="btn-plan" onclick="closeConfigModal()" style="width:100%;justify-content:center;background:transparent;border-color:var(--border);color:var(--text-secondary);">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p>© 2025 FLYHOST. Paiement sécurisé via MoneyFusion. Tous droits réservés.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // =============================================
+        // CONFIGURATION (synchronisée avec index.js)
+        // =============================================
+        const API_BASE = window.location.origin;
+        let authToken = localStorage.getItem('flyhost_token');
+        let currentUser = null;
+
+        // Plans et prix (doivent correspondre à index.js)
+        const PLANS = {
+            'free': { name: 'Gratuit', coins: 0, f_cfa: 0, memory: 256, disk: 5120, cpu: 50, duration: 1, maxServers: 1 },
+            '1gb': { name: '1GB', coins: 50, f_cfa: 395, memory: 1024, disk: 10240, cpu: 100, duration: 14, maxServers: 3 },
+            '2gb': { name: '2GB', coins: 80, f_cfa: 600, memory: 2048, disk: 20480, cpu: 200, duration: 14, maxServers: 5 },
+            '4gb': { name: '4GB', coins: 130, f_cfa: 800, memory: 4096, disk: 40960, cpu: 400, duration: 14, maxServers: 10 },
+            '8gb': { name: '8GB', coins: 170, f_cfa: 1300, memory: 8192, disk: 81920, cpu: 800, duration: 14, maxServers: 15 },
+            'unlimited': { name: 'Illimité', coins: 200, f_cfa: 1600, memory: '∞', disk: '∞', cpu: '∞', duration: 14, maxServers: 999 }
+        };
+
+        // Variables d'état
+        let selectedPlan = null;
+        let selectedPaymentMethod = null;
+        let activePromoCode = null;
+        let serverToTransfer = null;
+        let selectedConfigEnv = 'nodejs';
+        let activePricingPromo = null; // Promotion campagne active
+
+        // =============================================
+        // INITIALISATION
+        // =============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!authToken) {
+                window.location.href = '/login';
+                return;
+            }
+            fetchUserData();
+            loadExistingServers();
+            // Charger la promo active avant de rendre les plans
+            fetch('/api/promotions').then(r => r.json()).then(d => {
+                if (d.success && d.promotions?.length) {
+                    const active = d.promotions.filter(p => p.active && p.discount_percent > 0);
+                    activePricingPromo = active.find(p => p.pinned) || active.sort((a,b) => b.discount_percent - a.discount_percent)[0] || null;
+                }
+            }).catch(()=>{}).finally(() => renderPlans());
+
+            // Observer pour animations
+            const sections = document.querySelectorAll('.section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(e => e.isIntersecting && e.target.classList.add('visible'));
+            }, { threshold: 0.1 });
+            sections.forEach(s => observer.observe(s));
+        });
+
+        // =============================================
+        // UTILISATEUR
+        // =============================================
+        async function fetchUserData() {
+            try {
+                const res = await fetch(`${API_BASE}/api/user/me`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    const _uc = document.getElementById('userCoins'); if(_uc) _uc.innerText = currentUser.coins;
+                    renderPlans(); // Re-rendre avec l'état free_server_created
+                } else {
+                    showAlert('Impossible de charger les données utilisateur', 'error');
+                }
+            } catch (e) {
+                showAlert('Erreur réseau', 'error');
+            }
+        }
+
+
+        // =============================================
+        // SERVEURS EXISTANTS + RENOUVELLEMENT / TRANSFERT
+        // =============================================
+        async function loadExistingServers() {
+            const container = document.getElementById('existingServersContainer');
+            try {
+                const res = await fetch(`${API_BASE}/api/servers`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                if (!data.servers || data.servers.length === 0) {
+                    container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:2rem;">Aucun serveur pour le moment. Créez-en un !</div>`;
+                    return;
+                }
+                container.innerHTML = data.servers.map(server => renderServerCard(server)).join('');
+            } catch (e) {
+                container.innerHTML = `<div class="alert alert-error">Erreur chargement: ${e.message}</div>`;
+            }
+        }
+
+        function renderServerCard(server) {
+            const expires = new Date(server.expires_at);
+            const now = new Date();
+            const daysLeft = Math.ceil((expires - now) / (1000*60*60*24));
+            let statusClass = '';
+            if (!server.is_active) statusClass = 'expired';
+            else if (daysLeft <= 1) statusClass = 'expiring';
+
+            return `
+                <div class="server-card ${statusClass}">
+                    <div class="server-header">
+                        <span class="server-name">${server.server_name}</span>
+                        <span class="server-type">${server.server_type}</span>
+                    </div>
+                    <div class="server-details">
+                        <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value">${server.server_status}</span></div>
+                        <div class="detail-row"><span class="detail-label">Expire</span><span class="detail-value">${expires.toLocaleDateString('fr-FR')}</span></div>
+                        <div class="detail-row"><span class="detail-label">Renouvellement</span><span class="detail-value">${PLANS[server.server_type]?.coins || '?'} coins</span></div>
+                    </div>
+                    <div class="server-actions">
+                        ${server.is_active ? `
+                            <button class="btn-sm renew" onclick="renewServer('${server.id}', '${server.server_type}')"><i class="fas fa-sync-alt"></i> Renouveler</button>
+                            <button class="btn-sm transfer" onclick="openTransferModal('${server.id}', '${server.server_name}')"><i class="fas fa-exchange-alt"></i> Transférer</button>
+                        ` : ''}
+                        <a href="/dashboard?server=${server.id}" class="btn-sm"><i class="fas fa-eye"></i> Voir</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renouvellement
+        async function renewServer(serverId, serverType) {
+            if (!currentUser || currentUser.coins < PLANS[serverType].coins) {
+                showAlert('Solde de coins insuffisant pour renouveler', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/api/servers/${serverId}/renew`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert(`✅ Serveur renouvelé jusqu'au ${new Date(data.new_expires_at).toLocaleDateString()}`, 'success');
+                    currentUser.coins = data.remaining_coins;
+                    const _uc = document.getElementById('userCoins'); if(_uc) _uc.innerText = currentUser.coins;
+                    loadExistingServers();
+                } else {
+                    showAlert('Erreur: ' + data.error, 'error');
+                }
+            } catch (e) {
+                showAlert('Erreur renouvellement', 'error');
+            }
+        }
+
+        // Transfert
+        let transferServerId = null;
+        function openTransferModal(serverId, serverName) {
+            transferServerId = serverId;
+            document.getElementById('transferServerName').value = serverName;
+            document.getElementById('transferModal').style.display = 'flex';
+        }
+        function closeTransferModal() {
+            document.getElementById('transferModal').style.display = 'none';
+            transferServerId = null;
+        }
+        async function executeTransfer() {
+            const target = document.getElementById('transferTarget').value.trim();
+            if (!target) { showAlert('Indiquez le destinataire (email ou pseudo)', 'error'); return; }
+            try {
+                const res = await fetch(`${API_BASE}/api/servers/transfer`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ server_id: transferServerId, target_identifier: target })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showAlert('✅ Serveur transféré avec succès', 'success');
+                    closeTransferModal();
+                    loadExistingServers();
+                } else {
+                    showAlert('Erreur: ' + data.error, 'error');
+                }
+            } catch (e) {
+                showAlert('Erreur transfert', 'error');
+            }
+        }
+
+        // =============================================
+        // CODE PROMO
+        // =============================================
+        async function applyPromoCode() {
+            const code = document.getElementById('promoCodeInput').value.trim();
+            const msgDiv = document.getElementById('promoMessage');
+            if (!code) { msgDiv.innerText = 'Entrez un code'; return; }
+            msgDiv.innerText = 'Vérification...';
+            try {
+                const res = await fetch(`${API_BASE}/api/promo/validate?code=${encodeURIComponent(code)}`);
+                const data = await res.json();
+                if (data.valid) {
+                    activePromoCode = code;
+                    msgDiv.innerText = '✅ Code promo appliqué !';
+                    // Compte à rebours si expiry
+                    if (data.expires_at) {
+                        startPromoCountdown(new Date(data.expires_at));
+                    } else {
+                        document.getElementById('promoCountdown').style.display = 'none';
+                    }
+                } else {
+                    activePromoCode = null;
+                    msgDiv.innerText = '❌ Code invalide ou expiré';
+                    document.getElementById('promoCountdown').style.display = 'none';
+                }
+            } catch (e) {
+                msgDiv.innerText = 'Erreur de validation';
+            }
+        }
+
+        let promoCountdownInterval = null;
+        function startPromoCountdown(expiryDate) {
+            const countdownDiv = document.getElementById('promoCountdown');
+            const timerEl = document.getElementById('promoCountdownTimer');
+            countdownDiv.style.display = 'flex';
+            if (promoCountdownInterval) clearInterval(promoCountdownInterval);
+            function update() {
+                const diff = expiryDate - Date.now();
+                if (diff <= 0) {
+                    timerEl.textContent = 'Expiré !';
+                    countdownDiv.style.background = 'linear-gradient(135deg,#fee2e2,#fef2f2)';
+                    countdownDiv.style.borderColor = '#f87171';
+                    clearInterval(promoCountdownInterval);
+                    return;
+                }
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                timerEl.textContent = h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+            }
+            update();
+            promoCountdownInterval = setInterval(update, 1000);
+        }
+
+        // =============================================
+        // RENDU DES PLANS
+        // =============================================
+        function renderPlans() {
+            const grid = document.getElementById('plansGrid');
+            grid.innerHTML = '';
+            const freeUsed = currentUser?.free_server_created;
+
+            // Inject promo banner above grid if active
+            const existingBanner = document.getElementById('paymentPromoBanner');
+            if (existingBanner) existingBanner.remove();
+            if (activePricingPromo) {
+                const COLORS = { orange:'#f97316',red:'#ef4444',green:'#10b981',blue:'#3b82f6',purple:'#6366f1',gold:'#f59e0b' };
+                const c = COLORS[activePricingPromo.color_scheme] || '#f97316';
+                const planLbl = activePricingPromo.server_type ? {
+                    free:'Starter','1gb':'1 GB','2gb':'2 GB','4gb':'4 GB',
+                    '8gb':'8 GB',unlimited:'Unlimited',admin:'Admin'
+                }[activePricingPromo.server_type] || activePricingPromo.server_type : 'tous les plans';
+                const banner = document.createElement('div');
+                banner.id = 'paymentPromoBanner';
+                banner.style.cssText = `background:linear-gradient(135deg,${c},#c2410c);color:#fff;border-radius:12px;padding:12px 18px;margin-bottom:16px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px ${c}55;`;
+                banner.innerHTML = `<span>🔥</span><span>${activePricingPromo.badge_text} — ${activePricingPromo.title.replace(/^[🔥🎉💥🏷️🎁\s]+/,'')} · −${activePricingPromo.discount_percent}% sur ${planLbl} (coins)</span>`;
+                grid.parentElement.insertBefore(banner, grid);
+            }
+
+            for (const [key, plan] of Object.entries(PLANS)) {
+                const popular = key === '2gb' ? 'popular' : '';
+                const isFree = key === 'free';
+                const isDisabled = isFree && freeUsed;
+
+                // Calcul promo coins
+                let promoApplies = activePricingPromo && plan.coins > 0 &&
+                    (!activePricingPromo.server_type || activePricingPromo.server_type === key);
+                const discCoins = promoApplies ? Math.round(plan.coins * (1 - activePricingPromo.discount_percent / 100)) : null;
+
+                const coinsDisplay = promoApplies
+                    ? `<span style="text-decoration:line-through;opacity:.55;font-size:12px;">${plan.coins}</span> <span style="color:#f97316;font-weight:800;">${discCoins}</span>`
+                    : plan.coins;
+
+                grid.innerHTML += `
+                    <div class="plan-card ${popular}" style="${isDisabled ? 'opacity:0.5;pointer-events:none;filter:grayscale(0.5);' : ''}${promoApplies ? 'border-color:rgba(249,115,22,.4);' : ''}">
+                        ${key === '2gb' ? '<div class="plan-badge">Populaire</div>' : ''}
+                        ${isDisabled ? '<div class="plan-badge" style="background:#64748b;">Déjà utilisé</div>' : ''}
+                        ${promoApplies ? `<div class="plan-badge" style="background:linear-gradient(135deg,#f97316,#ef4444);top:10px;right:10px;left:auto;">−${activePricingPromo.discount_percent}%</div>` : ''}
+                        <div class="plan-name">Serveur ${plan.name}</div>
+                        <div class="plan-price">${plan.f_cfa} <small>FCFA</small></div>
+                        <div class="plan-price-coins"><i class="fas fa-coins"></i> ${coinsDisplay} pièces</div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> ${plan.memory === '∞' ? 'RAM illimitée' : plan.memory + ' MB RAM'}</li>
+                            <li><i class="fas fa-check"></i> ${plan.disk === '∞' ? 'Stockage illimité' : plan.disk + ' MB SSD'}</li>
+                            <li><i class="fas fa-check"></i> CPU ${plan.cpu === '∞' ? 'illimité' : plan.cpu + '%'}</li>
+                            <li><i class="fas fa-check"></i> Durée ${plan.duration} jours</li>
+                        </ul>
+                        ${isDisabled
+                            ? `<div style="text-align:center;color:#64748b;font-size:13px;margin-top:12px;padding:10px;background:rgba(100,116,139,0.1);border-radius:10px;"><i class="fas fa-lock"></i> Serveur gratuit déjà utilisé.<br>Un seul par compte.</div>`
+                            : `<div class="plan-btns">
+                                <button class="btn-plan" onclick="openConfigModal('${key}', 'money')"><i class="fas fa-credit-card"></i> Payer FCFA</button>
+                                <button class="btn-plan coins" onclick="openConfigModal('${key}', 'coins')"><i class="fas fa-coins"></i> Payer ${promoApplies ? discCoins : plan.coins} coins</button>
+                               </div>`
+                        }
+                    </div>
+                `;
+            }
+        }
+
+        // =============================================
+        // CONFIGURATION SERVEUR (MODAL)
+        // =============================================
+        function selectConfigEnv(env) {
+            selectedConfigEnv = env;
+            document.querySelectorAll('#configEnvGrid .env-card').forEach(c => c.classList.remove('active'));
+            // Match by env value — discord maps to nodejs
+            const techMap = { nodejs: 'nodejs', python: 'python', php: 'php', java: 'java', static: 'static' };
+            const cardId = `cfg-env-${env}`;
+            document.getElementById(cardId)?.classList.add('active');
+        }
+
+        function openConfigModal(planKey, method) {
+            selectedPlan = planKey;
+            selectedPaymentMethod = method;
+            selectedConfigEnv = 'nodejs';
+            // Reset env selection
+            document.querySelectorAll('#configEnvGrid .env-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('cfg-env-nodejs')?.classList.add('active');
+
+            const modal = document.getElementById('serverConfigModal');
+            document.getElementById('configPhoneGroup').style.display = method === 'money' ? 'block' : 'none';
+            document.getElementById('configServerName').value = '';
+            document.getElementById('configPhoneNumber').value = '';
+
+            const plan = PLANS[planKey];
+            const priceLabel = method === 'money'
+                ? `<strong style="color:var(--warning);">${plan.f_cfa} FCFA</strong>`
+                : `<strong style="color:var(--warning);"><i class="fas fa-coins"></i> ${plan.coins} coins</strong>`;
+
+            document.getElementById('configModalSubtitle').textContent = `Plan ${plan.name} · ${plan.duration} jours`;
+            document.getElementById('configSummary').innerHTML = `
+                <div class="cfg-row"><span><i class="fas fa-box"></i> Plan</span> <strong>${plan.name}</strong></div>
+                <div class="cfg-row"><span><i class="fas fa-memory"></i> RAM</span> <strong>${plan.memory === '∞' ? 'Illimitée' : plan.memory + ' MB'}</strong></div>
+                <div class="cfg-row"><span><i class="fas fa-hdd"></i> Disque</span> <strong>${plan.disk === '∞' ? 'Illimité' : plan.disk + ' MB'}</strong></div>
+                <div class="cfg-row"><span><i class="fas fa-microchip"></i> CPU</span> <strong>${plan.cpu === '∞' ? 'Illimité' : plan.cpu + '%'}</strong></div>
+                <div class="cfg-row"><span><i class="fas fa-clock"></i> Durée</span> <strong>${plan.duration} jours</strong></div>
+                <div class="cfg-row"><span><i class="fas fa-tag"></i> Prix</span> ${priceLabel}</div>
+                ${activePromoCode ? `<div class="cfg-row" style="color:var(--green);"><span><i class="fas fa-check-circle"></i> Code promo</span> <strong>${activePromoCode}</strong></div>` : ''}
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function closeConfigModal() {
+            document.getElementById('serverConfigModal').style.display = 'none';
+            document.getElementById('configServerName').value = '';
+            document.getElementById('configPhoneNumber').value = '';
+            selectedConfigEnv = 'nodejs';
+        }
+
+        async function confirmServerCreation() {
+            const serverName = document.getElementById('configServerName').value.trim();
+            if (!serverName || serverName.length < 3 || serverName.length > 30) {
+                showAlert('Nom du serveur invalide (3-30 caractères)', 'error');
+                return;
+            }
+            const btn = document.getElementById('configCreateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:8px;"></i>Création en cours…';
+            try {
+                if (selectedPaymentMethod === 'money') {
+                    const phone = document.getElementById('configPhoneNumber').value.trim();
+                    if (!phone) { showAlert('Numéro de téléphone requis pour MoneyFusion', 'error'); return; }
+                    await initiateMoneyPayment(serverName, phone);
+                } else {
+                    await createServerWithCoins(serverName);
+                }
+                closeConfigModal();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-rocket" style="margin-right:8px;"></i>Créer le serveur';
+            }
+        }
+
+        // Paiement par coins
+        async function createServerWithCoins(serverName) {
+            const plan = PLANS[selectedPlan];
+            if (!currentUser || currentUser.coins < plan.coins) {
+                showAlert('Solde de coins insuffisant', 'error');
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE}/api/servers/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        plan: selectedPlan,
+                        api_key: currentUser.api_key,
+                        server_name: serverName,
+                        env_type: selectedConfigEnv,
+                        promo_code: activePromoCode || undefined
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    toast('Serveur créé avec succès !', 'success');
+                    currentUser.coins -= plan.coins;
+                    const _uc = document.getElementById('userCoins'); if(_uc) _uc.innerText = currentUser.coins;
+                    loadExistingServers();
+                    activePromoCode = null;
+                    document.getElementById('promoCodeInput').value = '';
+                    if (data.credentials) showCredentialsModal(data.credentials, selectedConfigEnv);
+                } else {
+                    showAlert('Erreur: ' + data.error, 'error');
+                }
+            } catch (e) {
+                showAlert('Erreur création serveur', 'error');
+            }
+        }
+
+        // Paiement MoneyFusion
+        async function initiateMoneyPayment(serverName, phone) {
+            try {
+                const res = await fetch(`${API_BASE}/api/payment/initiate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        plan: selectedPlan,
+                        amount: PLANS[selectedPlan].f_cfa,
+                        panel_name: serverName,
+                        phone_number: phone,
+                        env_type: selectedConfigEnv,
+                        promo_code: activePromoCode
+                    })
+                });
+                const data = await res.json();
+                if (data.success && data.paymentUrl) {
+                    window.location.href = data.paymentUrl; // redirection MoneyFusion
+                } else {
+                    showAlert('Erreur init paiement: ' + (data.error || 'inconnue'), 'error');
+                }
+            } catch (e) {
+                showAlert('Erreur paiement', 'error');
+            }
+        }
+
+        // =============================================
+        // GRADE REVENDEUR
+        // =============================================
+        async function purchaseResellerGrade(method) {
+            if (method === 'coins') {
+                if (!currentUser || currentUser.coins < 800) {
+                    showAlert('Vous avez besoin de 800 coins', 'error');
+                    return;
+                }
+                try {
+                    const res = await fetch(`${API_BASE}/api/grade/admin/purchase`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ payment_method: 'coins' })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showAlert('✅ Grade revendeur activé (30 jours)', 'success');
+                        currentUser.coins -= 800;
+                        const _uc = document.getElementById('userCoins'); if(_uc) _uc.innerText = currentUser.coins;
+                    } else {
+                        showAlert('Erreur: ' + data.error, 'error');
+                    }
+                } catch (e) {
+                    showAlert('Erreur achat grade', 'error');
+                }
+            } else {
+                // Paiement MoneyFusion pour grade
+                try {
+                    const res = await fetch(`${API_BASE}/api/grade/admin/purchase`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            payment_method: 'money',
+                            phone_number: prompt('Numéro de téléphone pour MoneyFusion:') 
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.paymentUrl) {
+                        window.location.href = data.paymentUrl;
+                    } else {
+                        showAlert('Erreur: ' + (data.error || 'inconnue'), 'error');
+                    }
+                } catch (e) {
+                    showAlert('Erreur paiement grade', 'error');
+                }
+            }
+        }
+
+        // =============================================
+        // UTILS
+        // =============================================
+        function toast(message, type='info', duration=4000){
+            let c=document.getElementById('toastContainer');
+            if(!c){c=document.createElement('div');c.id='toastContainer';c.className='toast-container';document.body.appendChild(c);}
+            const icons={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};
+            const el=document.createElement('div');el.className=`toast ${type}`;
+            el.innerHTML=`<i class="fas ${icons[type]||icons.info}"></i><span>${message}</span>`;
+            c.appendChild(el);
+            setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},duration);
+        }
+        function showAlert(message, type='info'){toast(message, type);}
+        function showSuccess(msg){toast(msg,'success');}
+        function showError(msg){toast(msg,'error',5000);}
+    
+        // ========== DRAWER / SIDEBAR ==========
+        function toggleSidebar() {
+            const drawer = document.getElementById('drawer');
+            if (drawer.classList.contains('open')) { closeSidebar(); } else { openSidebar(); }
+        }
+        function openSidebar() {
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('active');
+            document.getElementById('hamburgerBtn').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('active');
+            document.getElementById('hamburgerBtn').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        window.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSidebar(); });
+
+        // Chargement infos utilisateur dans le drawer
+        (function() {
+            try {
+                const user = JSON.parse(localStorage.getItem('flyhost_user') || '{}');
+                if (user.username) {
+                    const init = user.username.charAt(0).toUpperCase();
+                    const a1 = document.getElementById('topbarAvatar');
+                    const a2 = document.getElementById('drawerAvatar');
+                    if (a1) a1.textContent = init;
+                    if (a2) a2.textContent = init;
+                    const un = document.getElementById('drawerUsername');
+                    if (un) un.textContent = user.username;
+                    const co = document.getElementById('drawerCoins');
+                    if (co) co.textContent = user.coins || 0;
+                    const ro = document.getElementById('drawerRole');
+                    if (ro) {
+                        ro.textContent = user.role === 'superadmin' ? 'Super Admin' : user.role === 'admin' ? 'Admin' : 'Utilisateur';
+                        ro.className = 'drawer-role-badge' + (user.role ? ' ' + user.role : '');
+                    }
+                }
+                // Highlight active page
+                const page = window.location.pathname.replace('/', '').split('/')[0] || 'dashboard';
+                document.querySelectorAll('.nav-item[data-page]').forEach(function(el) {
+                    if (el.dataset.page === page) el.classList.add('active');
+                    else el.classList.remove('active');
+                });
+            } catch(e) {}
+        })();
+
+        if (typeof logout === 'undefined') {
+            function logout() {
+                localStorage.removeItem('flyhost_token');
+                localStorage.removeItem('flyhost_user');
+                window.location.href = '/login';
+            }
+        }
+
+        // ===== CREDENTIALS MODAL =====
+        function showCredentialsModal(creds, envType) {
+            const existing = document.getElementById('credentialsModal');
+            if (existing) existing.remove();
+
+            const m = document.createElement('div');
+            m.id = 'credentialsModal';
+            m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;backdrop-filter:blur(4px);';
+
+            // Node.js = panel Pterodactyl visible
+            if (!envType || envType === 'nodejs') {
+                m.innerHTML = `
+                <div style="background:#0f172a;border:1px solid #334155;border-radius:20px;max-width:500px;width:100%;box-shadow:0 25px 80px rgba(0,0,0,0.6);overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#10b981,#059669);padding:24px 28px;">
+                        <div style="display:flex;align-items:center;gap:14px;">
+                            <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;">🖥️</div>
+                            <div>
+                                <h2 style="margin:0;color:#fff;font-size:20px;font-weight:800;">Accès au Panel Pterodactyl</h2>
+                                <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">Votre serveur est prêt ! Connectez-vous au panel.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding:24px 28px;">
+                        <div style="background:#f59e0b1a;border:1px solid #f59e0b44;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
+                            <span style="font-size:18px;">⚠️</span>
+                            <p style="margin:0;color:#f59e0b;font-size:13px;line-height:1.5;">Notez ces informations maintenant ! Le mot de passe est aussi envoyé par email, mais pensez à le conserver.</p>
+                        </div>
+                        ${credRow('Lien du panel', creds.panel_url, true)}
+                        ${credRow('Nom d\'utilisateur', creds.username)}
+                        ${credRow('Mot de passe', creds.password, false, true)}
+                        <div style="display:flex;gap:10px;margin-top:24px;">
+                            <a href="${creds.panel_url}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:14px;"><i class="fas fa-external-link-alt"></i> Ouvrir le panel</a>
+                            <button onclick="document.getElementById('credentialsModal').remove()" style="flex:1;padding:12px;background:#1e293b;border:1px solid #334155;color:#fff;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;">Fermer</button>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                // Autres technos : modal "Application déployée" sans mention Pterodactyl
+                const techLabels = { python:'Python', php:'PHP', java:'Java', static:'HTML/Static', discord:'Discord Bot' };
+                const techIcons  = { python:'🐍', php:'🐘', java:'☕', static:'🌐', discord:'🤖' };
+                const label = techLabels[envType] || envType;
+                const icon  = techIcons[envType]  || '🚀';
+                const serverId = creds.server_id || '';
+                m.innerHTML = `
+                <div style="background:#0f172a;border:1px solid #334155;border-radius:20px;max-width:460px;width:100%;box-shadow:0 25px 80px rgba(0,0,0,0.6);overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:28px;">
+                        <div style="text-align:center;">
+                            <div style="font-size:48px;margin-bottom:10px;">${icon}</div>
+                            <h2 style="margin:0;color:#fff;font-size:22px;font-weight:800;">Application déployée !</h2>
+                            <p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:14px;">Votre application <strong>${label}</strong> est en ligne</p>
+                        </div>
+                    </div>
+                    <div style="padding:24px 28px;">
+                        <div style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:16px;margin-bottom:20px;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                                <div style="width:8px;height:8px;border-radius:50%;background:#10b981;animation:pulse 1.5s infinite;"></div>
+                                <span style="font-size:14px;font-weight:700;color:#e2e8f0;">Serveur actif</span>
+                            </div>
+                            <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.6;">Votre application est maintenant hébergée sur notre infrastructure. Gérez-la depuis votre tableau de bord.</p>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            ${serverId ? `<a href="/server?id=${serverId}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:14px;"><i class="fas fa-server"></i> Gérer le serveur</a>` : ''}
+                            <button onclick="document.getElementById('credentialsModal').remove()" style="flex:1;padding:12px;background:#1e293b;border:1px solid #334155;color:#fff;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;">Fermer</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            document.body.appendChild(m);
+            m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+        }
+
+        function credRow(label, value, isLink = false, isPassword = false) {
+            const id = 'cred_' + Math.random().toString(36).slice(2);
+            const passId = 'pass_' + Math.random().toString(36).slice(2);
+            const display = isPassword ? '••••••••••••••••' : value;
+            const eye = isPassword ? `<button onclick="var el=document.getElementById('${passId}');el.textContent=el.textContent==='${value}'?'••••••••••••••••':'${value}';" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px 8px;font-size:14px;"><i class="fas fa-eye"></i></button>` : '';
+            return `<div style="margin-bottom:14px;">
+                <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#94a3b8;">${label}</p>
+                <div style="display:flex;align-items:center;gap:8px;background:#1e293b;border:1px solid #334155;border-radius:10px;padding:10px 14px;">
+                    ${isLink ? `<i class="fas fa-link" style="color:#6366f1;flex-shrink:0;"></i>` : `<i class="fas fa-key" style="color:#6366f1;flex-shrink:0;"></i>`}
+                    <span id="${passId}" style="flex:1;font-family:monospace;font-size:14px;color:#e2e8f0;word-break:break-all;">${display}</span>
+                    ${eye}
+                    <button onclick="navigator.clipboard.writeText('${value}');toast('Copié !','success',2000);" style="background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px 8px;font-size:14px;" title="Copier"><i class="fas fa-copy"></i></button>
+                </div>
+            </div>`;
+        }
+
+        // ===== T001 : DARK MODE =====
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('fh_theme', next);
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        (function() {
+            const saved = localStorage.getItem('fh_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', saved);
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        })();
+
+        // ===== T002 : SERVICE WORKER =====
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+</script>
+</body>
+</html>
